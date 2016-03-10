@@ -18,6 +18,39 @@ $dark:                            #444 !default;
 // The path for our ionicons font files, relative to the built CSS in www/css
 $ionicons-font-path: "../lib/ionic/fonts" !default;
 
+
+/*
+
+
+	Defines
+
+
+*/
+$balanced: #76C103;
+$royal: #7E5FA9;
+$balancedBorder: #498F24;
+
+
+// Modules
+@import "www/app/auth/style";
+
+
+
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
+
+.button{
+
+}
+
+.button.button-balanced{
+	border: 1px solid $balancedBorder;
+	box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+}
+.button.button-light{
+	border: 1px solid #DDDDDD;
+}
+
+
+
 

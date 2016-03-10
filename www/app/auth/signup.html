@@ -1,0 +1,49 @@
+<ion-view class="auth signup"
+		  ng-controller="SignupController as vm">
+	<ion-nav-title>Sign Up</ion-nav-title>
+	<ion-content>
+
+		<!-- LOGO -->
+		<img src="img/auth/auth-logo.png" title="Logo" class="logo"/>
+
+		<!-- FORM -->
+		<div class="list">
+			<label class="item item-input">
+				<input type="text"
+					   placeholder="Name"
+					   ng-model="vm.name">
+			</label>
+			<label class="item item-input">
+				<input type="email"
+					   placeholder="Email"
+					   ng-model="vm.email">
+			</label>
+			<label class="item item-input">
+				<input type="password"
+					   placeholder="Password"
+					   ng-model="vm.password">
+			</label>
+		</div>
+
+
+		<div class="padding">
+
+			<p class="text-center">Your details will be stored in a secure database and will not be shared with anyone
+				without your express permission</p>
+
+			<div class="row">
+				<div class="col">
+					<button class="button button-balanced button-full">Sign Up</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<button class="button button-light button-full"
+							ng-click="vm.login()">I have an account - login</button>
+				</div>
+			</div>
+		</div>
+	</ion-content>
+
+
+</ion-view>

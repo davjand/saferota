@@ -2,13 +2,26 @@
   "name": "HelloIonic",
   "private": "true",
   "devDependencies": {
-    "ionic": "driftyco/ionic-bower#1.2.4"
+    "ionic": "driftyco/ionic-bower#1.2.4",
+    "angular-cache": "^4.5.0"
   },
   "dependencies": {
     "angular-ladda": "^0.3.4",
-    "angular-mocks": "^1.5.0"
+    "angular-mocks": "^1.5.0",
+    "angular-cache": "^4.5.0",
+    "angular-cached-resource": "^1.4.2",
+    "moment": "^2.12.0",
+    "angular-toastr": "^1.7.0",
+    "ngCordova": "^0.1.24-alpha",
+    "angularbknd-sdk": "^1.8.2"
   },
   "resolutions": {
     "angular": "1.5.0"
+  },
+  "overrides": {
+    "ladda":{
+      "main": ["dist/ladda.js","dist/ladda-themeless.min.css"]
+    }
   }
+
 }

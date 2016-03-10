@@ -27,6 +27,6 @@
     "commit": "e4986226d6ae3ca1364e5f38f7cb18ce56f549cc"
   },
   "_source": "git://github.com/backand/angularbknd-sdk.git",
-  "_target": "1.8.2",
+  "_target": "^1.8.2",
   "_originalSource": "angularbknd-sdk"
 }

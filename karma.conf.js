@@ -2,6 +2,8 @@
 // Generated on Wed Mar 09 2016 13:58:05 GMT+0000 (GMT)
 
 module.exports = function (config) {
+	'use strict';
+
 	config.set({
 
 		// base path that will be used to resolve all patterns (eg. files, exclude)
@@ -10,21 +12,36 @@ module.exports = function (config) {
 
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: ['jasmine'],
+		frameworks: ['wiredep','jasmine'],
 
+
+		wiredep: {
+			dependencies: true,    // default: true
+			devDependencies: true, // default: false
+			exclude: []
+			//overrides: []
+		},
+
+		plugins: ['karma-wiredep','karma-jasmine','karma-chrome-launcher','karma-phantomjs-launcher'],
 
 		// list of files / patterns to load in the browser
 		files: [
 			'www/lib/ionic/js/ionic.bundle.js',
 			'www/lib/angular-mocks/angular-mocks.js',
 
+			/*'www/lib/ngCordova/dist/ng-cordova.js',
+			'www/lib/ngCordova/dist/ng-cordova-mocks.js',
 			'www/lib/ladda/dist/spin.min.js',
 			'www/lib/ladda/dist/ladda.min.js',
 			'www/lib/angular-ladda/dist/angular-ladda.min.js',
 			'www/lib/angularbknd-sdk/dist/backand.min.js',
+			'www/lib/moment/min/moment.min.js',
+			'www/lib/angular-cache/dist/angular-cache.js',*/
 
-			'www/js/**/*.js',
-			//'www/js/**/*.spec.js'
+
+			'www/app/**/*.module.js',
+
+			'www/app/**/*.js'
 		],
 
 
@@ -52,7 +69,8 @@ module.exports = function (config) {
 
 
 		// level of logging
-		// possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+		// possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN ||
+		// config.LOG_INFO || config.LOG_DEBUG
 		logLevel: config.LOG_INFO,
 
 
@@ -72,5 +90,5 @@ module.exports = function (config) {
 		// Concurrency level
 		// how many browser should be started simultaneous
 		concurrency: Infinity
-	})
-}
+	});
+};

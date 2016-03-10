@@ -1,0 +1,27 @@
+/*
+
+
+	Auth Module Styling
+
+
+*/
+.auth{
+	img.logo{
+		width: 100%;
+
+		margin: 50px auto 15px;
+		max-width: 500px;
+		max-height: 240px;
+		height: auto;
+	}
+
+	.list{
+		.item:first-child{
+			border-top: none !important;
+		}
+	}
+
+	.actions{
+
+	}
+}

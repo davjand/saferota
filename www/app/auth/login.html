@@ -1,0 +1,47 @@
+<ion-view class="auth login"
+		  ng-controller="LoginController as vm">
+	<ion-nav-title>Login</ion-nav-title>
+	<ion-content>
+
+		<!-- LOGO -->
+		<img src="img/auth/auth-logo.png" title="Logo" class="logo"/>
+
+		<!-- FORM -->
+		<div class="list">
+			<label class="item item-input">
+				<input type="email"
+					   placeholder="Email"
+					   ng-model="vm.email">
+			</label>
+			<label class="item item-input">
+				<input type="password"
+					   placeholder="Password"
+					   ng-model="vm.password">
+			</label>
+		</div>
+
+		<div class="actions padding">
+			<div class="row">
+				<div class="col">
+					<button class="button button-balanced button-full"
+							ng-click="vm.login()">Login
+					</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<button class="button button-light button-full"
+							ng-click="vm.signup()">Sign Up Now
+					</button>
+				</div>
+				<div class="col">
+					<button class="button button-light button-full"
+							ng-click="vm.resetPassword()">Forgot Password?
+					</button>
+				</div>
+			</div>
+		</div>
+	</ion-content>
+
+
+</ion-view>
