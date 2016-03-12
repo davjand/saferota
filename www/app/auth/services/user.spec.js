@@ -5,7 +5,7 @@ describe('SafeRota Auth: User Object', function () {
 	it('Can set the user defaults', inject(function (User) {
 		var user = new User();
 
-		expect(user.email).toEqual('');
+		expect(user.username).toEqual('');
 	}));
 	it('Can get the fullname', inject(function (User) {
 		var user = new User({

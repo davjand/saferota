@@ -13,15 +13,18 @@
     "moment": "^2.12.0",
     "angular-toastr": "^1.7.0",
     "ngCordova": "^0.1.24-alpha",
-    "angularbknd-sdk": "^1.8.2"
+    "angularbknd-sdk": "^1.8.2",
+    "angular-auto-validate": "^1.19.3"
   },
   "resolutions": {
     "angular": "1.5.0"
   },
   "overrides": {
-    "ladda":{
-      "main": ["dist/ladda.js","dist/ladda-themeless.min.css"]
+    "ladda": {
+      "main": [
+        "dist/ladda.min.js",
+        "dist/ladda-themeless.min.css"
+      ]
     }
   }
-
 }

@@ -11,7 +11,7 @@ $positive:                        #387ef5 !default;
 $calm:                            #11c1f3 !default;
 $balanced:                        #33cd5f !default;
 $energized:                       #ffc900 !default;
-$assertive:                       #ef473a !default;
+
 $royal:                           #886aea !default;
 $dark:                            #444 !default;
 */
@@ -31,13 +31,20 @@ $dark:                            #444 !default;
 */
 .auth img.logo {
   width: 100%;
-  margin: 50px auto 15px;
+  margin: 20px auto 10px;
   max-width: 500px;
   max-height: 240px;
   height: auto; }
 
 .auth .list .item:first-child {
   border-top: none !important; }
+
+.auth.signup .terms-and-conditions label.item {
+  border: none;
+  font-size: 13px; }
+
+.auth.signup .signup button {
+  margin-top: 0; }
 
 /*!
   Ionicons, v2.0.1
@@ -9761,3 +9768,35 @@ a.button {
 
 .button.button-light {
   border: 1px solid #DDDDDD; }
+
+/*
+
+
+
+	Form Styling
+
+
+
+*/
+form label.form-group.has-error {
+  background: #FFDFDF; }
+
+form span.error-msg {
+  display: inline-block;
+  color: #ef473a;
+  font-size: 12px;
+  padding-right: 15px; }
+
+form .form-error {
+  text-align: center;
+  font-weight: 700;
+  color: #ef473a;
+  background: #FFDFDF;
+  padding: 10px; }
+
+form .form-success {
+  text-align: center;
+  font-weight: 700;
+  color: #fff;
+  background: #76C103;
+  padding: 10px; }

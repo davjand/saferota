@@ -5,31 +5,47 @@
 		.module('saferota.auth')
 		.controller('LoginController', LoginController);
 
-	LoginController.$inject = ['AuthService','$state'];
+	LoginController.$inject = ['AuthService', '$state'];
 
 	/* @ngInject */
-	function LoginController(AuthService,$state) {
+	function LoginController(AuthService, $state) {
 		var vm = this;
 		vm.email = '';
 		vm.password = '';
+		vm.error = false;
+		vm.loading = false;
 
 		vm.login = login;
-		vm.signup = function(){$state.go('signup');};
-		vm.resetPassword = function(){$state.go('reset-password');};
+		vm.signup = function () {
+			$state.go('signup');
+		};
+		vm.resetPassword = function () {
+			$state.go('resetPassword',{email: vm.email});
+		};
 
-		activate();
 
 		////////////////
 
-		function activate() {
 
-		}
+		function login(loginForm) {
 
-		function login(){
+			if (!loginForm.$valid) {
+				return;
+			}
+			vm.error = null;
+			vm.loading = true;
+
 			AuthService.login(
 				vm.email,
 				vm.password
-			);
+			).then(function () {
+				vm.loading = false;
+			}, function (error) {
+				vm.error = error;
+				vm.password = '';
+				vm.loading = false;
+				loginForm.$setPristine();
+			});
 		}
 	}
 

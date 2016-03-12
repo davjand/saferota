@@ -9,7 +9,7 @@
 	img.logo{
 		width: 100%;
 
-		margin: 50px auto 15px;
+		margin: 20px auto 10px;
 		max-width: 500px;
 		max-height: 240px;
 		height: auto;
@@ -21,7 +21,17 @@
 		}
 	}
 
-	.actions{
+	&.signup{
+		.terms-and-conditions{
+			label.item{
+				border:none;
+				font-size: 13px;
+			}
+		}
+		.signup button{
+			margin-top: 0;
+		}
 
 	}
+
 }

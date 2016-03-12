@@ -12,6 +12,7 @@
 			 3rd Party modules
 			 */
 			'ionic',
-			'toastr'
+			'toastr',
+			'angular-ladda'
 		]);
 })();

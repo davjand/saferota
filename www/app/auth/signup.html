@@ -7,42 +7,71 @@
 		<img src="img/auth/auth-logo.png" title="Logo" class="logo"/>
 
 		<!-- FORM -->
-		<div class="list">
-			<label class="item item-input">
-				<input type="text"
-					   placeholder="Name"
-					   ng-model="vm.name">
-			</label>
-			<label class="item item-input">
-				<input type="email"
-					   placeholder="Email"
-					   ng-model="vm.email">
-			</label>
-			<label class="item item-input">
-				<input type="password"
-					   placeholder="Password"
-					   ng-model="vm.password">
-			</label>
+		<form method="post"
+			  name="signupForm"
+			  ng-submit="vm.signup(signupForm)"
+			  novalidate="">
+
+			<div class="form-error"
+				 ng-if="vm.error">
+				{{vm.error}}
+			</div>
+			<div class="form-error"
+				 ng-if="!vm.terms && vm.submit">
+				Please agree to our Terms and Conditions
+			</div>
+
+
+			<div class="list">
+				<label class="item item-input form-group">
+					<input type="text"
+						   placeholder="Name"
+						   ng-model="vm.name"
+						   ng-model-options="{updateOn:'blur'}"
+						   required-err-type="authRequired"
+						   required>
+				</label>
+				<label class="item item-input form-group">
+					<input type="email"
+						   placeholder="Email"
+						   ng-model="vm.email"
+						   ng-model-options="{updateOn:'blur'}"
+						   email-err-type="authEmail"
+						   required-err-type="authRequired"
+						   required>
+				</label>
+				<label class="item item-input form-group">
+					<input type="password"
+						   placeholder="Password"
+						   ng-model="vm.password"
+						   ng-minlength="6"
+						   ng-model-options="{updateOn:'blur'}"
+						   ng-minlength-err-type="authMinLength"
+						   required-err-type="authRequired"
+						   required>
+				</label>
+			</div>
+
+
+			<div class="padding terms-and-conditions">
+				<ion-checkbox class="form-group" ng-model="vm.terms">
+					Terms &amp; Conditions
+				</ion-checkbox>
+			</div>
+			<div class="padding-horizontal signup">
+				<button class="button button-balanced button-full"
+						type="submit"
+						ladda="vm.loading">Sign Up</button>
+			</div>
+		</form>
+
+		<div class="login padding">
+			<button class="button button-light button-full"
+					ng-click="vm.login()">I have an account - Login
+			</button>
+
 		</div>
 
-
-		<div class="padding">
-
-			<p class="text-center">Your details will be stored in a secure database and will not be shared with anyone
-				without your express permission</p>
-
-			<div class="row">
-				<div class="col">
-					<button class="button button-balanced button-full">Sign Up</button>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col">
-					<button class="button button-light button-full"
-							ng-click="vm.login()">I have an account - login</button>
-				</div>
-			</div>
-		</div>
 	</ion-content>
 
 

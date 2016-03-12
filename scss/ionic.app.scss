@@ -10,13 +10,14 @@ $positive:                        #387ef5 !default;
 $calm:                            #11c1f3 !default;
 $balanced:                        #33cd5f !default;
 $energized:                       #ffc900 !default;
-$assertive:                       #ef473a !default;
+
 $royal:                           #886aea !default;
 $dark:                            #444 !default;
 */
 
 // The path for our ionicons font files, relative to the built CSS in www/css
 $ionicons-font-path: "../lib/ionic/fonts" !default;
+
 
 
 /*
@@ -29,6 +30,10 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 $balanced: #76C103;
 $royal: #7E5FA9;
 $balancedBorder: #498F24;
+$assertive: #ef473a;
+
+
+$errorBg: #FFDFDF;
 
 
 // Modules
@@ -49,6 +54,46 @@ $balancedBorder: #498F24;
 }
 .button.button-light{
 	border: 1px solid #DDDDDD;
+}
+
+
+/*
+
+
+
+	Form Styling
+
+
+
+*/
+form{
+	label.form-group.has-error{
+		//border-bottom: 2px solid $assertive;
+		//margin-bottom: 1px;
+		background: $errorBg;
+	}
+
+	span.error-msg{
+		display: inline-block;
+		color: $assertive;
+		font-size: 12px;
+		padding-right: 15px;
+	}
+
+	.form-error{
+		text-align: center;
+		font-weight: 700;
+		color: $assertive;
+		background: $errorBg;
+		padding: 10px;
+	}
+	.form-success{
+		text-align: center;
+		font-weight: 700;
+		color: #fff;
+		background: $balanced;
+		padding: 10px;
+	}
 }
 
 

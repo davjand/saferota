@@ -20,9 +20,10 @@
 
 			var self = this,
 				defaults = {
+					id: '',
 					firstName: '',
 					lastName: '',
-					email: ''
+					username: ''
 				};
 			angular.extend(defaults, options);
 			angular.extend(self, defaults);

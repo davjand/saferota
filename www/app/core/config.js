@@ -3,12 +3,14 @@
 
 	angular
 		.module('saferota.core')
-		.run(runBlock)
-		.config(config);
+		.run(ionicRun)
+		.config(routeConfig)
+		.config(laddaConfig);
 
+	// Ionic Config
 
 	/* @ngInject */
-	function runBlock($ionicPlatform) {
+	function ionicRun($ionicPlatform) {
 		$ionicPlatform.ready(function () {
 			// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
 			// for form inputs)
@@ -25,10 +27,27 @@
 
 	}
 
+	// Config Routes
+
+
 	/* @ngInject */
-	function config($urlRouterProvider) {
+	function routeConfig($urlRouterProvider) {
 
 		// if none of the above states are matched, use this as the fallback
-
 	}
+
+
+	// Config Ladda
+
+
+	/* @ngInject */
+	function laddaConfig(laddaProvider){
+		laddaProvider.setOption({
+			style: 'zoom-in',
+			spinnerSize: 35,
+			spinnerColor: '#ffffff'
+		});
+	}
+
+
 })();
