@@ -13,6 +13,7 @@
 			 */
 			'ionic',
 			'toastr',
-			'angular-ladda'
+			'angular-ladda',
+			'angular-cache'
 		]);
 })();

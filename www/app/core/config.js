@@ -3,9 +3,11 @@
 
 	angular
 		.module('saferota.core')
+		.config(laddaConfig)
+		.config(cacheConfig)
 		.run(ionicRun)
-		.config(routeConfig)
-		.config(laddaConfig);
+		.run(apiConfig);
+		
 
 	// Ionic Config
 
@@ -31,9 +33,9 @@
 
 
 	/* @ngInject */
-	function routeConfig($urlRouterProvider) {
-
-		// if none of the above states are matched, use this as the fallback
+	function cacheConfig(CacheFactoryProvider) {
+		//14 days
+		angular.extend(CacheFactoryProvider.defaults, { maxAge: 14 * 24 * 60 * 60 * 1000 });
 	}
 
 
@@ -47,6 +49,16 @@
 			spinnerSize: 35,
 			spinnerColor: '#ffffff'
 		});
+	}
+	
+	
+	// Config Backendless
+
+	/* @ngInject */
+	function apiConfig(Backendless){
+		Backendless.initApp("C1C7FA38-5751-AD0D-FFB9-6A7E712C9D00",
+			"827C6171-B5C1-819F-FF14-A57770892900",
+			"v1");
 	}
 
 

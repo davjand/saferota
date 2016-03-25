@@ -4,6 +4,7 @@
 
 	angular
 		.module('saferota.core')
-		.constant('moment', moment);
+		.constant('moment', moment)
+		.constant('Backendless', Backendless);
 
 })();

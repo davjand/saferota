@@ -5,14 +5,14 @@
 		.module('saferota.auth')
 		.service('Session', Session);
 
-	Session.$inject = ['User', 'Backand', '$q'];
+	Session.$inject = ['User', 'Backendless', '$q'];
 
 	/* @ngInject */
-	function Session(User, Backand, $q) {
+	function Session(User, Backendless, $q) {
 		var self = this;
 
 		//Public
-		self.isLoggedIn = Backand.getUsername() !== null;
+		self.isLoggedIn = _isLoggedIn();
 		self.user = null;
 		self.data = {};
 
@@ -24,6 +24,11 @@
 		self.clear = clear;
 		self.getReady = getReady;
 
+		//Private, for testing only
+		if (window.inject) {
+			self._handleDescribeUserClass = _handleDescribeUserClass;
+		}
+
 
 		///////////////////////////////
 
@@ -32,12 +37,9 @@
 		 getReady
 
 		 */
-		function getReady(){
-			if(self._ready === true){
-				return true;
-			}else{
-				return self._ready.promise;
-			}
+		function getReady() {
+			return self._ready.promise;
+
 		}
 
 		/*
@@ -49,20 +51,17 @@
 
 		 */
 		function start() {
-			if (self._ready === true) {
-				self._ready = $q.defer();
+			self._ready = $q.defer();
+
+			if (_isLoggedIn()) {
+				Backendless.UserService.describeUserClass(
+					new Backendless.Async(
+						_handleDescribeUserClass,
+						_handleError));
 			}
-
-
-			Backand.getUserDetails()
-				.then(function (data) {
-					self.user = new User(data);
-					self.isLoggedIn = true;
-					self._ready.resolve();
-					self._ready = true;
-				}, function (r) {
-					self._ready.reject(r);
-				});
+			else {
+				self._ready.reject('Not Logged In');
+			}
 
 			return self._ready.promise;
 		}
@@ -71,6 +70,27 @@
 			this.isLoggedIn = false;
 			this.user = null;
 			this.data = {};
+		}
+
+
+		/*
+
+		 Private
+
+		 */
+
+		function _isLoggedIn() {
+			return Backendless.UserService.getCurrentUser() !== null;
+		}
+
+		function _handleDescribeUserClass(data) {
+			self.user = new User(data);
+			self.isLoggedIn = true;
+			self._ready.resolve();
+		}
+
+		function _handleError(error) {
+			self._ready.reject(error.message);
 		}
 	}
 

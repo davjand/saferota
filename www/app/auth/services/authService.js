@@ -5,10 +5,10 @@
 		.module('saferota.auth')
 		.service('AuthService', AuthService);
 
-	AuthService.$inject = ['Backand','Session', '$q','$rootScope', 'AUTH_EVENTS'];
+	AuthService.$inject = ['Backendless','Session', '$q','$rootScope', 'AUTH_EVENTS'];
 
 	/* @ngInject */
-	function AuthService(Backand, Session, $q, $rootScope, AUTH_EVENTS) {
+	function AuthService(Backendless, Session, $q, $rootScope, AUTH_EVENTS) {
 		var self = this;
 
 		//Public
@@ -26,12 +26,7 @@
 
 		function activate() {
 
-			if (Backand.getUsername() !== null) {
-				//start a session
-				Session.start();
-			}
-
-
+			Session.start();
 		}
 
 		/*
@@ -48,19 +43,14 @@
 		function login(email, password) {
 			var p = $q.defer();
 
-			Backand.signin(email, password)
-				.then(function () {
-					//start the session
-					return Session.start();
-				}).then(function () {
-					//success
-					p.resolve();
+
+			Backendless.UserService.login( email, password, true,
+				new Backendless.Async( function(user){
+					p.resolve(user);
 					$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-				},
-				//Error
-				function (r) {
-					p.reject(_errMsg(r));
-				});
+				}, function(error){
+					p.reject(error.message);
+				}) );
 			return p.promise;
 		}
 
@@ -76,23 +66,27 @@
 
 			name = _parseName(name);
 
-			Backand.signup(name.first, name.last, email, password, password)
-				.then(function(){
-					//signin
-					return Backand.signin(email,password);
-				})
-				.then(function () {
-					//start the session
-					return Session.start();
-				}).then(function () {
-					//success
-					p.resolve();
-					$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-				},
-				//Error
-				function (r) {
-					p.reject(_errMsg(r));
-				});
+			var user = new Backendless.User();
+			user.email = email;
+			user.password = password;
+			user.firstName = name.first;
+			user.lastName = name.last;
+
+			Backendless.UserService.register( user,
+				new Backendless.Async( function(){
+					Session.start().then(function(){
+						self.login(email,password).then(function(){
+							p.resolve();
+							$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+						},function(err){
+							p.reject(err);
+						});
+					},function(error){
+						p.reject(error);
+					})
+				},function(error){
+					p.reject(error.message);
+				}) );
 			return p.promise;
 		}
 
@@ -105,12 +99,13 @@
 		 */
 		function resetPassword(email){
 			var p = $q.defer();
-			Backand.requestResetPassword(email)
-				.then(function(){
+
+			Backendless.UserService.restorePassword( email,
+				new Backendless.Async(function(){
 					p.resolve();
-				},function(r){
-					p.reject(_errMsg(r));
-				});
+				},function(error){
+					p.reject(error.message);
+				}));
 			return p.promise;
 		}
 
@@ -123,13 +118,14 @@
 		 */
 		function logout(){
 			var p = $q.defer();
-			Backand.signout().then(function(){
+
+			Backendless.UserService.logout( new Backendless.Async( function(){
 				Session.clear();
 				$rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
 				p.resolve();
-			},function(error){
-				p.reject(error);
-			});
+			}, function(error){
+				p.reject(error.message);
+			}) );
 
 			return p.promise;
 

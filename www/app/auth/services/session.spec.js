@@ -1,26 +1,18 @@
 describe('saferota.auth Session', function () {
 
 	beforeEach(module('saferota.auth'));
-	beforeEach(inject(function ($q, $timeout, Backand) {
+	beforeEach(inject(function ($q, Backendless,Session) {
 
-		spyOn(Backand, 'getUserDetails').and.returnValue($q.when({
-			firstName: 'John',
-			lastName: 'Doe',
-			username: 'john@doe.com'
-		}));
-	}));
-
-
-	it('Can save the session details into the session', function (done) {
-		inject(function (Session,$rootScope) {
-			Session.start().then(function () {
-				expect(Session.user.firstName).toEqual('John');
-				Session.clear();
-				done();
+		spyOn(Backendless.UserService, 'describeUserClass').and.callFake(function(){
+			Session._handleDescribeUserClass({
+				firstName: 'John',
+				lastName: 'Doe',
+				username: 'john@doe.com'
 			});
-			$rootScope.$digest();
 		});
-	});
+		spyOn(Backendless.UserService, 'getCurrentUser').and.returnValue("John");
+	}));
+	
 
 	it('Can clear a session', inject(function (Session) {
 		Session.user = {'firstName': 'David'};

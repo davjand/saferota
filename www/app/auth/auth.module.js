@@ -3,8 +3,8 @@
 
 	angular
 		.module('saferota.auth', [
+			'saferota.core',
 			'angular-cache',
-			'backand',
 			'ui.router',
 			'jcs-autoValidate',
 			'angular-ladda'
