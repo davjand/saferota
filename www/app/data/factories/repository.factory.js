@@ -10,8 +10,7 @@
 	/* @ngInject */
 	function Repository(DataConfig, $injector, $q) {
 
-		var LocalProvider = $injector.get(DataConfig.local);
-		//var remoteProvider = $injector.get(DataConfig.remote);
+
 
 
 		/**
@@ -20,21 +19,34 @@
 		 * Creates a repository for data models
 		 *
 		 * @param Model
+		 * @param localAdapter {String}
+		 * @param remoteProvider {String}
 		 *
 		 */
-		var Repository = function(Model){
-
+		var Repository = function(Model, localAdapter, remoteAdapter){
 			this._model = Model;
 
+			//set defaults
+			localAdapter = localAdapter || DataConfig.local;
+			remoteAdapter = remoteAdapter || DataConfig.remote;
+
 			/*
-			Create the storage repositories
+			Inject the storage repositories
 			 */
-			this.local = new LocalProvider(Model.className())
+			var LocalProvider = $injector.get(localAdapter);
+			var RemoteProvider = $injector.get(remoteAdapter);
+
+			/*
+			Create the adapters
+			 */
+			this._local = new LocalProvider(Model.config());
+			this._remote = new RemoteProvider(Model.config());
 
 		};
 
 		//repositories
 		Repository.prototype.save = save;
+		Repository.prototype.update = update;
 		Repository.prototype.remove = remove;
 		Repository.prototype.get = getItem;
 		Repository.prototype.find = find;
@@ -80,6 +92,10 @@
 		function fetch(){
 
 
+		}
+		
+		function update(){
+			
 		}
 
 

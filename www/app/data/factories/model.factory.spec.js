@@ -27,10 +27,12 @@ describe('saferota.data Model', function () {
 	/*
 	 .schema
 	 */
-	it('Can set the schema', inject(function (Model) {
+	it('Can set the schema with updated and created dates', inject(function (Model) {
 		var m = new Model('test');
 		m.schema({name: 'test'});
 		expect(m._schema.name).toEqual('test');
+		expect(m._schema.createdDate).toBeNull();
+		expect(m._schema.updatedDate).toBeNull();
 	}));
 
 	/*
@@ -89,7 +91,7 @@ describe('saferota.data Model', function () {
 			.key('primaryKey')
 			.relationship('hasOne', 'owner', 'Owner')
 			.methods({
-				fullname: function(){
+				fullname: function () {
 					return this.first + ' ' + this.last
 				}
 			});
@@ -136,11 +138,36 @@ describe('saferota.data Model', function () {
 		expect(m.name).toEqual('not default');
 	}));
 
-	it('Sets isNew to false if a primary key is passed', function(Model){
+	it('Sets isNew to false if a primary key is passed', inject(function (Model) {
 		var Test = new Model('test').schema({name: 'default'}).key('id');
 
 		var m = Test.create({id: 10, name: 'not default'});
 		expect(m._isNew).toBeFalsy();
-	});
+	}));
+
+	it('Can set the created and updated dates to default values', inject(function (Model) {
+		var Test = new Model('test').schema({name: 'default'}).key('id');
+
+		var m = Test.create({id: 10});
+
+		expect(m.createdDate).not.toBeNull();
+		expect(m.updatedDate).not.toBeNull();
+	}));
+
+	it('Can set the created and updated dates from passed item', inject(function (Model) {
+		var Test = new Model('test').schema({name: 'default'}).key('id');
+		var date1 = new Date(2015, 10, 10),
+			date2 = new Date(2012, 10, 2);
+
+		var m = Test.create({
+			id: 10,
+			createdDate: date1,
+			updatedDate: date2
+		});
+
+		expect(m.createdDate).toEqual(date1);
+		expect(m.updatedDate).toEqual(date2);
+	}));
+
 
 });

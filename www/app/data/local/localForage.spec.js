@@ -1,19 +1,19 @@
 describe('saferota.data LocalAdpatorLocalForage', function () {
 	beforeEach(module('saferota.data'));
 
-	afterEach(inject(function (LocalAdaptorLocalForage) {
-		LocalAdaptorLocalForage.clearAll();
+	afterEach(inject(function (LocalAdapterLocalForage) {
+		LocalAdapterLocalForage.clearAll();
 	}));
 
 	/*
 	 Can create / store / get parameters
 	 */
 	it('Can create new cache and save data into it', function (done) {
-		inject(function (LocalAdaptorLocalForage, $rootScope) {
-			var local = new LocalAdaptorLocalForage('test');
+		inject(function (LocalAdapterLocalForage, $rootScope) {
+			var local = new LocalAdapterLocalForage({name:'test'});
 
-			local.setData('name', 'John').then(function () {
-				return local.getData('name');
+			local.set('name', 'John').then(function () {
+				return local.get('name');
 			}).then(function (data) {
 				expect(data).toEqual('John');
 				done();

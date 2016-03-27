@@ -18,7 +18,7 @@
 	
 	/* @ngInject */
 	function configureData(DataConfigProvider){
-		DataConfigProvider.setLocal('LocalAdaptorLocalForage');
+		DataConfigProvider.setLocal('LocalAdapterLocalForage');
 	}
 
 })();

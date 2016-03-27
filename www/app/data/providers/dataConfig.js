@@ -20,8 +20,8 @@
 		/*
 			Defaults
 		 */
-		var localProvider = 'LocalAdaptorLocalForage';
-		var remoteProvider = null;
+		var localProvider = 'LocalAdapterMemory';
+		var remoteProvider = 'RemoteAdapterMemory';
 
 		/**
 		 * SetLocal Provider

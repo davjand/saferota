@@ -99,6 +99,8 @@
 		 * @returns {*}
 		 */
 		function schema(schema) {
+			schema.createdDate = null;
+			schema.updatedDate = null;
 			return this.config(schema, '_schema');
 		}
 
@@ -120,7 +122,6 @@
 		 * Accepts a key value array of methods which are then bound to 'this'
 		 *
 		 * @param methods {Object}
-		 * @param force {Boolean} - Allow overwriting of prototype methods
 		 * @returns {methods}
 		 */
 		function methods(methods) {
@@ -166,7 +167,7 @@
 		 *
 		 * Can only be called once
 		 *
-		 * @param data
+		 * @param createData
 		 */
 		function create(createData) {
 
@@ -196,10 +197,15 @@
 				var model = this;
 
 				model._isNew = true;
-				model.setData(passedData);
+				model.setData(passedData,true);
 
-				//if the primary key is now set,
-
+				//Set created and updated dates
+				if(model.createdDate === null){
+					model.createdDate = new Date();
+				}
+				if(model.updatedDate === null){
+					model.updatedDate = new Date();
+				}
 
 			};
 
@@ -228,14 +234,22 @@
 			 * Set the data from a passed object
 			 *
 			 * @param d {data} object
+			 * @param setDefault {Boolean} - if set to true will set the defaults
 			 *
 			 */
-			function setData(d) {
+			function setData(d,setDefault) {
 				d = d || {};
+				setDefault = typeof setDefault === 'undefined' ? false : setDefault;
+
 				var thisModel = this;
 
+				//set each item to either
 				angular.forEach(this._schema,function(val,key){
-					thisModel[key] = d[key] || val;
+					if(setDefault){
+						thisModel[key] = d[key] || val;
+					}else if(d[key]){
+						thisModel[key] = d[key];
+					}
 				});
 
 				//set the primary key
