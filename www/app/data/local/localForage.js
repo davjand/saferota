@@ -10,7 +10,7 @@
 	//allow all to be cleared easily
 	var allCaches = [];
 	var PREFIX = 'data_';
-	var CONFIG_KEY = "__config";
+	var CONFIG_KEY = "_config";
 
 
 	/* @ngInject */
@@ -20,6 +20,7 @@
 			initialize: initialize,
 			get: getData,
 			set: setData,
+			keys: keys,
 			getConfig: getConfig,
 			setConfig: setConfig,
 			length: length,
@@ -38,17 +39,30 @@
 
 		function initialize(options) {
 			options = options || {};
+			var self = this;
+
 			if (!options.name) {
 				throw('Cache name is required');
 			}
 
-			this._cacheName = name;
+			this._cacheName = options.name;
 			this.$cache = $localForage.createInstance({
 				name: PREFIX + this._cacheName
 			});
 
 			//keep a record of all objects
 			allCaches.push(this.$cache);
+
+			//init the config
+			self.$cache.getItem(CONFIG_KEY).then(function(config){
+				if(angular.isObject(config)){
+					return $q.when();
+				}else{
+					return self.$cache.setItem(CONFIG_KEY,{});
+				}
+			}).then(function(){
+				self._ready.resolve();
+			})
 		}
 
 		/**
@@ -59,7 +73,15 @@
 		 * @returns {*}
 		 */
 		function setData(key, val) {
-			return this.$cache.setItem(key, val);
+			var p = $q.defer();
+			var self = this;
+			self.isReady().then(function () {
+				return self.$cache.setItem(key, val);
+			}).then(function () {
+				p.resolve();
+			}, self._err);
+
+			return p.promise;
 		}
 
 		/**
@@ -70,17 +92,37 @@
 		 * @returns {*}
 		 */
 		function getData(key) {
-			return this.$cache.getItem(key);
+			var p = $q.defer();
+			var self = this;
+
+			self.isReady().then(function () {
+				return self.$cache.getItem(key);
+			}).then(function (value) {
+				p.resolve(value);
+			}, self._err(p));
+
+			return p.promise;
 		}
 
 		/**
 		 *
 		 * getConfig
 		 *
+		 * creates a new config object if needed
+		 *
 		 * @returns {*}
 		 */
-		function getConfig(){
-			return this.$cache.getItem(CONFIG_KEY);
+		function getConfig() {
+			var p = $q.defer();
+			var self = this;
+
+			self.isReady().then(function () {
+				return self.$cache.getItem(CONFIG_KEY);
+			}).then(function (value) {
+				p.resolve(value);
+			}, self._err(p));
+
+			return p.promise;
 		}
 
 		/**
@@ -90,8 +132,17 @@
 		 * @param config
 		 * @returns {*|boolean}
 		 */
-		function setConfig(config){
-			return this.$cache.setItem(CONFIG_KEY,config);
+		function setConfig(config) {
+			var p = $q.defer();
+			var self = this;
+
+			self.isReady().then(function () {
+				return self.$cache.setItem(CONFIG_KEY, config);
+			}).then(function () {
+				p.resolve();
+			}, self._err(p));
+
+			return p.promise;
 		}
 
 
@@ -102,13 +153,14 @@
 		 */
 		function length() {
 			var p = $q.defer();
+			var self = this;
 
-			this.$cache.length().then(function(value){
-				p.resolve(value - 1); //factor in config length
-			},function(error){
-				p.reject(error);
-			});
-
+			self.isReady().then(function () {
+					return self.$cache.length();
+				})
+				.then(function (value) {
+					p.resolve(value - 1); //factor in config length
+				}, self._err(p));
 
 			return p.promise;
 		}
@@ -124,13 +176,43 @@
 		}
 
 		/**
+		 * keys
+		 *
+		 * Returns {}
+		 */
+		function keys() {
+			var p = $q.defer();
+			var self = this;
+
+			self.isReady().then(function () {
+				return self.$cache.keys();
+			}).then(function (keys) {
+				//remove the config key from the array
+				keys.splice(keys.indexOf(CONFIG_KEY), 1);
+				p.resolve(keys);
+			}, self._err(p));
+
+			return p.promise;
+		}
+
+		/**
 		 *
 		 * Clear the current cache
 		 *
 		 * @returns {*}
 		 */
 		function clear() {
-			return this.$cache.clear();
+			var p = $q.defer();
+			var self = this;
+			self.isReady().then(function () {
+				return self.$cache.clear();
+			}).then(function () {
+				p.resolve();
+			}, self._err(p));
+
+			return p.promise;
+
+
 		}
 
 		/**
@@ -152,8 +234,16 @@
 		 *
 		 * @param id
 		 */
-		function remove(id){
-			return this.$cache.remove(id);
+		function remove(id) {
+			var p = $q.defer();
+			var self = this;
+			self.isReady().then(function () {
+				return self.$cache.removeItem(id);
+			}).then(function () {
+				p.resolve();
+			}, self._err(p));
+
+			return p.promise;
 		}
 	}
 

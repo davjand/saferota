@@ -215,4 +215,27 @@ describe('saferota.data LocalAdapterMemory', function () {
 			$rootScope.$digest();
 		});
 	});
+	
+	/*
+	.keys
+	*/
+	 
+	it('Can get the array keys',function(done){
+	    inject(function($rootScope){
+			local.data({
+				key1: 'test1',
+				key2: 'test2',
+				key3: 'test3',
+				key4: 'test2'
+			}).then(function(){
+				return local.keys();
+			}).then(function(keys){
+				expect(keys[0]).toBe('key1');
+				expect(keys[2]).toBe('key3');
+				expect(keys[3]).toBe('key4');
+				done();
+			});
+	        $rootScope.$digest();
+	    });
+	});
 });

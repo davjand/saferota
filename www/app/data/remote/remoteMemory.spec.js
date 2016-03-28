@@ -43,7 +43,7 @@ describe('saferota.data RemoteAdaptorMemory', function () {
 			var m = Test.create({id: 2});
 
 			remote.save(m).then(function(){
-				expect(remote.$cache[0].id).toEqual(2);
+				expect(remote.$cache[0].id).toEqual('2');
 				done();
 			});
 			$rootScope.$digest();
@@ -87,7 +87,7 @@ describe('saferota.data RemoteAdaptorMemory', function () {
 				return remote.remove(m2);
 			}).then(function(model){
 				expect(remote.$cache.length).toBe(2);
-				expect(model.id).toEqual(5);
+				expect(model.id).toEqual('5');
 				done();
 			});
 			$rootScope.$digest();

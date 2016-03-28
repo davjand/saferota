@@ -13,6 +13,7 @@
 	 initialize: initialize,
 	 get: getData,
 	 set: setData,
+	 keys: keys
 	 remove: remove,
 	 getConfig: getConfig,
 	 setConfig: setConfig,
@@ -37,6 +38,7 @@
 		'initialize',
 		'getConfig',
 		'setConfig',
+		'keys',
 		'get',
 		'set',
 		'length',
@@ -59,13 +61,14 @@
 			Constructor
 			 - Creates a new copy of the config object
 			 - Calls the initialize function (provided by implementation)
-			 - Attempts to load the config settings
-			 	- If can load them then
+			 - Creates this.ready which is a promise that resovles when the config has been initialized
+
 			 */
 			var Adapter = function (config) {
+				this._ready = $q.defer(); //class should decide when ready
+				
 				var conf = angular.merge({},config);
 				this.initialize(conf);
-				this.configKey({modelConfig: conf});
 			};
 
 			angular.forEach(REQUIRED, function (key) {
@@ -76,14 +79,22 @@
 				}
 			});
 
-			//Start function
-			Adapter.prototype.start = start;
 
 			//add in extra helper functions
 			Adapter.prototype.data = data;
 			Adapter.prototype.config = config;
 			Adapter.prototype.updatedAt = updatedAt;
 			Adapter.prototype.configKey = configKey;
+			Adapter.prototype.isReady = function(){return this._ready.promise;};
+
+			/*
+				Helper function to reject promises
+			 */
+			Adapter.prototype._err = function(p){
+				return function(error){
+					p.reject(error);
+				}
+			};
 
 			//set static method
 			Adapter.clearAll = options['clearAll'];
@@ -107,7 +118,7 @@
 		 *
 		 * @param key
 		 * @param value
-		 * @return Promise
+		 * @return {Promise|*}
 		 */
 		function configKey(key, value) {
 			var self = this;
@@ -140,11 +151,23 @@
 		 * @returns {Promise|*}
 		 */
 		function updatedAt(date) {
+			var p = $q.defer();
+
 			if (typeof date !== 'undefined') {
-				return this.configKey('updatedAt', date);
+				this.configKey('updatedAt', date).then(function(){
+					p.resolve();
+				})
 			} else {
-				return this.configKey('updatedAt')
+				this.configKey('updatedAt').then(function(val){
+					if(typeof val === 'string'){
+						p.resolve(new Date(val));
+					}else{
+						p.resolve(val);
+					}
+				});
 			}
+
+			return p.promise;
 		}
 
 
@@ -164,13 +187,15 @@
 		 * @returns {*}
 		 */
 		function data(key, value) {
+			var pArr = [];
+
 			if (angular.isArray(key)) {
 				/*
 				 Return multiple keys
 				 */
 				var p = $q.defer();
 				var found = {};
-				var pArr = [];
+
 
 				//Loop through the keys and create an array of promises
 				angular.forEach(key, function (k) {
@@ -190,7 +215,6 @@
 				/*
 				 Set multiple keys
 				 */
-				var pArr = [];
 				angular.forEach(key, function (v, k) {
 					pArr.push(this.set(k, v));
 				}, this);

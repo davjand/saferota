@@ -62,6 +62,9 @@
 		CreateModel.prototype.methods = methods;
 		CreateModel.prototype.relationship = relationship;
 		CreateModel.prototype.create = create;
+		CreateModel.prototype.className = function(){
+			return this._config.name;
+		};
 
 
 		return CreateModel;
@@ -187,6 +190,17 @@
 
 			 */
 
+			/*
+
+			 Integrity check:
+
+			 1) check that the primary key isn't set in the schema
+
+			 */
+			if (typeof this._schema[this._config.key] !== 'undefined') {
+				throw('Error: ModelFactory.create - primary key must not be set in model schema');
+			}
+
 			/**
 			 *
 			 * Constructor
@@ -196,14 +210,15 @@
 			var Model = function (passedData) {
 				var model = this;
 
-				model._isNew = true;
-				model.setData(passedData,true);
+				model.__existsRemotely = false;
+
+				model.setData(passedData, true);
 
 				//Set created and updated dates
-				if(model.createdDate === null){
+				if (model.createdDate === null) {
 					model.createdDate = new Date();
 				}
-				if(model.updatedDate === null){
+				if (model.updatedDate === null) {
 					model.updatedDate = new Date();
 				}
 
@@ -215,18 +230,33 @@
 			Model.prototype._schema = factory._schema;
 
 			//set the custom methods
-			angular.forEach(factory._methods,function(fx,key){
+			angular.forEach(factory._methods, function (fx, key) {
 				Model.prototype[key] = fx;
 			});
 
 			//Default Methods
-			Model.prototype.className = function(){return this._config.name;};
-			Model.prototype.getPrimaryKey = function(){return this._config.key;};
-			Model.prototype.getKey = function(){return this[this.getPrimaryKey()];};
-			
+			Model.prototype.className = function () {
+				return this._config.name;
+			};
+			Model.prototype.getPrimaryKey = function () {
+				return this._config.key;
+			};
+			Model.prototype.getKey = function () {
+				return this[this.getPrimaryKey()];
+			};
+			Model.prototype.setKey = function(key){
+				if(typeof key !== 'string'){
+					key = key.toString();
+				}
+				this[this.getPrimaryKey()] = key;
+			};
+
 			Model.prototype.setData = setData;
 			Model.prototype.getData = getData;
 			Model.prototype.data = data;
+			Model.prototype.toObject = toObject;
+			Model.prototype.guid = guid;
+			Model.prototype.resolveWithRemote = resolveWithRemote;
 
 
 			/**
@@ -237,28 +267,46 @@
 			 * @param setDefault {Boolean} - if set to true will set the defaults
 			 *
 			 */
-			function setData(d,setDefault) {
+			function setData(d, setDefault) {
 				d = d || {};
 				setDefault = typeof setDefault === 'undefined' ? false : setDefault;
 
 				var thisModel = this;
 
 				//set each item to either
-				angular.forEach(this._schema,function(val,key){
-					if(setDefault){
+				angular.forEach(this._schema, function (val, key) {
+					if (setDefault) {
 						thisModel[key] = d[key] || val;
-					}else if(d[key]){
+					} else if (d[key]) {
 						thisModel[key] = d[key];
 					}
 				});
 
-				//set the primary key
-				if(this._config.key in d){
-					thisModel[this._config.key] = d[this._config.key];
-					this._isNew = false; //not new if has a primary key
+				/*
+				 Primary Key / local/remote logic
+
+				 1) is a LOCAL object
+				 */
+				if (typeof d.__existsRemotely !== 'undefined' && !d.__existsRemotely) {
+					if (typeof d[this._config.key] === 'undefined') {
+						throw('Error: Model - cannot create local object without key')
+					}
+					thisModel.setKey(d[this.getPrimaryKey()]);
+					thisModel.__existsRemotely = false;
 				}
-				else{
-					thisModel[this._config.key] = null;
+				/*
+				 2) is a REMOTE Object
+				 */
+				else if (typeof d[this._config.key] !== 'undefined') {
+					thisModel.setKey(d[this.getPrimaryKey()]);
+					thisModel.__existsRemotely = true;
+				}
+				/*
+				3) new object, generate new ID
+				 */
+				else {
+					thisModel[this._config.key] = this.guid();
+					thisModel.__existsRemotely = false;
 				}
 
 			}
@@ -273,8 +321,8 @@
 			 */
 			function getData() {
 				var dataExport = {};
-				angular.forEach(this,function(val,key){
-					if(typeof val !== 'function' && typeof val !== 'undefined'){
+				angular.forEach(this, function (val, key) {
+					if (typeof val !== 'function' && typeof val !== 'undefined') {
 						dataExport[key] = val;
 					}
 				});
@@ -296,13 +344,86 @@
 				}
 			}
 
+			/**
+			 * toObject
+			 *
+			 * Returns a vanilla json object from the data
+			 *
+			 * sets className / updatedDate/createdDate if withMeta is true
+			 *
+			 * @param withMeta {Boolean} - Defaults to true
+			 * @returns {{}}
+			 */
+			function toObject(withMeta) {
+				withMeta = typeof withMeta === 'undefined' ? true : withMeta;
+				var data = {},
+					self = this;
+
+				//Add meta data
+				if (withMeta) {
+					data.__className = this.className();
+					data.__existsRemotely = this.__existsRemotely;
+				}
+				//parse schema
+				angular.forEach(this._schema, function (val, key) {
+					if (!withMeta && (key === 'createdDate' || key === 'updatedDate' )) {
+						return;
+					}
+					data[key] = self[key];
+				});
+				//add id
+				data[this.getPrimaryKey()] = this.getKey();
+				return data;
+			}
+
 			/*
-				Cache the model
-				and return a newly created model
+			 Cache the model
+			 and return a newly created model
 			 */
 			factory._instance = Model;
 			return new Model(createData);
 		}
+
+
+		/**
+		 * guid
+		 *
+		 * Generate a Unique Identifier to use for local IDs
+		 *
+		 * Credit to Stack Overflow
+		 * http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+		 *
+		 * @returns {string}
+		 */
+		function guid() {
+			function s4() {
+				return Math.floor((1 + Math.random()) * 0x10000)
+					.toString(16)
+					.substring(1);
+			}
+
+			return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+				s4() + '-' + s4() + s4() + s4();
+
+		}
+
+		/**
+		 * resolveWithRemote
+		 *
+		 * Resolves a local object with remote data
+		 *  - Updates the ID
+		 *  - Updates any schema items
+		 *
+		 * @param data
+		 */
+		function resolveWithRemote(data){
+			//remote data must have ID or we're just going to cause a mess
+			if(typeof data[this.getPrimaryKey()] === 'undefined'){
+				throw('Error: Model - Cannot resolveWithRemote if passed data has no id');
+			}
+			this.setData(data);
+		}
+
 	}
 })();
 

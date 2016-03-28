@@ -16,6 +16,7 @@
 			set: setData,
 			getConfig: getConfig,
 			setConfig: setConfig,
+			keys: keys,
 			length: length,
 			filter: filter,
 			clear: clear,
@@ -30,10 +31,15 @@
 		
 		////////////////////////////////
 
-		function initialize(options){
-			
+		/**
+		 *
+		 * Constructor
+		 *
+		 */
+		function initialize(){
 			this.$cache = {};
 			this.$config = {};
+			this._ready.resolve();
 		}
 
 		/**
@@ -92,6 +98,17 @@
 		}
 
 		/**
+		 * keys
+		 *
+		 * Get the array keys
+		 *
+		 * @returns {Promise|*}
+		 */
+		function keys(){
+			return _wrapInPromise(Object.keys(this.$cache));
+		}
+
+		/**
 		 * filter
 		 *
 		 * @param callback
@@ -100,11 +117,15 @@
 		function filter(callback){
 			var data = {};
 
-			angular.forEach(this.$cache,function(value,key){
-				if(callback.call(this,value,key)){
-					data[key] = value;
-				}
-			});
+			if(callback) {
+				angular.forEach(this.$cache, function (value, key) {
+					if (callback.call(this, value, key)) {
+						data[key] = value;
+					}
+				});
+			}else{
+				data = this.$cache;
+			}
 			return _wrapInPromise(data);
 		}
 
@@ -152,9 +173,7 @@
 		 * @private
 		 */
 		function _wrapInPromise(value){
-			var p = $q.defer();
-			p.resolve(value);
-			return p.promise;
+			return $q.when(value);
 		}
 		
 	}
