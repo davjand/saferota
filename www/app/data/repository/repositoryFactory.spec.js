@@ -87,13 +87,13 @@ describe('saferota.data Repository', function () {
 	/*
 	._pushToLocal
 	 */
-	xit('_pushToLocal can add data onto the local repository',function(done){
+	/*xit('_pushToLocal can add data onto the local repository',function(done){
 	    inject(function($rootScope){
-	        var m =  
-				
-	        $rootScope.$digest();
+	 var m =
+
+	 $rootScope.$digest();
 	    });
-	});
+	 });*/
 	
 
 	/*

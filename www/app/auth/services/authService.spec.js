@@ -25,7 +25,7 @@ describe('saferota.auth AuthService', function () {
 	Login
 
 	 */
-	xit('Login: Starts a Session and broadcasts a login message', function (done) {
+	/*	xit('Login: Starts a Session and broadcasts a login message', function (done) {
 		inject(function (AuthService, Session, Backand, $q, AUTH_EVENTS, $rootScope) {
 
 			spyOn(Backand, 'signin').and.returnValue($q.when({}));
@@ -50,14 +50,14 @@ describe('saferota.auth AuthService', function () {
 			});
 			$rootScope.$digest();
 		});
-	});
+	 });*/
 
 	/*
 
 	Signup
 
 	 */
-	xit('Signup: Starts a Session and broadcasts a login message', function (done) {
+	/*xit('Signup: Starts a Session and broadcasts a login message', function (done) {
 		inject(function (AuthService, Session, Backendless, $q, AUTH_EVENTS, $rootScope) {
 
 			spyOn(Backendless.UserService, 'register').and.returnValue($q.when({}));
@@ -82,14 +82,14 @@ describe('saferota.auth AuthService', function () {
 			});
 			$rootScope.$digest();
 		});
-	});
+	 });*/
 
 	/*
 
 	 Reset Password
 
 	 */
-	xit('Reset Password calls BackanD API', function (done) {
+	/*xit('Reset Password calls BackanD API', function (done) {
 		inject(function (AuthService, Backand, $q, $rootScope) {
 
 			spyOn(Backand, 'requestResetPassword').and.returnValue($q.when({}));
@@ -100,14 +100,14 @@ describe('saferota.auth AuthService', function () {
 			});
 			$rootScope.$digest();
 		});
-	});
+	 });*/
 
 	/*
 
 	Logout
 
 	 */
-	xit('Logout calls Backand API, clears the session and triggers an event', function (done) {
+	/*xit('Logout calls Backand API, clears the session and triggers an event', function (done) {
 		inject(function (AuthService, Session, Backand, $q, AUTH_EVENTS, $rootScope) {
 
 			spyOn(Backand, 'signout').and.returnValue($q.when({}));
@@ -132,7 +132,7 @@ describe('saferota.auth AuthService', function () {
 			});
 			$rootScope.$digest();
 		});
-	});
+	 });*/
 
 
 

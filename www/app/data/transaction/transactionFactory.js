@@ -25,16 +25,15 @@
 		 * Construct a transaction, accepts the following parameter combinations
 		 *
 		 * Initialise from a model and type
-		 * ```javascript
-		 * 		new Transaction(Transaction.TYPES[...],ModelInstance)
+		 * ```js
+		 new Transaction(Transaction.TYPES[...],ModelInstance)
 		 * ```
 		 *
 		 * Or initialise from a previously objectified Transaction
 		 *
-		 * ```javascript
-		 * 		new Transaction(TransactionInstance.toObject())
+		 * ```js
+		 new Transaction(TransactionInstance.toObject())
 		 * ```
-		 *
 		 *
 		 * @param type {string | Object}
 		 * @param model {Model}
