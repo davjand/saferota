@@ -5,10 +5,10 @@
 		.module('saferota.data')
 		.factory('TransactionQueue', CreateTransactionQueue);
 
-	CreateTransactionQueue.$inject = ['Transaction', '$injector', 'DataConfig', '$q'];
+	CreateTransactionQueue.$inject = ['Transaction', '$injector', 'DataConfig', '$q', 'RepositoryService'];
 
 	/* @ngInject */
-	function CreateTransactionQueue(Transaction, $injector, DataConfig, $q) {
+	function CreateTransactionQueue(Transaction, $injector, DataConfig, $q, RepositoryService) {
 
 		var TransactionQueue = function (localAdapter, name) {
 			name = name || '_queue';
@@ -29,6 +29,7 @@
 		TransactionQueue.prototype.pop = pop;
 		TransactionQueue.prototype.length = length;
 		TransactionQueue.prototype.clear = clear;
+		TransactionQueue.prototype.resolveTransaction = resolveTransaction;
 
 
 		//private
@@ -153,7 +154,13 @@
 						}
 					});
 					self.$localId[transaction.model.id].splice(localPos, 1);
+
+					//if last one, remove
+					if (self.$localId[transaction.model.id].length < 1) {
+						delete self.$localId[transaction.model.id];
+					}
 				}
+
 				//remove from the cache
 				return self.$cache.remove(k);
 			}).then(function () {
@@ -179,6 +186,63 @@
 		function clear() {
 			this.$localId = {};
 			return this.$cache.clear();
+		}
+
+
+		/**
+		 * resolveTransaction
+		 *
+		 * Pass in data from a remote service (expects an ID)
+		 *  - Pops of the last transaction and notifies the repo to update
+		 *  - Reviews any cached transactions that are of the same object an update
+		 *
+		 *  Only supports primary keys at the moment
+		 *  @TODO Foreign key support
+		 *
+		 * @param data
+		 * @returns {*}
+		 */
+		function resolveTransaction(data) {
+			data = data || {};
+			var self = this,
+				transaction;
+
+			return self.ready.then(function () {
+				return self.pop();
+			}).then(function (latestTx) {
+				var p = $q.defer(),
+					oldId = latestTx.model.id;
+
+				transaction = latestTx;
+				transaction.resolve(data);
+
+				//see if any other transactions need updating
+				if (!transaction.model.__existsRemotely && self.$localId[transaction.model.id]) {
+					var keys = self.$localId[transaction.model.id];
+					var fx = function (index) {
+						if (index < keys.length) {
+							var k = keys[index].position;
+							self.$cache.get(k).then(function (item) {
+								var tx = new Transaction(item);
+								tx.model.setData(data, false);
+								return self.$cache.set(k, tx.toObject());
+							}).then(function () {
+								fx(index + 1);
+							});
+						} else {
+							delete self.$localId[oldId];
+							p.resolve();
+						}
+					};
+					fx(0);
+				}
+				else {
+					p.resolve();
+				}
+				return p.promise;
+			}).then(function () {
+				RepositoryService.notify(transaction);
+			});
 		}
 
 

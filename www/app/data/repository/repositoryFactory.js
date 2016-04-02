@@ -54,7 +54,7 @@
 		Repository.prototype.get = getItem;
 		Repository.prototype.find = find;
 		Repository.prototype.fetch = fetch;
-		
+		Repository.prototype.notify = notify;
 		
 		//Internal Methods - expose for testing
 		Repository.prototype._initConfig = _initConfig;
@@ -95,6 +95,17 @@
 			else{
 
 			}
+		}
+
+		/**
+		 * notify
+		 *
+		 * Receives a resolved transaction
+		 *
+		 * @param transaction
+		 */
+		function notify(transaction) {
+			
 		}
 
 		function remove(model){

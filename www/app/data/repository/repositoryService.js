@@ -5,16 +5,18 @@
 		.module('saferota.data')
 		.service('RepositoryService', RepositoryService);
 
-	RepositoryService.$inject = ['Repository','Model'];
+	RepositoryService.$inject = ['Repository'];
 
 	/* @ngInject */
-	function RepositoryService(Repository,Model) {
+	function RepositoryService(Repository) {
 		var self = this;
 
 		this.$cache = {};
 
 		this.create = create;
 		this.get = getRepo;
+		this.notify = notify;
+		this.clear = clear;
 
 		////////////////
 
@@ -58,6 +60,27 @@
 				throw('Error: RepositoryService.get "'+name+'" could not be found');
 			}
 			return self.$cache[name];
+		}
+
+		/**
+		 * notify
+		 *
+		 * Shortcut to notify a repository
+		 *
+		 */
+		function notify(modelName, transaction) {
+			this.getRepo(modelName).notify(transaction);
+		}
+
+
+		/**
+		 * .clear
+		 *
+		 * Clears the cache
+		 *
+		 */
+		function clear() {
+			this.$cache = [];
 		}
 	}
 

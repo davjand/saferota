@@ -236,19 +236,23 @@
 
 			//Default Methods
 			Model.prototype.className = function () {
+				//noinspection JSPotentiallyInvalidUsageOfThis
 				return this._config.name;
 			};
 			Model.prototype.getPrimaryKey = function () {
+				//noinspection JSPotentiallyInvalidUsageOfThis
 				return this._config.key;
 			};
 			Model.prototype.getKey = function () {
 				return this[this.getPrimaryKey()];
 			};
-			Model.prototype.setKey = function(key){
+			Model.prototype.setKey = function (key, remote) {
+				remote = typeof remote !== 'undefined' ? remote : true;
 				if(typeof key !== 'string'){
 					key = key.toString();
 				}
 				this[this.getPrimaryKey()] = key;
+				this.__existsRemotely = remote;
 			};
 
 			Model.prototype.setData = setData;
@@ -269,12 +273,13 @@
 			 */
 			function setData(d, setDefault) {
 				d = d || {};
+				var self = this;
 				setDefault = typeof setDefault === 'undefined' ? false : setDefault;
 
 				var thisModel = this;
 
 				//set each item to either
-				angular.forEach(this._schema, function (val, key) {
+				angular.forEach(self._schema, function (val, key) {
 					if (setDefault) {
 						thisModel[key] = d[key] || val;
 					} else if (d[key]) {
@@ -288,25 +293,22 @@
 				 1) is a LOCAL object
 				 */
 				if (typeof d.__existsRemotely !== 'undefined' && !d.__existsRemotely) {
-					if (typeof d[this._config.key] === 'undefined') {
+					if (typeof d[self._config.key] === 'undefined') {
 						throw('Error: Model - cannot create local object without key')
 					}
-					thisModel.setKey(d[this.getPrimaryKey()]);
-					thisModel.__existsRemotely = false;
+					thisModel.setKey(d[self.getPrimaryKey()], false);
 				}
 				/*
 				 2) is a REMOTE Object
 				 */
-				else if (typeof d[this._config.key] !== 'undefined') {
-					thisModel.setKey(d[this.getPrimaryKey()]);
-					thisModel.__existsRemotely = true;
+				else if (typeof d[self._config.key] !== 'undefined') {
+					thisModel.setKey(d[self.getPrimaryKey()], true);
 				}
 				/*
 				3) new object, generate new ID
 				 */
 				else {
-					thisModel[this._config.key] = this.guid();
-					thisModel.__existsRemotely = false;
+					thisModel.setKey(self.guid(), false);
 				}
 
 			}
@@ -365,7 +367,7 @@
 					data.__existsRemotely = this.__existsRemotely;
 				}
 				//parse schema
-				angular.forEach(this._schema, function (val, key) {
+				angular.forEach(self._schema, function (val, key) {
 					if (!withMeta && (key === 'createdDate' || key === 'updatedDate' )) {
 						return;
 					}

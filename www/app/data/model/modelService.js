@@ -15,7 +15,7 @@
 		
 		this.create = create;
 		this.get = getModel;
-		this._clear = _clear;
+		this.clear = clear;
 		
 		////////////////
 
@@ -53,13 +53,13 @@
 		}
 
 		/**
-		 * _clear
+		 * clear
 		 *
 		 * Clears the cache
 		 *
 		 * @private
 		 */
-		function _clear(){
+		function clear() {
 			self.$cache = [];
 		}
 	}

@@ -12,7 +12,7 @@ module.exports = function (config) {
 
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: ['wiredep','jasmine'],
+		frameworks: ['wiredep', 'jasmine'],
 
 
 		wiredep: {
@@ -22,7 +22,11 @@ module.exports = function (config) {
 			//overrides: []
 		},
 
-		plugins: ['karma-wiredep','karma-jasmine','karma-chrome-launcher','karma-phantomjs-launcher'],
+		plugins: ['karma-wiredep',
+			'karma-jasmine',
+			'karma-chrome-launcher',
+			'karma-phantomjs-launcher',
+			'karma-coverage'],
 
 		// list of files / patterns to load in the browser
 		files: [
@@ -30,13 +34,13 @@ module.exports = function (config) {
 			'www/lib/angular-mocks/angular-mocks.js',
 
 			/*'www/lib/ngCordova/dist/ng-cordova.js',
-			'www/lib/ngCordova/dist/ng-cordova-mocks.js',
-			'www/lib/ladda/dist/spin.min.js',
-			'www/lib/ladda/dist/ladda.min.js',
-			'www/lib/angular-ladda/dist/angular-ladda.min.js',
-			'www/lib/angularbknd-sdk/dist/backand.min.js',
-			'www/lib/moment/min/moment.min.js',
-			'www/lib/angular-cache/dist/angular-cache.js',*/
+			 'www/lib/ngCordova/dist/ng-cordova-mocks.js',
+			 'www/lib/ladda/dist/spin.min.js',
+			 'www/lib/ladda/dist/ladda.min.js',
+			 'www/lib/angular-ladda/dist/angular-ladda.min.js',
+			 'www/lib/angularbknd-sdk/dist/backand.min.js',
+			 'www/lib/moment/min/moment.min.js',
+			 'www/lib/angular-cache/dist/angular-cache.js',*/
 
 
 			'www/app/**/*.module.js',
@@ -51,7 +55,9 @@ module.exports = function (config) {
 
 		// preprocess matching files before serving them to the browser
 		// available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-		preprocessors: {},
+		preprocessors: {
+			'www/app/**/!(*spec).js': ['coverage']
+		},
 
 
 		// test results reporter to use

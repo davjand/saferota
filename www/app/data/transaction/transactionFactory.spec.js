@@ -10,7 +10,7 @@ describe('saferota.data Transaction', function () {
 	}));
 
 	afterEach(function(){
-		ModelService._clear();
+		ModelService.clear();
 	});
 
 
@@ -87,8 +87,18 @@ describe('saferota.data Transaction', function () {
 		expect(tx11.model.id).toBe(m2.id);
 		expect(tx11.model.__existsRemotely).toBe(m2.__existsRemotely);
 		expect(tx11.model.name).toBe('john');
-		
-		
+
+	});
+
+	/*
+	 .resolve
+	 */
+	it('.resolve: Can set the resolved data on the transaction', function () {
+		var m1 = TestModel.create({name: 'david'});
+		var tx = new Transaction(Transaction.TYPES.CREATE, m1);
+
+		tx.resolve({id: 20});
+		expect(tx.resolveData.id).toBe(20);
 	});
 	
 	

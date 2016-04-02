@@ -3,12 +3,12 @@
 
 	angular
 		.module('saferota.data')
-		.factory('Transaction', Transaction);
+		.factory('Transaction', TransactionFactory);
 
-	Transaction.$inject = ['ModelService'];
+	TransactionFactory.$inject = ['ModelService'];
 
 	/* @ngInject */
-	function Transaction(ModelService) {
+	function TransactionFactory(ModelService) {
 
 		/*
 		 Enum
@@ -38,7 +38,7 @@
 		 * @param type {string | Object}
 		 * @param model {Model}
 		 */
-		var createTransaction = function (type, model) {
+		var Transaction = function (type, model) {
 
 			if(typeof type === 'string') {
 				this.type = type;
@@ -54,16 +54,17 @@
 		/*
 		 Prototype
 		 */
-		createTransaction.prototype.toObject = toObject;
-		createTransaction.prototype.fromObject = fromObject;
+		Transaction.prototype.toObject = toObject;
+		Transaction.prototype.fromObject = fromObject;
+		Transaction.prototype.resolve = resolve;
 
 		/*
 		 Static
 		 */
-		createTransaction.TYPES = TX_TYPES;
+		Transaction.TYPES = TX_TYPES;
 
 
-		return createTransaction;
+		return Transaction;
 
 
 		////////////////////////////////
@@ -84,15 +85,37 @@
 				type: this.type,
 				modelName: this.modelName,
 				time: this.time,
-				model: this.model.toObject()
+				model: this.model.toObject(),
+				resolveData: this.resolveData
 			};
 		}
 
+		/**
+		 * fromObject
+		 *
+		 * Builds the transaction from an object
+		 * expects a model object that can then be converted to a model class
+		 *
+		 * Main use case for this is deserializing from JSON
+		 *
+		 * @param obj
+		 */
 		function fromObject(obj) {
 			this.type = obj.type;
 			this.time = obj.time;
 			this.modelName = obj.modelName;
 			this.model = ModelService.get(this.modelName).create(obj.model);
+			this.resolveData = angular.merge({}, obj.resolveData);
+		}
+
+		/**
+		 *
+		 * Sets the resolved data
+		 *
+		 * @param data
+		 */
+		function resolve(data) {
+			this.resolveData = angular.merge({}, data);
 		}
 	}
 

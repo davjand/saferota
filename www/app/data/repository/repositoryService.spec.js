@@ -1,26 +1,55 @@
 describe('saferota.data RepositoryService', function () {
 	beforeEach(module('saferota.data'));
-	
-	var TestModel = null;
-	
-	beforeEach(inject(function(ModelService){
+
+	var TestModel, ModelService, RepositoryService;
+
+	beforeEach(inject(function (_ModelService_, _RepositoryService_) {
+		ModelService = _ModelService_;
+		RepositoryService = _RepositoryService_;
 		TestModel = ModelService.create('test');
 	}));
-	
-	it('Can intiialize', inject(function (RepositoryService) {
-		expect(RepositoryService.$cache).toEqual({});
-	}));
 
-	it('Can create and cache models with the model factory', inject(function (RepositoryService) {
+	afterEach(function () {
+		ModelService.clear();
+		RepositoryService.clear();
+	});
+
+	it('Can intiialize', function () {
+		expect(RepositoryService.$cache).toEqual({});
+	});
+
+	/*
+	 .create
+	 */
+	it('Can create and cache models with the model factory', function () {
 		var Repo = RepositoryService.create(TestModel);
 		expect(RepositoryService.$cache['test']).toEqual(Repo);
-	}));
+	});
 
-	it('Can return a a repo by string or by Model', inject(function (RepositoryService) {
+	/*
+	 .get
+	 */
+	it('Can return a a repo by string or by Model', function () {
 		var Repo = RepositoryService.create(TestModel);
 		expect(RepositoryService.get(TestModel)).toEqual(Repo);
 		expect(RepositoryService.get('test')).toEqual(Repo);
-	}));
+	});
+
+	/*
+	 .clear
+	 */
+	it('Can clear', function () {
+		RepositoryService.create(TestModel);
+		RepositoryService.clear();
+		expect(RepositoryService.$cache.length).toBe(0);
+	});
+
+	/*
+	 .notify
+	 */
+	it('Can notify a repository', function () {
+
+	});
 
 
 });

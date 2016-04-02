@@ -4,16 +4,29 @@ describe('saferota.data TransactionQueue', function () {
 	var TransactionQueue, Transaction, TestModel, queue, $rootScope,
 		m1, m2, m3, t1, t2, t3, t4, t5, t6;
 
+	var ModelService, RepositoryService;
+
+
 	function _d() {
 		$rootScope.$digest();
 	}
 
 	//Setup Objects
-	beforeEach(inject(function (_TransactionQueue_, _Transaction_, ModelService, _$rootScope_) {
+	beforeEach(inject(function (_TransactionQueue_,
+								_Transaction_,
+								_ModelService_,
+								_RepositoryService_,
+								_$rootScope_) {
+
 		TransactionQueue = _TransactionQueue_;
 		Transaction = _Transaction_;
 		$rootScope = _$rootScope_;
+		ModelService = _ModelService_;
+		RepositoryService = _RepositoryService_;
+
+		
 		TestModel = ModelService.create('test').schema({firstName: 'John', lastName: 'Doe'});
+		RepositoryService.create(TestModel);
 
 		queue = new TransactionQueue('LocalAdapterMemory');
 
@@ -36,6 +49,10 @@ describe('saferota.data TransactionQueue', function () {
 	//Clear After
 	afterEach(function () {
 		queue.clear();
+
+		RepositoryService.$cache = [];
+		ModelService.$cache = [];
+
 	});
 
 
@@ -211,9 +228,68 @@ describe('saferota.data TransactionQueue', function () {
 			expect(cache[m1.id].length).toBe(2);
 			expect(cache[m1.id][0].position).toBe(1);
 			expect(cache[m1.id][1].position).toBe(2);
+
+			//if last transaction, the id should be removed
+			return queue.pop().then(function () {
+				return queue.pop();
+			});
+		}).then(function () {
+			var cache = queue.$localId;
+			expect(cache[m1.id]).not.toBeDefined();
 			done();
 		});
 
+		_d();
+	});
+
+	/*
+	 .resolveTransaction
+
+	 Return data for when a transaction is resolved with the server
+	 - should notify the relevant repository
+	 - should see if any other transactions are reliant on this transaction and update the transactions with the new id
+	 - pop the transaction and remove te relevent local id.
+
+	 */
+	it('.resolveTransaction can resolve a transaction', function (done) {
+
+		spyOn(RepositoryService, 'notify');
+
+		queue.pushArray([t1, t2, t3, t4]).then(function () {
+			return queue.resolveTransaction({id: 17});
+		}).then(function () {
+
+			//should have notified the repository
+			expect(RepositoryService.notify).toHaveBeenCalled();
+			return queue.length();
+		}).then(function (len) {
+			//should have popped the transaction
+			expect(len).toBe(3);
+
+			//the cache should be gone as well
+			expect(queue.$localId[m1.id]).not.toBeDefined();
+
+			return queue.getNext();
+		}).then(function (nextTx) {
+			//The next transaction should now be t2
+			expect(nextTx.model.firstName).toBe(m1.firstName);
+			//ID should have been updated to the resolved data
+			expect(nextTx.model.id).toBe('17');
+			expect(nextTx.model.__existsRemotely).toBe(true);
+
+
+			//resolve the next one with no data
+			return queue.resolveTransaction();
+		}).then(function () {
+			//should have been called twice now
+			expect(RepositoryService.notify).toHaveBeenCalledTimes(2);
+
+			return queue.getNext();
+		}).then(function (nextTx) {
+			//this should be t3 and been resolved (as same model) which should have been resolved from the first resolution
+			expect(nextTx.model.id).toBe('17');
+			done();
+		});
 
 		_d();
 	});

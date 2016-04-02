@@ -1,19 +1,44 @@
 describe('saferota.data ModelService', function () {
-	beforeEach(module('saferota.data'));
+	var ModelService;
 
-	it('Can intiialize', inject(function (ModelService) {
-		expect(ModelService.$cache).toEqual({});
+	beforeEach(module('saferota.data'));
+	beforeEach(inject(function (_ModelService_) {
+		ModelService = _ModelService_;
 	}));
 
-	it('Can create and cache models with the model factory', inject(function (ModelService) {
+	afterEach(function () {
+		ModelService.clear();
+	});
+
+
+	it('Can intiialize', function () {
+		expect(ModelService.$cache).toEqual({});
+	});
+
+	/*
+	 .create
+	 */
+	it('Can create and cache models with the model factory', function () {
 		var Test = ModelService.create('test');
 		expect(ModelService.$cache['test']).toEqual(Test);
-	}));
+	});
 
-	it('Can return a previously created model', inject(function (ModelService) {
+	/*
+	 .get
+	 */
+	it('Can return a previously created model', function () {
 		var Test = ModelService.create('test');
 		expect(ModelService.get('test')).toEqual(Test);
-	}));
+	});
+
+	/*
+	 .clear
+	 */
+	it('Can clear', function () {
+		ModelService.create("test");
+		ModelService.clear();
+		expect(ModelService.$cache.length).toBe(0);
+	});
 
 
 });
