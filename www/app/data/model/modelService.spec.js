@@ -31,14 +31,4 @@ describe('saferota.data ModelService', function () {
 		expect(ModelService.get('test')).toEqual(Test);
 	});
 
-	/*
-	 .clear
-	 */
-	it('Can clear', function () {
-		ModelService.create("test");
-		ModelService.clear();
-		expect(ModelService.$cache.length).toBe(0);
-	});
-
-
 });

@@ -23,7 +23,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 
 	 */
 	var _digest = function (d) {
-		var interval = 1;
+		var interval = 5;
 
 		var fx = function () {
 			if (!d.done) {
@@ -54,7 +54,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 Can create / store / get parameters
 	 */
 	it('Can create new cache and save data into it', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 
 		local.set('name', 'John').then(function () {
 			return local.get('name');
@@ -70,7 +70,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 .configKey
 	 */
 	it('Can set a configuration key', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 		local.config({
 			setting1: 'a',
 			setting2: 'b'
@@ -94,7 +94,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 .updatedAt (Date)
 	 */
 	it('Can get / set the updated date', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 		var date = new Date();
 
 		local.updatedAt(date).then(function () {
@@ -112,7 +112,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 .data - get multiple
 	 */
 	it('data function get get multiple data when passed an array', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 		local.data({
 			key1: 'test1',
 			key2: 'test2',
@@ -134,7 +134,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 .remove
 	 */
 	it('Can remove data from the cache', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 		local.data('test', 'testData').then(function () {
 			return local.remove('test');
 		}).then(function () {
@@ -152,7 +152,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 .length
 	 */
 	it('Can determine the length of the stored items', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 		local.data({
 			key1: 'test1',
 			key2: 'test2',
@@ -171,7 +171,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 .clear
 	 */
 	it('Can clear the cache', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 
 		local.data({
 			key1: 'test1',
@@ -197,7 +197,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 .keys
 	 */
 	it('Can retrieve the keys', function (done) {
-		var d = {flag: false};
+		var d = {done: false};
 
 		local.data({
 			key1: 'test1',

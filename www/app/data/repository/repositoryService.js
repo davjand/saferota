@@ -17,29 +17,24 @@
 		this.get = getRepo;
 		this.notify = notify;
 		this.clear = clear;
+		this.notify = notify;
 
 		////////////////
 
 		/**
 		 *
-		 * Creates a repository for a model
+		 * Creates a model and corresponding repository
 		 *
-		 * @param Model {Model}
-		 * @param localAdapter {LocalAdapterInterface} (optional)
-		 * @param remoteAdapter {RemoteAdapterInterface} (optional)
+		 * @param Model
 		 * @returns {*}
 		 */
-		function create(Model, localAdapter, remoteAdapter) {
-			var name = Model.className();
-
-			localAdapter = localAdapter || null;
-			remoteAdapter = remoteAdapter || null;
-
-			if(typeof self.$cache[name] !== 'undefined'){
+		function create(Model) {
+			if (typeof self.$cache[Model.className()] !== 'undefined') {
 				throw('Error: RepositoryService.new "'+name+'" already exists');
 			}
-			self.$cache[name] = new Repository(Model,localAdapter,remoteAdapter);
-			return self.$cache[name];
+			self.$cache[Model.className()] = new Repository(Model);
+
+			return self.$cache[Model.className()];
 		}
 
 		/**
@@ -62,16 +57,6 @@
 			return self.$cache[name];
 		}
 
-		/**
-		 * notify
-		 *
-		 * Shortcut to notify a repository
-		 *
-		 */
-		function notify(modelName, transaction) {
-			this.getRepo(modelName).notify(transaction);
-		}
-
 
 		/**
 		 * .clear
@@ -81,6 +66,17 @@
 		 */
 		function clear() {
 			this.$cache = [];
+		}
+
+		/**
+		 * notify
+		 *
+		 * Notifies a models repository of a complete transaction
+		 *
+		 * @param transaction {Transaction}
+		 */
+		function notify(transaction) {
+			self.get(transaction.modelName).notify(transaction);
 		}
 	}
 

@@ -197,7 +197,7 @@ describe('saferota.data Model', function () {
 		expect(data.__className).toEqual('test');
 
 	}));
-	
+
 	it('Can Serialize the model into a JSON object (no meta data)', inject(function (Model) {
 		var Test = new Model('test').schema({name: 'default'});
 
@@ -210,9 +210,9 @@ describe('saferota.data Model', function () {
 		expect(data.updatedDate).toBeUndefined();
 		expect(data.__className).toBeUndefined();
 	}));
-	
+
 	/*
-		.setData
+	 .setData
 	 */
 	it('Can init a model from an object created with toObject', inject(function (Model) {
 		var Test = new Model('test').schema({name: 'default'});
@@ -235,9 +235,9 @@ describe('saferota.data Model', function () {
 		expect(m2.createdDate).toBe(date);
 		expect(m2.updatedDate).toBe(date);
 	}));
-	
+
 	/*
-	localID and __existsRemotely functionality
+	 localID and __existsRemotely functionality
 	 */
 	it('Generates a local ID and sets localID to true if generated without an ID', inject(function (Model) {
 		var Test = new Model('test').schema({name: 'default'});
@@ -264,56 +264,71 @@ describe('saferota.data Model', function () {
 			name: 'David'
 		});
 		expect(m3.__existsRemotely).toBe(false);
-		
+
 		//test serializing and deserializing object types
-		
+
 	}));
 	/*
-	toObject / setData and  __existsRemotely functionality
+	 toObject / setData and  __existsRemotely functionality
 	 */
 	it('__existsRemotely and ID survive toObject and new constructor', inject(function (Model) {
 		var Test = new Model('test').schema({name: 'default'});
-		
+
 		//Create an object and serialize
 		var m1 = Test.create();
 		var d1 = m1.toObject();
 		expect(d1.__existsRemotely).toBe(false);
-		
+
 		//Create an object from the serializiation
 		var m2 = Test.create(d1);
 		expect(m2.__existsRemotely).toBe(false);
 		expect(m2.id).toBe(m1.id);
-		
+
 		//create a new 'server' model
 		var m3 = Test.create({id: 200, name: 'test'});
 		var d3 = m3.toObject();
 		expect(d3.__existsRemotely).toBe(true);
-		
+
 		//Create a new object from the server seriliazation
 		var d4 = Test.create(d3);
 		expect(d4.id).toBe(d3.id);
 		expect(d4.__existsRemotely).toBe(true);
 
 	}));
-	
+
 	/*
-	.resolveRemote - sets a local object with the data from the server
+	 .resolveRemote - sets a local object with the data from the server
 	 */
 	it('.resolveRemote sets the new ID and sets __existsRemotely to false', inject(function (Model) {
 		var Test = new Model('test').schema({name: 'default', phone: '200'});
-		
+
 		var m1 = Test.create({name: 'James Bond'});
-		
+
 		m1.resolveWithRemote({id: 999, name: 'Mr Bond'});
 
 		expect(m1.__existsRemotely).toBe(true);
-		
+
 		expect(m1.name).toBe('Mr Bond');
 		expect(m1.phone).toBe('200');
 		expect(m1.id).toBe('999');
-		
+
 	}));
-	
+
+	it('Create can be passed a callback that is called everytime an instance is created', inject(function (Model) {
+		var calls = 0,
+			fx = function () {
+				calls++;
+			};
+
+		var Test = new Model('test', fx);
+
+
+		Test.create({});
+		expect(calls).toBe(1);
+
+		Test.create({id: 2});
+		expect(calls).toBe(2);
+	}));
 
 
 });

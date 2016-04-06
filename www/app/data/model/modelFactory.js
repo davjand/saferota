@@ -36,11 +36,12 @@
 		 *
 		 * Constructor for a model class
 		 *
-		 * @param name
+		 * @param name {string}
+		 * @param onCreate {Function}
 		 * @returns {CreateModel}
 		 * @constructor
 		 */
-		var CreateModel = function (name) {
+		var CreateModel = function (name, onCreate) {
 			this._config = {
 				name: name,
 				key: 'id'
@@ -49,6 +50,9 @@
 			this._rel = {};
 			this._instance = null;
 			this._methods = {};
+
+			//add the callback
+			this._onCreate = onCreate;
 
 			return this;
 		};
@@ -62,7 +66,7 @@
 		CreateModel.prototype.methods = methods;
 		CreateModel.prototype.relationship = relationship;
 		CreateModel.prototype.create = create;
-		CreateModel.prototype.className = function(){
+		CreateModel.prototype.className = function () {
 			return this._config.name;
 		};
 
@@ -170,6 +174,8 @@
 		 *
 		 * Can only be called once
 		 *
+		 * Callback can be passed that will be called every time a model is created
+		 *
 		 * @param createData
 		 */
 		function create(createData) {
@@ -177,8 +183,10 @@
 			var factory = this;
 
 			/*
+
 			 If the object has already been created then return a new
 			 instance of the created object
+
 			 */
 			if (factory._instance !== null) {
 				return new factory._instance(createData);
@@ -193,7 +201,6 @@
 			/*
 
 			 Integrity check:
-
 			 1) check that the primary key isn't set in the schema
 
 			 */
@@ -222,6 +229,14 @@
 					model.updatedDate = new Date();
 				}
 
+				//callbacks when created
+				if (angular.isFunction(Model.prototype._onCreate)) {
+					Model.prototype._onCreate.call(this);
+				}
+				if (angular.isFunction(Model.prototype.initialize)) {
+					Model.prototype.initialize.call(this);
+				}
+
 			};
 
 			//set the schema
@@ -248,7 +263,7 @@
 			};
 			Model.prototype.setKey = function (key, remote) {
 				remote = typeof remote !== 'undefined' ? remote : true;
-				if(typeof key !== 'string'){
+				if (typeof key !== 'string') {
 					key = key.toString();
 				}
 				this[this.getPrimaryKey()] = key;
@@ -262,6 +277,25 @@
 			Model.prototype.guid = guid;
 			Model.prototype.resolveWithRemote = resolveWithRemote;
 
+			//Callback
+			Model.prototype._onCreate = factory._onCreate;
+
+
+			/*
+			 Cache the model
+			 and return a newly created model
+			 */
+			factory._instance = Model;
+
+			//now create the object
+			return factory.create(createData);
+
+
+			//////////////////////////////////////////////////
+
+			//Function Definitions
+
+			//////////////////////////////////////////////////
 
 			/**
 			 *
@@ -305,7 +339,7 @@
 					thisModel.setKey(d[self.getPrimaryKey()], true);
 				}
 				/*
-				3) new object, generate new ID
+				 3) new object, generate new ID
 				 */
 				else {
 					thisModel.setKey(self.guid(), false);
@@ -377,13 +411,6 @@
 				data[this.getPrimaryKey()] = this.getKey();
 				return data;
 			}
-
-			/*
-			 Cache the model
-			 and return a newly created model
-			 */
-			factory._instance = Model;
-			return new Model(createData);
 		}
 
 
@@ -418,9 +445,9 @@
 		 *
 		 * @param data
 		 */
-		function resolveWithRemote(data){
+		function resolveWithRemote(data) {
 			//remote data must have ID or we're just going to cause a mess
-			if(typeof data[this.getPrimaryKey()] === 'undefined'){
+			if (typeof data[this.getPrimaryKey()] === 'undefined') {
 				throw('Error: Model - Cannot resolveWithRemote if passed data has no id');
 			}
 			this.setData(data);

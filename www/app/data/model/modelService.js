@@ -10,12 +10,12 @@
 	/* @ngInject */
 	function ModelService(Model) {
 		var self = this;
-		
-		this.$cache = {};
-		
-		this.create = create;
-		this.get = getModel;
-		this.clear = clear;
+
+		self.$cache = {};
+
+		self.create = create;
+		self.get = getModel;
+		self.clear = clear;
 		
 		////////////////
 
@@ -26,13 +26,15 @@
 		 * Creates a new model and caches it in the service
 		 *
 		 * @param name
+		 * @param onCreate {Function}
+		 *
 		 * @returns {*}
 		 */
-		function create(name) {
+		function create(name, onCreate) {
 			if(typeof self.$cache[name] !== 'undefined'){
 				throw('Error: ModelService.new "'+name+'" already exists');
 			}
-			self.$cache[name] = new Model(name);
+			self.$cache[name] = new Model(name, onCreate);
 			return self.$cache[name];
 		}
 
@@ -62,6 +64,7 @@
 		function clear() {
 			self.$cache = [];
 		}
+
 	}
 
 })();

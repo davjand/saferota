@@ -1,16 +1,16 @@
 describe('saferota.data RepositoryService', function () {
 	beforeEach(module('saferota.data'));
 
-	var TestModel, ModelService, RepositoryService;
+	var RepositoryService, ModelService, TestModel, repo;
 
-	beforeEach(inject(function (_ModelService_, _RepositoryService_) {
-		ModelService = _ModelService_;
+	beforeEach(inject(function (_RepositoryService_, _ModelService_) {
 		RepositoryService = _RepositoryService_;
+		ModelService = _ModelService_;
+
 		TestModel = ModelService.create('test');
 	}));
 
 	afterEach(function () {
-		ModelService.clear();
 		RepositoryService.clear();
 	});
 
@@ -27,7 +27,7 @@ describe('saferota.data RepositoryService', function () {
 	});
 
 	/*
-	 .get
+	 .getRepo
 	 */
 	it('Can return a a repo by string or by Model', function () {
 		var Repo = RepositoryService.create(TestModel);

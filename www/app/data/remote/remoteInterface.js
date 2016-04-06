@@ -15,10 +15,10 @@
 	];
 
 
-	RemoteAdapterInterface.$inject = ['$q'];
+	RemoteAdapterInterface.$inject = [];
 
 	/* @ngInject */
-	function RemoteAdapterInterface($q) {
+	function RemoteAdapterInterface() {
 
 		return function (options) {
 

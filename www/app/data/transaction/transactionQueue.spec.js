@@ -1,10 +1,8 @@
 describe('saferota.data TransactionQueue', function () {
 	beforeEach(module('saferota.data'));
 
-	var TransactionQueue, Transaction, TestModel, queue, $rootScope,
+	var TransactionQueue, Transaction, RepositoryService, TestModel, ModelService, queue, $rootScope,
 		m1, m2, m3, t1, t2, t3, t4, t5, t6;
-
-	var ModelService, RepositoryService;
 
 
 	function _d() {
@@ -14,19 +12,18 @@ describe('saferota.data TransactionQueue', function () {
 	//Setup Objects
 	beforeEach(inject(function (_TransactionQueue_,
 								_Transaction_,
-								_ModelService_,
 								_RepositoryService_,
+								_ModelService_,
 								_$rootScope_) {
 
 		TransactionQueue = _TransactionQueue_;
 		Transaction = _Transaction_;
 		$rootScope = _$rootScope_;
-		ModelService = _ModelService_;
 		RepositoryService = _RepositoryService_;
+		ModelService = _ModelService_;
 
 		
 		TestModel = ModelService.create('test').schema({firstName: 'John', lastName: 'Doe'});
-		RepositoryService.create(TestModel);
 
 		queue = new TransactionQueue('LocalAdapterMemory');
 
@@ -49,10 +46,7 @@ describe('saferota.data TransactionQueue', function () {
 	//Clear After
 	afterEach(function () {
 		queue.clear();
-
-		RepositoryService.$cache = [];
-		ModelService.$cache = [];
-
+		ModelService.clear();
 	});
 
 

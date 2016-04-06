@@ -36,20 +36,31 @@
 		////////////////////////////////
 
 		function initialize() {
-			this.$cache = [];
+			this.$cache = {};
+
+			//additional functions
+			this._getCache = _getCache;
+		}
+
+		function _getCache(name) {
+			if (typeof this.$cache[name] === 'undefined') {
+				this.$cache[name] = [];
+			}
+			return this.$cache[name];
 		}
 
 		/**
 		 *
 		 * Get functionality
 		 *
+		 * @param Model {Model}
 		 * @param id
 		 * @returns {*}
 		 */
-		function get(id) {
+		function get(Model, id) {
 			var p = $q.defer();
 
-			this.find({filter: {id: id}}).then(function (data) {
+			this.find(Model, {filter: {id: id}}).then(function (data) {
 				if (data.length > 0) {
 					p.resolve(data[0]);
 				} else {
@@ -73,12 +84,13 @@
 		 *  - orderBy: $filter.orderBy style parameter
 		 *  - filter: $filter style filtering
 		 *
+		 * @param Model
 		 * @param options
 		 *
 		 * @return Promise
 		 */
-		function find(options) {
-			var data = this.$cache;
+		function find(Model, options) {
+			var data = this._getCache(Model.className());
 
 			if (typeof options.filter !== 'undefined') {
 				data = $filter('filter')(data, options.filter);
@@ -93,17 +105,29 @@
 		 * Save data to the array
 		 *
 		 * Can be passed an array
-		 * 
-		 * @param model {Model | Array(Model)}
+		 *
+		 * @param model {Model | []}
 		 * @returns {*}
 		 */
 		function save(model) {
+			var self = this,
+				resolved = {},
+				storeModel = function (m) {
+					var obj = m.toObject(false);
+					obj.id = _guid();
+					self._getCache(m.className()).push(obj);
+					return {id: obj.id};
+				};
+
 			if(angular.isArray(model)){
-				this.$cache = this.$cache.concat(this.$cache,model);
+				resolved = [];
+				angular.forEach(model, function (item) {
+					resolved.push(storeModel(item));
+				});
 			}else{
-				this.$cache.push(model);
+				resolved = storeModel(model);
 			}
-			return _wrapInPromise(model);
+			return _wrapInPromise(resolved);
 		}
 
 		/**
@@ -116,14 +140,14 @@
 			var id = model.getKey();
 			var currentIndex = null;
 
-			angular.forEach(this.$cache,function(item,index){
-				if(item.getKey() === id){
+			angular.forEach(this._getCache(model.className()), function (item, index) {
+				if (item.id === id) {
 					currentIndex = index;
 				}
 			});
 
 			if(currentIndex !== null){
-				this.$cache[currentIndex] = model;
+				this._getCache(model.className())[currentIndex] = model;
 			}
 
 			return _wrapInPromise(model);
@@ -138,14 +162,14 @@
 		 * @returns {*}
 		 */
 		function remove(model) {
-			var id = model.getKey();
+			var id = model.id;
 			var currentIndex = null;
-			angular.forEach(this.$cache,function(item,index){
-				if(item.getKey() === id){
+			angular.forEach(this._getCache(model.className()), function (item, index) {
+				if (item.id === id) {
 					currentIndex = index;
 				}
 			});
-			return _wrapInPromise(this.$cache.splice(currentIndex,1)[0]);
+			return _wrapInPromise(this._getCache(model.className()).splice(currentIndex, 1)[0]);
 		}
 
 
@@ -159,9 +183,30 @@
 		 * @private
 		 */
 		function _wrapInPromise(value) {
-			var p = $q.defer();
-			p.resolve(value);
-			return p.promise;
+			return $q.when(value);
+		}
+
+
+		/**
+		 * guid
+		 *
+		 * Generate a Unique Identifier to use for local IDs
+		 *
+		 * Credit to Stack Overflow
+		 * http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+		 *
+		 * @returns {string}
+		 */
+		function _guid() {
+			function s4() {
+				return Math.floor((1 + Math.random()) * 0x10000)
+					.toString(16)
+					.substring(1);
+			}
+
+			return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+				s4() + '-' + s4() + s4() + s4();
+
 		}
 
 	}

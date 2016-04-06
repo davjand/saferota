@@ -5,10 +5,10 @@
 		.module('saferota.data')
 		.factory('TransactionQueue', CreateTransactionQueue);
 
-	CreateTransactionQueue.$inject = ['Transaction', '$injector', 'DataConfig', '$q', 'RepositoryService'];
+	CreateTransactionQueue.$inject = ['Transaction', '$injector', 'DataConfig', 'RepositoryService', '$q'];
 
 	/* @ngInject */
-	function CreateTransactionQueue(Transaction, $injector, DataConfig, $q, RepositoryService) {
+	function CreateTransactionQueue(Transaction, $injector, DataConfig, RepositoryService, $q) {
 
 		var TransactionQueue = function (localAdapter, name) {
 			name = name || '_queue';
