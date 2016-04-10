@@ -1,38 +1,50 @@
 describe('saferota.data Repository', function () {
 	beforeEach(module('saferota.data'));
 
-	var repo, ModelService, TestModel, $rootScope, RequestService, RepositoryService;
-	var m1, m2, m3, m4;
+	var repo, ModelService, TestModel, $rootScope, RequestService, RepositoryService, Transaction;
+	var m1, m2, m3, m4, m5;
 
+	var _d = function () {
+		$rootScope.$digest();
+	};
 
-	beforeEach(inject(function (_ModelService_, _$rootScope_, _RequestService_, _RepositoryService_) {
+	beforeEach(inject(function (_ModelService_, _$rootScope_, _RequestService_, _RepositoryService_, _Transaction_) {
 		ModelService = _ModelService_;
 		$rootScope = _$rootScope_;
 		RequestService = _RequestService_;
 		RepositoryService = _RepositoryService_;
+		Transaction = _Transaction_;
 
-		TestModel = ModelService.create('TestModel').schema({name: 'default'});
+		TestModel = ModelService.create('TestModel').schema({name: 'default', town: ''});
 		repo = RepositoryService.create(TestModel);
 
 		m1 = TestModel.create({
 			id: 1,
 			name: 'James',
+			town: 'sheffield',
 			updatedDate: new Date(2015, 1, 1)
 		});
 		m2 = TestModel.create({
 			id: 2,
 			name: 'John',
+			town: 'newcastle',
 			updatedDate: new Date(2015, 1, 1)
 		});
 		m3 = TestModel.create({
 			id: 3,
 			name: 'Jack',
+			town: 'newcastle',
 			updatedDate: new Date(2016, 1, 1)
 		});
 		m4 = TestModel.create({
 			id: 4,
 			name: 'Jane',
+			town: 'sheffield',
 			updatedDate: new Date(2016, 1, 1)
+		});
+		m5 = TestModel.create({
+			name: 'New Name',
+			town: 'sheffield'
 		});
 
 
@@ -52,45 +64,39 @@ describe('saferota.data Repository', function () {
 	 .initConfig
 	 */
 	it('initConfig loads the cached configuration, if fresh sets _isFresh to true', function (done) {
-		inject(function ($rootScope) {
-			repo._initConfig().then(function () {
-				expect(repo._configLoaded).toBe(true);
-				expect(repo._isFresh).toBe(true);
-				expect(repo._updatedAt).toBe(null);
-				done();
-			});
-
-			$rootScope.$digest();
+		repo._initConfig().then(function () {
+			expect(repo._configLoaded).toBe(true);
+			expect(repo._updatedAt).toBe(null);
+			done();
 		});
+		_d();
+
 	});
 	it('initConfig can load a cached date', function (done) {
-		inject(function ($rootScope) {
-			var date = new Date(2016, 2, 2);
-
-			repo.$local.updatedAt(date).then(function () {
-				return repo._initConfig();
-			}).then(function () {
-				expect(repo._isFresh).toBe(false);
-				expect(repo._updatedAt).toBe(date);
-				done();
-			});
-			$rootScope.$digest();
+		var date = new Date(2016, 2, 2);
+		repo.$local.updatedAt(date).then(function () {
+			return repo._initConfig(true);
+		}).then(function () {
+			expect(repo._updatedAt).toBe(date);
+			done();
 		});
+		_d();
+
 	});
 
 	/*
 	 .ready
 	 */
 	it('Ready is a promise that resolves when ready', function (done) {
-		inject(function ($rootScope) {
-			repo.ready().then(function () {
-				expect(repo._configLoaded).toBe(true);
-				done();
-			});
 
-			repo._initConfig();
-			$rootScope.$digest();
+		repo.ready().then(function () {
+			expect(repo._configLoaded).toBe(true);
+			done();
 		});
+
+		repo._initConfig();
+		_d();
+
 	});
 
 	/*
@@ -131,8 +137,9 @@ describe('saferota.data Repository', function () {
 		//can add a seperate item
 		repo._putMem(m2);
 		expect(Object.keys(repo.$mem).length).toBe(2);
-
 	});
+
+
 	/*
 	 _inMem
 	 */
@@ -153,6 +160,21 @@ describe('saferota.data Repository', function () {
 		$scope.$destroy();
 		expect(repo._deregScope).toHaveBeenCalled();
 	});
+	it('_regScope only registered with rootscope if no scope currently on the object', function () {
+		var $s = $rootScope.$new();
+		repo._putMem(m1, $s);
+
+		var a = repo.$mem[m1.id];
+		expect(a.s[0]).toBe($s);
+		expect(a.s.length).toBe(1);
+
+		repo._putMem(m1);
+		var b = repo.$mem[m1.id];
+		expect(b.s.length).toBe(1);
+
+
+	});
+	
 	/*
 	 _deregScope
 	 */
@@ -198,7 +220,7 @@ describe('saferota.data Repository', function () {
 			done();
 		});
 
-		$rootScope.$digest();
+		_d();
 	});
 
 	it('.save can take an array', function (done) {
@@ -211,8 +233,48 @@ describe('saferota.data Repository', function () {
 
 			done();
 		});
-		$rootScope.$digest();
+		_d();
 
+	});
+
+	it('.save will use the object with the latest update date if an object already exists', function (done) {
+		var called = false;
+
+		//trigger update
+		m1.on('update', function () {
+			called = true;
+		});
+
+		repo.save([m1, m2, m3]).then(function () {
+			//create some new objects but tweak them
+			var m12 = TestModel.create(m1.toObject(), false, true);
+			var m22 = TestModel.create(m2.toObject(), false, true);
+
+			m12.updatedDate = new Date(2017, 1, 1);
+			m12.name = 'James Bond';
+
+			m22.updatedDate = new Date(2014, 1, 1);
+			m22.name = 'John 2nd';
+
+			//callback should not have been triggered
+			expect(called).toBe(false);
+
+			return repo.save([m12, m22], false, false, true);
+		}).then(function () {
+			expect(m1.name).toBe('James Bond');
+			expect(m2.name).toBe('John');
+
+			//callback should not have been triggered
+			expect(called).toBe(true);
+
+			//changes should have been saved
+			return repo.$local.data([m1.id, m2.id]);
+		}).then(function (data) {
+			expect(data[m1.id].name).toBe('James Bond');
+			expect(data[m2.id].name).toBe('John');
+			done();
+		});
+		_d();
 	});
 
 
@@ -220,9 +282,11 @@ describe('saferota.data Repository', function () {
 	 get
 	 */
 	it('.get can retrieve a model from memory if is in memory', function (done) {
-		spyOn(repo.$local, 'get').and.callThrough();
 
 		repo.save([m1, m2, m3]).then(function () {
+			//spu on here as save may use get
+			spyOn(repo.$local, 'get').and.callThrough();
+
 			return repo.get(m1.id)
 		}).then(function (model1) {
 			//shouldn't have gone to the local adapter
@@ -232,7 +296,7 @@ describe('saferota.data Repository', function () {
 			done();
 		});
 
-		$rootScope.$digest();
+		_d();
 	});
 	it('.get can retrieve a model from the cache if forced (and update local object)', function (done) {
 		spyOn(repo.$local, 'get').and.callThrough();
@@ -254,7 +318,7 @@ describe('saferota.data Repository', function () {
 		});
 
 
-		$rootScope.$digest();
+		_d();
 	});
 	it('.get can retrieve a model from the cache if it does not exist in memory', function (done) {
 		var $s = $rootScope.$new(true);
@@ -270,18 +334,143 @@ describe('saferota.data Repository', function () {
 			done();
 		});
 
-
-		$rootScope.$digest();
+		_d();
 	});
 
+	/*
+	 .remove
+	 */
+	it('.remove removes the model from the memory cache', function (done) {
+		repo.save(m1).then(function () {
+			return repo.remove(m1);
+		}).then(function () {
+			expect(repo.$mem[m1.id]).toBeUndefined();
+			done();
+		});
+		_d();
+	});
+	it('.remove triggers a remove event on the model', function (done) {
+		var $s = $rootScope.$new(true),
+			called = false;
+
+		m1.on($s, 'delete', function () {
+			called = true;
+		});
+
+		repo.save(m1).then(function () {
+			return repo.remove(m1);
+		}).then(function () {
+			expect(called).toBe(true);
+			done();
+		});
+		_d();
+	});
+
+	it('.remove removes from the local repository', function (done) {
+		repo.save(m1).then(function () {
+			return repo.remove(m1);
+		}).then(function () {
+			return repo.$local.length();
+		}).then(function (len) {
+			expect(len).toBe(0);
+			done();
+		});
+		_d();
+	});
 
 	/*
 	 find
 	 */
+	it('.find filters the local repo and returns items', function (done) {
+		repo.save([m1, m2, m3, m4]).then(function () {
+			return repo.find({town: 'newcastle'});
+		}).then(function (models) {
+			expect(models.length).toBe(2);
+			done();
+		});
+		_d();
+	});
+	it('.find items are bound to the passed scope', function (done) {
+		var $s1 = $rootScope.$new();
+		var $s2 = $rootScope.$new();
+
+		repo.save([m1, m2, m3, m4], $s1).then(function () {
+			$s1.$destroy();
+			return repo.find({town: 'newcastle'}, $s2);
+		}).then(function () {
+
+			expect(repo._inMem(m1)).toBe(false);
+			expect(repo._inMem(m2)).toBe(true);
+			expect(repo._inMem(m3)).toBe(true);
+			expect(repo._inMem(m4)).toBe(false);
+
+			$s2.$destroy();
+			expect(repo._inMem(m2)).toBe(false);
+			expect(repo._inMem(m3)).toBe(false);
+			done();
+		});
+		_d();
+	});
+
 
 	/*
 	 notify
 	 */
+	it('.notify updates the memory items with the resolved transaction and emits an event', function (done) {
+		var $s = $rootScope.$new(),
+			flag = false,
+			date = new Date(2015, 1, 1),
+			tx = new Transaction({
+				type: Transaction.TYPES.CREATE,
+				model: m5,
+				time: 0
+			});
+
+		//callback
+		m5.on($s, 'update', function () {
+			flag = true;
+		});
+
+		tx.resolve({id: '999-999', updatedDate: date});
+
+		repo.save([m3, m4, m5]).then(function () {
+			return repo.notify(tx);
+		}).then(function () {
+			expect(m5.id).toBe('999-999');
+			expect(repo.$mem[m5.id]).toBe(m5);
+			expect(repo.$mem[m5.id].id).toBe(m5.id);
+			expect(repo.$mem[m5.id].updatedDate).toEqual(date);
+
+			expect(flag).toBe(true);
+			$s.$destroy();
+			done();
+		});
+
+		_d();
+	});
+	it('.notify updates the local storage items', function (done) {
+		var date = new Date(2015, 1, 1);
+		var tx = new Transaction({
+			type: Transaction.TYPES.CREATE,
+			model: m5,
+			time: 0
+		});
+		tx.resolve({id: '999-999', name: 'updated', updatedDate: date});
+
+		repo.save([m3, m4, m5]).then(function () {
+			return repo.notify(tx);
+		}).then(function () {
+			return repo.$local.data('999-999');
+		}).then(function (data) {
+			expect(data.updatedDate).toEqual(date);
+			expect(data.name).toBe('updated');
+			expect(data.id).toBe('999-999');
+			done();
+		});
+
+		_d();
+	});
+
 
 	/*
 	 clear
@@ -294,4 +483,18 @@ describe('saferota.data Repository', function () {
 
 	});
 
+	/*
+	 .sync
+	 */
+	it('.sync adds the models and saves the sync status', function (done) {
+		var date = new Date(2015, 5, 5);
+		repo.sync([m1, m2], false, date).then(function () {
+			expect(repo._updatedAt).toBe(date);
+			return repo.$local.updatedAt();
+		}).then(function (d) {
+			expect(d).toEqual(date);
+			done();
+		});
+		_d();
+	});
 });

@@ -5,7 +5,7 @@
 		.module('saferota.data')
 		.factory('Model', ModelFactory);
 
-	ModelFactory.$inject = [];
+	ModelFactory.$inject = ['eventEmitter'];
 
 
 	/*
@@ -30,7 +30,7 @@
 
 
 	/* @ngInject */
-	function ModelFactory() {
+	function ModelFactory(eventEmitter) {
 
 		/**
 		 *
@@ -68,6 +68,12 @@
 		CreateModel.prototype.create = create;
 		CreateModel.prototype.className = function () {
 			return this._config.name;
+		};
+		CreateModel.prototype.getConfig = function () {
+			return angular.merge({}, this._config);//return a copy
+		};
+		CreateModel.prototype.getKey = function () {
+			return this._config.key;
 		};
 
 
@@ -177,8 +183,10 @@
 		 * Callback can be passed that will be called every time a model is created
 		 *
 		 * @param createData
+		 * @param $scope
+		 * @param stopCallback - stop the onCreate function from being called
 		 */
-		function create(createData) {
+		function create(createData, $scope, stopCallback) {
 
 			var factory = this;
 
@@ -189,7 +197,7 @@
 
 			 */
 			if (factory._instance !== null) {
-				return new factory._instance(createData);
+				return new factory._instance(createData, $scope, stopCallback);
 			}
 
 			/*
@@ -212,10 +220,13 @@
 			 *
 			 * Constructor
 			 *
-			 * @param passedData
+			 * @param passedData {Object}
+			 * @param $scope {$scope} The scope to the created object to
+			 * @param stopCallback {Function} - Stops the passed callback being called
 			 */
-			var Model = function (passedData) {
+			var Model = function (passedData, $scope, stopCallback) {
 				var model = this;
+				stopCallback = typeof stopCallback === 'undefined' ? false : stopCallback;
 
 				model.__existsRemotely = false;
 
@@ -230,8 +241,8 @@
 				}
 
 				//callbacks when created
-				if (angular.isFunction(Model.prototype._onCreate)) {
-					Model.prototype._onCreate.call(this);
+				if (angular.isFunction(Model.prototype._onCreate) && !stopCallback) {
+					Model.prototype._onCreate.call(this, $scope);
 				}
 				if (angular.isFunction(Model.prototype.initialize)) {
 					Model.prototype.initialize.call(this);
@@ -276,9 +287,13 @@
 			Model.prototype.toObject = toObject;
 			Model.prototype.guid = guid;
 			Model.prototype.resolveWithRemote = resolveWithRemote;
+			Model.prototype.isEqual = isEqual;
 
 			//Callback
 			Model.prototype._onCreate = factory._onCreate;
+
+			//Add event emitter
+			eventEmitter.inject(Model);
 
 
 			/*
@@ -288,7 +303,7 @@
 			factory._instance = Model;
 
 			//now create the object
-			return factory.create(createData);
+			return factory.create(createData, $scope, stopCallback);
 
 
 			//////////////////////////////////////////////////
@@ -451,6 +466,55 @@
 				throw('Error: Model - Cannot resolveWithRemote if passed data has no id');
 			}
 			this.setData(data);
+		}
+
+		/**
+		 * isEqual
+		 *
+		 * Sees if the current model is the same as the passed model
+		 *
+		 * @param model
+		 * returns {Boolean}
+		 */
+		function isEqual(model) {
+			//see if class name the same
+			var self = this;
+			if (self.className() !== model.className()) {
+				return false;
+			}
+
+			//recursive function
+			var objEqual = function (obj1, obj2) {
+				var match = true;
+				angular.forEach(obj1, function (v1, k) {
+					var v2 = obj2[k];
+					if (angular.isObject(v1) && angular.isObject(v2)) {
+						match = match && objEqual(v1, v2);
+					} else if (!angular.isObject(v1) && !angular.isObject(v2)) {
+						match = match && v1 === v2;
+					} else {
+						match = false;
+					}
+				});
+				return match;
+			};
+
+			var schemaMatch = true;
+			angular.forEach(self._schema, function (val, key) {
+				//ignore meta data
+				if (key === 'updatedDate' || key === 'createdDate') {
+					return;
+				}
+
+				var v1 = self[key], v2 = model[key];
+
+				if (angular.isObject(v1) && angular.isObject(v2)) {
+					schemaMatch = schemaMatch && objEqual(v1, v2);
+				} else {
+					schemaMatch = schemaMatch && v1 === v2;
+				}
+			});
+			return schemaMatch;
 		}
 
 	}

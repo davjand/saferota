@@ -1,56 +1,62 @@
 describe('saferota.data Model', function () {
 	beforeEach(module('saferota.data'));
 
+	var Model;
+
+	beforeEach(inject(function (_Model_) {
+		Model = _Model_;
+	}));
+	
 	/*
 	 Constructor
 	 */
-	it('Can create a new model type', inject(function (Model) {
+	it('Can create a new model type', function () {
 		var m = new Model('rota');
 		expect(m._config.name).toEqual('rota');
-	}));
+	});
 
 	/*
 	 .config
 	 */
-	it('Can set config options with config', inject(function (Model) {
+	it('Can set config options with config', function () {
 		var m = new Model('test');
 		m.config({key: 'value'});
 		expect(m._config.key).toEqual('value');
-	}));
-	it('config can only be used to set allowed properties', inject(function (Model) {
+	});
+	it('config can only be used to set allowed properties', function () {
 		var m = new Model('test');
 		m.config({key: 'test'}, 'anything');
 		//expect(m.anything).toBeUndefined();
-	}));
+	});
 
 
 	/*
 	 .schema
 	 */
-	it('Can set the schema with updated and created dates', inject(function (Model) {
+	it('Can set the schema with updated and created dates', function () {
 		var m = new Model('test');
 		m.schema({name: 'test'});
 		expect(m._schema.name).toEqual('test');
 		expect(m._schema.createdDate).toBeNull();
 		expect(m._schema.updatedDate).toBeNull();
-	}));
+	});
 
 	/*
 	 .key
 	 */
-	it('It Can set the primary key and chain methods', inject(function (Model) {
+	it('It Can set the primary key and chain methods', function () {
 		var m = new Model('test');
 
 		m.schema({name: 'test'}).key('__ID');
 
 		expect(m._schema.name).toEqual('test');
 		expect(m._config.key).toEqual('__ID');
-	}));
+	});
 
 	/*
 	 .methods
 	 */
-	it('Can set methods on the prototype and bind appropriately', inject(function (Model) {
+	it('Can set methods on the prototype and bind appropriately', function () {
 		var m = new Model('test');
 		m.dataItem = 123;
 
@@ -61,12 +67,12 @@ describe('saferota.data Model', function () {
 		});
 		expect(m._methods.getItemData.call(m)).toEqual(123);
 
-	}));
+	});
 
 	/*
 	 .createRelationship
 	 */
-	it('Can Set a relationship object', inject(function (Model) {
+	it('Can Set a relationship object', function () {
 		var m = new Model('test');
 
 		//shorthand
@@ -76,12 +82,12 @@ describe('saferota.data Model', function () {
 		expect(m._rel.category.model).toEqual('Category');
 		expect(m._rel.category.type).toEqual('hasOne');
 
-	}));
+	});
 
 	/*
 	 .create
 	 */
-	it('Can create a new model instance from the config', inject(function (Model) {
+	it('Can create a new model instance from the config', function () {
 		var Test = new Model('test');
 		Test.schema({
 				first: 'John',
@@ -126,12 +132,12 @@ describe('saferota.data Model', function () {
 		expect(dataExport.category).toEqual('newCategory');
 
 
-	}));
+	});
 
 	/*
 	 .create / set Data
 	 */
-	it('Can Set data. Can cast ids to string', inject(function (Model) {
+	it('Can Set data. Can cast ids to string', function () {
 		var Test = new Model('test');
 		Test.schema({name: 'default'}).key('id');
 
@@ -139,34 +145,34 @@ describe('saferota.data Model', function () {
 
 		expect(m.id).toEqual('10');
 		expect(m.name).toEqual('not default');
-	}));
+	});
 
 	/*
 	 .create / __existsRemotely functionality
 	 */
-	it('Sets __existsRemotely to true if a primary key is passed', inject(function (Model) {
+	it('Sets __existsRemotely to true if a primary key is passed', function () {
 		var Test = new Model('test').schema({name: 'default'}).key('id');
 
 		var m = Test.create({id: 10, name: 'not default'});
 		expect(m.__existsRemotely).toBe(true);
-	}));
+	});
 
 	/*
 	 .create / createdData and updatedDate - NEW
 	 */
-	it('Can set the created and updated dates to default values', inject(function (Model) {
+	it('Can set the created and updated dates to default values', function () {
 		var Test = new Model('test').schema({name: 'default'}).key('id');
 
 		var m = Test.create({id: 10});
 
 		expect(m.createdDate).not.toBeNull();
 		expect(m.updatedDate).not.toBeNull();
-	}));
+	});
 
 	/*
 	 .create / createdData and updatedDate - From existing
 	 */
-	it('Can set the created and updated dates from passed item', inject(function (Model) {
+	it('Can set the created and updated dates from passed item', function () {
 		var Test = new Model('test').schema({name: 'default'}).key('id');
 		var date1 = new Date(2015, 10, 10),
 			date2 = new Date(2012, 10, 2);
@@ -179,12 +185,12 @@ describe('saferota.data Model', function () {
 
 		expect(m.createdDate).toEqual(date1);
 		expect(m.updatedDate).toEqual(date2);
-	}));
+	});
 
 	/*
 	 .toObject
 	 */
-	it('Can serialize the model into a JSON object (with Meta Data)', inject(function (Model) {
+	it('Can serialize the model into a JSON object (with Meta Data)', function () {
 		var Test = new Model('test').schema({name: 'default'});
 
 		var m = Test.create({id: 1});
@@ -196,9 +202,9 @@ describe('saferota.data Model', function () {
 		expect(data.updatedDate).not.toBeNull();
 		expect(data.__className).toEqual('test');
 
-	}));
+	});
 
-	it('Can Serialize the model into a JSON object (no meta data)', inject(function (Model) {
+	it('Can Serialize the model into a JSON object (no meta data)', function () {
 		var Test = new Model('test').schema({name: 'default'});
 
 		var m = Test.create({id: 1});
@@ -209,12 +215,12 @@ describe('saferota.data Model', function () {
 		expect(data.createdDate).toBeUndefined();
 		expect(data.updatedDate).toBeUndefined();
 		expect(data.__className).toBeUndefined();
-	}));
+	});
 
 	/*
 	 .setData
 	 */
-	it('Can init a model from an object created with toObject', inject(function (Model) {
+	it('Can init a model from an object created with toObject', function () {
 		var Test = new Model('test').schema({name: 'default'});
 
 		var date = new Date(2015, 5, 5);
@@ -234,21 +240,21 @@ describe('saferota.data Model', function () {
 		expect(m2.name).toBe('james');
 		expect(m2.createdDate).toBe(date);
 		expect(m2.updatedDate).toBe(date);
-	}));
+	});
 
 	/*
 	 localID and __existsRemotely functionality
 	 */
-	it('Generates a local ID and sets localID to true if generated without an ID', inject(function (Model) {
+	it('Generates a local ID and sets localID to true if generated without an ID', function () {
 		var Test = new Model('test').schema({name: 'default'});
 
 		var m = Test.create();
 
 		expect(m.__existsRemotely).toBe(false);
 		expect(m.id.length).toEqual(36);
-	}));
+	});
 
-	it('Test __existsRemotely functionality', inject(function (Model) {
+	it('Test __existsRemotely functionality', function () {
 		var Test = new Model('test').schema({name: 'default'});
 
 		var m1 = Test.create();
@@ -267,11 +273,11 @@ describe('saferota.data Model', function () {
 
 		//test serializing and deserializing object types
 
-	}));
+	});
 	/*
 	 toObject / setData and  __existsRemotely functionality
 	 */
-	it('__existsRemotely and ID survive toObject and new constructor', inject(function (Model) {
+	it('__existsRemotely and ID survive toObject and new constructor', function () {
 		var Test = new Model('test').schema({name: 'default'});
 
 		//Create an object and serialize
@@ -294,12 +300,12 @@ describe('saferota.data Model', function () {
 		expect(d4.id).toBe(d3.id);
 		expect(d4.__existsRemotely).toBe(true);
 
-	}));
+	});
 
 	/*
 	 .resolveRemote - sets a local object with the data from the server
 	 */
-	it('.resolveRemote sets the new ID and sets __existsRemotely to false', inject(function (Model) {
+	it('.resolveRemote sets the new ID and sets __existsRemotely to false', function () {
 		var Test = new Model('test').schema({name: 'default', phone: '200'});
 
 		var m1 = Test.create({name: 'James Bond'});
@@ -312,9 +318,12 @@ describe('saferota.data Model', function () {
 		expect(m1.phone).toBe('200');
 		expect(m1.id).toBe('999');
 
-	}));
+	});
 
-	it('Create can be passed a callback that is called everytime an instance is created', inject(function (Model) {
+	/*
+	 Constructor callback
+	 */
+	it('Create can be passed a callback that is called everytime an instance is created', function () {
 		var calls = 0,
 			fx = function () {
 				calls++;
@@ -328,7 +337,62 @@ describe('saferota.data Model', function () {
 
 		Test.create({id: 2});
 		expect(calls).toBe(2);
-	}));
+	});
 
+	/*
+	 Event emitters
+	 */
+	it('Each model becomes an event emitter', function () {
+		var Test = new Model('test').schema({name: ''});
 
+		var t1 = Test.create();
+
+		expect(t1.on).toBeDefined();
+		expect(t1.off).toBeDefined();
+		expect(t1.emit).toBeDefined();
+
+		var v = 0;
+
+		t1.on('test', function (a) {
+			v = a;
+		});
+		t1.emit('test', 5);
+
+		expect(v).toBe(5);
+
+	});
+
+	/*
+	 Objects the same
+	 */
+	it('.isEqual determines if models are the same or not', function () {
+		var Test = new Model('test').schema({name: '', city: ''});
+		var Test2 = new Model('test2').schema({name: '', city: ''});
+
+		var m1 = Test.create({name: 'james'});
+		var m2 = Test2.create({name: 'james'});
+
+		//different models
+		expect(m1.isEqual(m2)).toBe(false);
+
+		//parameter differences
+		var m3 = Test.create({name: 'james'});
+		expect(m1.isEqual(m3)).toBe(true);
+
+		m3.city = 'London';
+		expect(m1.isEqual(m3)).toBe(false);
+
+		m1.city = 'London';
+		expect(m1.isEqual(m3)).toBe(true);
+
+		//objects
+		m1.name = {first: 'james', last: 'bond'};
+		m3.name = {first: 'james', last: 'bond'};
+		expect(m1.isEqual(m3)).toBe(true);
+
+		m3.name = {first: 'james', last: 'bone'};
+		expect(m1.isEqual(m3)).toBe(false);
+
+	});
+	
 });

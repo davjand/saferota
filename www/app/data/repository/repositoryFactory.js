@@ -25,17 +25,13 @@
 		 *
 		 */
 		var Repository = function (Model, localAdapter) {
-
 			/*
 			 Internal variables
 			 */
 			this._Model = Model;
 
 			this._ready = $q.defer();
-			this._configLoaded = false;
 			this._updatedAt = null;
-			this._isFresh = false;
-
 
 			/*
 			 Create the adapters
@@ -43,27 +39,35 @@
 			this.$mem = {};
 			this.$local = new ($injector.get(localAdapter || DataConfig.local))(this._Model._config);
 
+			//init
+			this._initConfig();
 		};
 
 
-		//External Interface
+		/*
+
+		 External Interface
+
+		 */
 		Repository.prototype.registerModel = registerModel;
 		Repository.prototype.save = save;
+		Repository.prototype.sync = sync;
 		Repository.prototype.remove = remove;
 		Repository.prototype.get = get;
 		Repository.prototype.find = find;
 		Repository.prototype.notify = notify;
-
 		Repository.prototype.clear = clear;
 
-		//Internal Methods - expose for testing
+		Repository.prototype.updatedAt = updatedAt;
+
+		//Internal Config
 		Repository.prototype._initConfig = _initConfig;
 		Repository.prototype.ready = function () {
 			return this._ready.promise;
 		};
 
 
-		//Internal
+		//Internal Memory Management
 		Repository.prototype._inMem = _inMem;
 		Repository.prototype._putMem = _putMem;
 		Repository.prototype._getMem = _getMem;
@@ -96,28 +100,131 @@
 
 
 		/**
-		 * save a model into the repository
+		 * updatedAt
 		 *
+		 * Gets or sets when the repository was last updated (with the server)
+		 * To allow differential sync
 		 *
-		 * @param model
-		 * @param $scope {$scope} (optional scope object to bind the items to if needed)
+		 * @param date (Optional)
+		 * @returns {Promise}
 		 */
-		function save(model, $scope) {
+		function updatedAt(date) {
+			var self = this;
+
+			return this.ready().then(function () {
+				if (typeof date === 'undefined') {
+					return $q.when(self._updatedAt);
+				} else {
+					self._updatedAt = date;
+					return self.$local.updatedAt(date);
+				}
+			});
+		}
+
+
+		/**
+		 * save model(s) into the repository
+		 *
+		 * Save the passed models into the datastore
+		 * If models exist in the datastore then load then
+		 * and see which is newer.
+		 * If the current model is newer, save that, otherwise keep the old changes
+		 * Persist these to memory
+		 * Then review the current cache and issue updates for whatever is needed
+		 *
+		 * @param model {Object | Array}
+		 * @param $scope {$scope} (optional scope object to bind the items to if needed). Pass false if not needed
+		 * @param setUpdatedDate {Boolean} - Defaults to true. Sets the model updated date
+		 * @param triggerUpdateEvent {Boolean} - Defaults to false. Triggers an update on the models in memory
+		 * @returns {Promise}
+		 */
+		function save(model, $scope, setUpdatedDate, triggerUpdateEvent) {
+			setUpdatedDate = typeof setUpdatedDate !== 'undefined' ? setUpdatedDate : true;
+			triggerUpdateEvent = typeof triggerUpdateEvent !== 'undefined' ? triggerUpdateEvent : false;
+
 			var self = this,
 				toSave = {};
 
 			if (!angular.isArray(model)) {
 				model = [model];
 			}
+
+			//get a list of keys of the models
+			var modelIndex = {};
 			angular.forEach(model, function (item) {
-				//register the models
-				if (!self._inMem(item)) {
-					self.registerModel(item, $scope)
+				// Add a timestamp to each model
+				if (setUpdatedDate) {
+					item.updatedDate = new Date(Date.now());
 				}
-				toSave[item.id] = item.toObject();
+				modelIndex[item.getKey()] = item;
 			});
 
-			return this.$local.data(toSave);
+			//see which are in local storage
+			return self.$local.data(Object.keys(modelIndex)).then(function (data) {
+				angular.forEach(modelIndex, function (modelVal, modelKey) {
+					/*
+					 if not found, we'll save the new one
+					 */
+					if (!data[modelKey] || data[modelKey] === null) {
+						toSave[modelKey] = modelVal;
+					}
+					/*
+					 If found then do a diff sync
+					 */
+					else {
+						var localModel = self._Model.create(data[modelKey], false, true);
+						if (!localModel.isEqual(modelVal)) {
+							if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
+								localModel.setData(modelVal.toObject());
+							}
+						}
+						toSave[modelKey] = localModel;
+					}
+
+				});
+				//save into the database
+				return self.$local.data(toSave);
+			}).then(function () {
+				/*
+				 Now review all the models in memory and updated if needed
+				 */
+				angular.forEach(toSave, function (savedModel, key) {
+					if ($scope !== false) {
+						self.registerModel(savedModel, $scope);
+					}
+
+					if (self._inMem(key)) {
+						self._getMem(key).setData(savedModel);
+
+						//trigger an update if specified
+						if (triggerUpdateEvent) {
+							self._getMem(key).emit('update');
+						}
+					}
+				});
+
+				return $q.when();
+			});
+		}
+
+		/**
+		 * sync function
+		 *
+		 * Wrapper for save
+		 * Saves the models then saves the updated date to the passed date
+		 * Defaults to the current time if no date passed
+		 *
+		 * @param model {Model | Array}
+		 * @param $scope {Scope} - to be passed to save function
+		 * @param date {Date} (Optional)
+		 * @returns {Promise}
+		 */
+		function sync(model, $scope, date) {
+			var self = this;
+			date = date || new Date(Date.now());
+			return this.save(model, $scope, false, true).then(function () {
+				return self.updatedAt(date);
+			});
 		}
 
 		/**
@@ -126,19 +233,80 @@
 		 * Receives a resolved transaction
 		 *
 		 * @param transaction
+		 * @returns a promise when complete
 		 */
 		function notify(transaction) {
+			var self = this,
+				initialId = transaction.model.getKey(),
+				model;
 
+			return this.$local.data(initialId).then(function (object) {
+				/*
+				 create a new model from data - or from transaction
+				 */
+				model = self._Model.create(object === null ? transaction.model : object);
+				/*
+				 Apply the data
+				 */
+				model.setData(transaction.resolveData);
+				/*
+				 Remove the old model
+				 */
+				return self.$local.remove(initialId);
+			}).then(function () {
+				/*
+				 Save back to local storage
+				 */
+				return self.$local.data(model.getKey(), model.toObject());
+			}).then(function () {
+				if (self._inMem(initialId)) {
+					/*
+					 Get the model from memory
+					 */
+					var m = self._getMem(initialId);
+					m.setData(transaction.resolveData);
+					/*
+					 Delete the old key (not the model, exists in m
+					 */
+					delete self.$mem[initialId];
+					/*
+					 Put back into memory
+					 */
+					var newKey = m.getKey();
+					if (self._inMem(newKey)) {
+						//shouldn't exist
+						throw "RepositoryFactory.notify: Resolved transaction ID already exists: " + newKey;
+					}
+					self.$mem[newKey] = m;
+
+					m.emit('update');
+				}
+				return $q.when();
+			})
 		}
 
+		/**
+		 * remove
+		 *
+		 * Removes a model from the local rempository
+		 *
+		 * @TODO notification on this object
+		 *
+		 * @param model
+		 * @returns {Promise}
+		 */
 		function remove(model) {
+			//trigger event
+			model.emit('delete');
+			this._delMem(model);
 
+			return this.$local.remove(model.getKey());
 		}
 
 		/**
 		 * get
 		 * @param id {String} - ID to retrieve
-		 * @param force {Boolean} -
+		 * @param force {Boolean} - Forces to bypass the memory object
 		 * @param $scope {$scope} - to bind the object to
 		 * @returns {Promise}
 		 */
@@ -162,7 +330,10 @@
 			 Retrieve from cache
 			 */
 			return self.$local.data(id).then(function (data) {
-				if (self._inMem(id)) {
+				if (data === null) {
+					return $q.when(null);
+				}
+				else if (self._inMem(id)) {
 					/*
 					 If in memory then update the object,
 					 register the new scope if applicable
@@ -184,13 +355,51 @@
 			});
 		}
 
-
-		function find(options) {
-
+		/**
+		 * find
+		 *
+		 * Find items in the local repository
+		 *
+		 * @param filter - see localInterface.filter for accepted parameters
+		 * @param $scope
+		 * @returns {Promise}
+		 */
+		function find(filter, $scope) {
+			var data = [],
+				self = this;
+			return this.$local.filter(filter).then(function (results) {
+				angular.forEach(results, function (item) {
+					/*
+					 see if the item exists in the cache,
+					 if not, create a new model
+					 */
+					var model = self._getMem(item[self._Model.getKey()]);
+					if (model === null) {
+						model = self._Model.create(item);
+					}
+					//register in cache
+					self._putMem(model, $scope);
+					data.push(model)
+				});
+				return $q.when(data);
+			});
 		}
 
-		function clear() {
+		/**
+		 * clear
+		 *
+		 * clear the repository, pass true to clear the localstorage as well
+		 *
+		 * @param andCache {Boolean}
+		 * @returns {Promise}
+		 */
+		function clear(andCache) {
 			this.$mem = {};
+			if (andCache) {
+				return this.$local.clear();
+			} else {
+				return $q.when();
+			}
 		}
 
 
@@ -205,26 +414,27 @@
 		 *
 		 * Loads the configuration from the local provider
 		 *  - Sets the update date
-		 *  - Sets _isFresh to true if no config
 		 *
+		 * @param reload {Boolean} - Force a reload
 		 * @returns {Promise|*}
 		 * @private
 		 */
-		function _initConfig() {
+		function _initConfig(reload) {
 			var self = this;
-			if (!self._configLoaded) {
-				self.$local.updatedAt().then(function (updatedAt) {
+			if (!self._configLoaded || reload) {
+				return self.$local.updatedAt().then(function (updatedAt) {
 					if (updatedAt instanceof Date) {
 						self._updatedAt = updatedAt;
-						self._isFresh = false;
 					} else {
-						self._isFresh = true;
+						self._updatedAt = null;
 					}
 					self._configLoaded = true;
 					self._ready.resolve();
+					return $q.when();
 				}, _err(self._ready));
+			} else {
+				return $q.when();
 			}
-			return self._ready.promise;
 		}
 
 
@@ -281,6 +491,15 @@
 		}
 
 
+		/**
+		 * _inMem
+		 *
+		 * returns true if the passed model or id is in memory
+		 *
+		 * @param id {Model | String}
+		 * @returns {boolean}
+		 * @private
+		 */
 		function _inMem(id) {
 			return typeof this.$mem[_modelId(id)] !== 'undefined';
 		}
@@ -294,8 +513,6 @@
 		 * @private
 		 */
 		function _putMem(model, $scope) {
-			$scope = $scope || $rootScope;
-
 			if (!this._inMem(model)) {
 				this.$mem[_modelId(model)] = {
 					m: model,
@@ -312,7 +529,6 @@
 		 * Gets a model from the internal memory
 		 *
 		 * @param id
-		 * @returns {*}
 		 * @private
 		 */
 		function _getMem(id) {
@@ -323,8 +539,16 @@
 			}
 		}
 
+		/**
+		 * _delMem
+		 *
+		 * @param model
+		 * @private
+		 */
 		function _delMem(model) {
-
+			if (this._inMem(model)) {
+				delete this.$mem[model.getKey()];
+			}
 		}
 
 		/**
@@ -339,13 +563,23 @@
 		 */
 		function _regScope(model, $scope) {
 			var self = this;
+
 			if (this._inMem(model)) {
-				var found = false,
-					id = _modelId(model.getKey());
+
+				var id = _modelId(model);
+
+				//if no scope passed and already has a scope then stop
+				if (typeof $scope === 'undefined' && self.$mem[id].c > 0) {
+					return;
+				}
+
+				var found = false;
+				//see if the scope has been found
 				angular.forEach(this.$mem[id].s, function (s) {
 					found = found || s === $scope;
 				});
 				if (!found) {
+					$scope = $scope || $rootScope;
 					this.$mem[id].c++;
 					this.$mem[id].s.push($scope);
 

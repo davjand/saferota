@@ -104,6 +104,13 @@ describe('saferota.data TransactionQueue', function () {
 		});
 		_d();
 	});
+	it('.getNext should return null if no items remainined', function (done) {
+		queue.getNext().then(function (data) {
+			expect(data).toBeNull();
+			done();
+		});
+		_d();
+	});
 
 	/*
 	 .pop

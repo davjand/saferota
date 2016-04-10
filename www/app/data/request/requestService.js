@@ -17,6 +17,8 @@
 		self.create = create;
 		self.update = update;
 		self.remove = remove;
+		self.find = find;
+		self.get = get;
 		self.next = next;
 
 		//Static
@@ -46,10 +48,11 @@
 		 * Shortcut for doing a new create request
 		 *
 		 * @param model
+		 * @param execute {Boolean} - to execute now or not
 		 * @returns {Promise}
 		 */
-		function create(model) {
-			return this.createRequest(model, Transaction.TYPES.CREATE);
+		function create(model, execute) {
+			return this.createRequest(model, Transaction.TYPES.CREATE, execute);
 		}
 
 		/**
@@ -58,10 +61,11 @@
 		 * Shortcut for creating a new update request
 		 *
 		 * @param model
+		 * @param execute {Boolean} - to execute now or not
 		 * @returns {Promise}
 		 */
-		function update(model) {
-			return this.createRequest(model, Transaction.TYPES.UPDATE);
+		function update(model, execute) {
+			return this.createRequest(model, Transaction.TYPES.UPDATE, execute);
 		}
 
 		/**
@@ -70,10 +74,11 @@
 		 * Shortcut for creating a new delete request
 		 *
 		 * @param model
+		 * @param execute {Boolean} - to execute now or not
 		 * @returns {Promise}
 		 */
-		function remove(model) {
-			return this.createRequest(model, Transaction.TYPES.DELETE);
+		function remove(model, execute) {
+			return this.createRequest(model, Transaction.TYPES.DELETE, execute);
 		}
 
 
@@ -84,12 +89,50 @@
 		 *
 		 * @param model
 		 * @param type
+		 * @param execute {Boolean} Defaults to true
 		 * @returns {$q.promise}
 		 */
-		function createRequest(model, type) {
+		function createRequest(model, type, execute) {
+			var self = this;
 			type = type || this.TYPES.CREATE;
-			return this.$queue.push(new Transaction(type, model));
+			execute = typeof execute === 'undefined' ? true : execute;
+
+			return this.$queue.push(new Transaction(type, model)).then(function () {
+				if (execute) {
+					return self.next();
+				}
+				return $q.when();
+			});
 		}
+
+
+		/**
+		 * get
+		 *
+		 * get request for data
+		 *
+		 * @param Model
+		 * @param id
+		 * @returns {*}
+		 */
+		function get(Model, id) {
+			return self.$adapter.get(Model, id);
+		}
+
+
+		/**
+		 * find
+		 *
+		 * find request for data
+		 *
+		 * @param Model
+		 * @param options
+		 * @returns {Promise}
+		 */
+		function find(Model, options) {
+			return self.$adapter.find(Model, options);
+		}
+
 
 		/**
 		 * next
@@ -98,9 +141,10 @@
 		 * Sets it to active
 		 * Calls _handleResponse with the response
 		 *
+		 * @param processAll
 		 * @returns {$q.promise}
 		 */
-		function next() {
+		function next(processAll) {
 			var self = this;
 			self.inProgress = true;
 			return this.$queue.length().then(function (length) {
@@ -117,7 +161,7 @@
 								throw("requestService.next Invalid model type: " + next.type);
 						}
 					}).then(function (data) {
-						return self._handleResponse(data);
+						return self._handleResponse(data, processAll);
 					}, function (error) {
 						return self._handleError(error);
 					});
@@ -131,11 +175,18 @@
 		 * _handleResponse
 		 *
 		 * @param data
+		 * @param processAll
 		 * @private
 		 */
-		function _handleResponse(data) {
-			this.inProgress = false;
-			return this.$queue.resolveTransaction(data);
+		function _handleResponse(data, processAll) {
+			var self = this;
+			self.inProgress = false;
+			return self.$queue.resolveTransaction(data).then(function () {
+				if (processAll) {
+					return self.next(processAll);
+				}
+				return $q.when();
+			});
 		}
 
 		/**

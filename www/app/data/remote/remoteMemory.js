@@ -58,19 +58,12 @@
 		 * @returns {*}
 		 */
 		function get(Model, id) {
-			var p = $q.defer();
+			var options = {filter: {}};
+			options.filter[Model.getKey()] = id;
 
-			this.find(Model, {filter: {id: id}}).then(function (data) {
-				if (data.length > 0) {
-					p.resolve(data[0]);
-				} else {
-					p.reject();
-				}
-			}, function () {
-				p.reject();
+			return this.find(Model, options).then(function (data) {
+				return $q.when(data.length > 0 ? data[0] : null)
 			});
-
-			return p.promise;
 		}
 
 		/**
@@ -90,6 +83,8 @@
 		 * @return Promise
 		 */
 		function find(Model, options) {
+			options = options || {};
+
 			var data = this._getCache(Model.className());
 
 			if (typeof options.filter !== 'undefined') {

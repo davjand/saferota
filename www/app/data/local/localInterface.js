@@ -43,22 +43,22 @@
 		'set',
 		'length',
 		'clear',
-		'filter',
+		'iterate',
 		'remove',
 		'clearAll'
 	];
 
 	LocalAdapterInterface.$inject = ['$q'];
-	
+
 	/* @ngInject */
 	function LocalAdapterInterface($q) {
 
 		return function (options) {
 
 			/*
-			Create the Adapter Interface Object
+			 Create the Adapter Interface Object
 
-			Constructor
+			 Constructor
 			 - Creates a new copy of the config object
 			 - Calls the initialize function (provided by implementation)
 			 - Creates this.ready which is a promise that resovles when the config has been initialized
@@ -66,8 +66,8 @@
 			 */
 			var Adapter = function (config) {
 				this._ready = $q.defer(); //class should decide when ready
-				
-				var conf = angular.merge({},config);
+
+				var conf = angular.merge({}, config);
 				this.initialize(conf);
 			};
 
@@ -85,13 +85,18 @@
 			Adapter.prototype.config = config;
 			Adapter.prototype.updatedAt = updatedAt;
 			Adapter.prototype.configKey = configKey;
-			Adapter.prototype.isReady = function(){return this._ready.promise;};
+			Adapter.prototype.isReady = function () {
+				return this._ready.promise;
+			};
+
+			//filter functions
+			Adapter.prototype.filter = filter;
 
 			/*
-				Helper function to reject promises
+			 Helper function to reject promises
 			 */
-			Adapter.prototype._err = function(p){
-				return function(error){
+			Adapter.prototype._err = function (p) {
+				return function (error) {
 					p.reject(error);
 				}
 			};
@@ -154,14 +159,14 @@
 			var p = $q.defer();
 
 			if (typeof date !== 'undefined') {
-				this.configKey('updatedAt', date).then(function(){
+				this.configKey('updatedAt', date).then(function () {
 					p.resolve();
 				})
 			} else {
-				this.configKey('updatedAt').then(function(val){
-					if(typeof val === 'string'){
+				this.configKey('updatedAt').then(function (val) {
+					if (typeof val === 'string') {
 						p.resolve(new Date(val));
-					}else{
+					} else {
 						p.resolve(val);
 					}
 				});
@@ -205,7 +210,12 @@
 				//Process the promises and merge the two arrays
 				$q.all(pArr).then(function (promiseData) {
 					angular.forEach(key, function (k, index) {
-						found[k] = promiseData[index];
+						if (promiseData[index] && promiseData[index] !== null) {
+							found[k] = promiseData[index];
+						}
+						else {
+							found[k] = null;
+						}
 					});
 					p.resolve(found);
 				});
@@ -233,6 +243,109 @@
 				return this.get(key);
 			}
 		}
+
+		/**
+		 * filter
+		 *
+		 * Uses the iterator function to filter the objects
+		 *
+		 * Supports the following specialist keys
+		 *
+		 * $logic = AND \ OR
+		 * $this - to allow filtering of the whole object (ie if just a string)
+		 *
+		 * @param filter
+		 *
+		 * @returns {Promise}
+		 */
+		function filter(filter) {
+
+			//if nothing then just return
+			if (!filter) {
+				return this.iterate(function () {
+					return true;
+				});
+			}
+
+			var $$OR = 'OR', $$AND = ' AND';
+
+			//shortcuts
+			if (typeof filter === 'string') {
+				filter = {$this: filter};
+			}
+			if (typeof filter.$logic === 'undefined') {
+				filter.$logic = $$AND;
+			}
+
+			return this.iterate(function (value, currentKey) {
+				var matches = filter.$logic === $$AND; //start as true if an AND, false if OR
+				currentKey = currentKey || true;
+
+				if (filter.$this) {
+					matches = filter.$this === value;
+				} else {
+
+					angular.forEach(filter, function (filterVal, filterKey) {
+
+						if (filterKey !== '$this' && filterKey !== '$logic') {
+
+							/*
+							 Preprocess filterValue into arrays
+							 */
+							if (!angular.isArray(filterVal)) {
+								filterVal = [filterVal];
+							}
+							/*
+							 Preprocess the value to be filtered into a array
+							 */
+							var objValue = value[filterKey],
+								found = false;
+
+							if (typeof objValue === 'undefined') {
+								if (filter.$logic === $$AND) {
+									matches = false;
+								}
+							} else {
+								if (!angular.isArray(objValue)) {
+									objValue = [objValue];
+								}
+								//array intersection
+								angular.forEach(objValue, function (o) {
+									found = found || filterVal.indexOf(o) != -1;
+								});
+
+								//Apply logic type
+								if (filter.$logic === $$OR) {
+									matches = matches || found;
+								} else {
+									matches = matches && found;
+								}
+							}
+						}
+
+					});
+				}
+				if (matches) {
+					return currentKey;
+				}
+			});
+
+
+			/*var data = {};
+
+			 if(callback) {
+			 angular.forEach(this.$cache, function (value, key) {
+			 if (callback.call(this, value, key)) {
+			 data[key] = value;
+			 }
+			 });
+			 }else{
+			 data = this.$cache;
+			 }
+			 return _wrapInPromise(data);*/
+
+		}
+
 
 		/**
 		 *

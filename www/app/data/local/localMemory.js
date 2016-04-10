@@ -5,10 +5,10 @@
 		.module('saferota.data')
 		.factory('LocalAdapterMemory', LocalAdapterMemory);
 
-	LocalAdapterMemory.$inject = ['LocalAdapterInterface','$q'];
+	LocalAdapterMemory.$inject = ['LocalAdapterInterface', '$q'];
 
 	/* @ngInject */
-	function LocalAdapterMemory(LocalAdapterInterface,$q) {
+	function LocalAdapterMemory(LocalAdapterInterface, $q) {
 
 		return LocalAdapterInterface({
 			initialize: initialize,
@@ -18,17 +18,17 @@
 			setConfig: setConfig,
 			keys: keys,
 			length: length,
-			filter: filter,
+			iterate: iterate,
 			clear: clear,
 			remove: remove,
 			clearAll: clearAll
 		});
 
-		
+
 		////////////////////////////////
 
 		// Function Definitions
-		
+
 		////////////////////////////////
 
 		/**
@@ -36,7 +36,7 @@
 		 * Constructor
 		 *
 		 */
-		function initialize(){
+		function initialize() {
 			this.$cache = {};
 			this.$config = {};
 			this._ready.resolve();
@@ -49,7 +49,7 @@
 		 * @param val
 		 * @returns {*}
 		 */
-		function setData(key,val){
+		function setData(key, val) {
 			this.$cache[key] = val;
 			return _wrapInPromise();
 		}
@@ -61,8 +61,12 @@
 		 * @param key
 		 * @returns {*}
 		 */
-		function getData(key){
-			return _wrapInPromise(this.$cache[key]);
+		function getData(key) {
+			return _wrapInPromise(
+				typeof this.$cache[key] !== 'undefined'
+					? this.$cache[key]
+					: null
+			);
 		}
 
 
@@ -72,7 +76,7 @@
 		 *
 		 * @returns {*}
 		 */
-		function getConfig(){
+		function getConfig() {
 			return _wrapInPromise(this.$config);
 		}
 
@@ -83,7 +87,7 @@
 		 * @param config
 		 * @returns {*}
 		 */
-		function setConfig(config){
+		function setConfig(config) {
 			this.$config = config;
 			return _wrapInPromise();
 		}
@@ -93,7 +97,7 @@
 		 *
 		 * @returns {*}
 		 */
-		function length(){
+		function length() {
 			return _wrapInPromise(Object.keys(this.$cache).length);
 		}
 
@@ -104,29 +108,27 @@
 		 *
 		 * @returns {Promise|*}
 		 */
-		function keys(){
+		function keys() {
 			return _wrapInPromise(Object.keys(this.$cache));
 		}
 
 		/**
-		 * filter
+		 * iterate
+		 *
 		 *
 		 * @param callback
 		 * @returns {*}
 		 */
-		function filter(callback){
-			var data = {};
+		function iterate(callback) {
+			var self = this,
+				data = [];
 
-			if(callback) {
-				angular.forEach(this.$cache, function (value, key) {
-					if (callback.call(this, value, key)) {
-						data[key] = value;
-					}
-				});
-			}else{
-				data = this.$cache;
-			}
-			return _wrapInPromise(data);
+			angular.forEach(self.$cache, function (val, key) {
+				if (callback(val, key)) {
+					data.push(val);
+				}
+			});
+			return $q.when(data);
 		}
 
 		/**
@@ -135,8 +137,9 @@
 		 *
 		 * @returns {*}
 		 */
-		function clear(){
+		function clear() {
 			this.$cache = [];
+			this.$config = {};
 			return _wrapInPromise();
 		}
 
@@ -147,7 +150,8 @@
 		 * Placeholder as no real function in this type
 		 *
 		 */
-		function clearAll(){}
+		function clearAll() {
+		}
 
 		/**
 		 *
@@ -172,10 +176,10 @@
 		 *
 		 * @private
 		 */
-		function _wrapInPromise(value){
+		function _wrapInPromise(value) {
 			return $q.when(value);
 		}
-		
+
 	}
 })();
 

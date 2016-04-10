@@ -24,7 +24,7 @@
 			getConfig: getConfig,
 			setConfig: setConfig,
 			length: length,
-			filter: filter,
+			iterate: iterate,
 			clear: clear,
 			clearAll: clearAll,
 			remove: remove
@@ -166,13 +166,13 @@
 		}
 
 		/**
-		 * each
+		 * iterate
 		 *
 		 * @param callback
 		 * @returns {*}
 		 */
-		function filter(callback) {
-			//return this.$cache.iterate(callback);
+		function iterate(callback) {
+			return this.$cache.iterate(callback);
 		}
 
 		/**
@@ -211,8 +211,6 @@
 			}, self._err(p));
 
 			return p.promise;
-
-
 		}
 
 		/**
@@ -223,9 +221,11 @@
 		 *
 		 */
 		function clearAll() {
+			var arr = [];
 			angular.forEach(allCaches, function (item) {
-				item.clear();
+				arr.push(item.clear());
 			});
+			return $q.all(arr);
 		}
 
 		/**

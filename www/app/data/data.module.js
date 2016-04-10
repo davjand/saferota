@@ -3,6 +3,7 @@
 
 	angular
 		.module('saferota.data', [
-			'LocalForageModule'
+			'LocalForageModule',
+			'rt.eventemitter'
 		]);
 })();

@@ -2,7 +2,7 @@ describe('saferota.data RequestService', function () {
 	beforeEach(module('saferota.data'));
 
 	var RequestService, ModelService, RepositoryService, $rootScope, TestModel, $q, repo,
-		m1, m2, m3;
+		m1, m2;
 
 	beforeEach(inject(function (_RequestService_, _ModelService_, _$rootScope_, _$q_, _RepositoryService_) {
 		RequestService = _RequestService_;
@@ -14,6 +14,7 @@ describe('saferota.data RequestService', function () {
 		TestModel = ModelService.create('test').schema({name: 'no name'});
 		repo = RepositoryService.create(TestModel);
 		m1 = TestModel.create({name: 'james'});
+		m2 = TestModel.create({name: 'john'});
 
 	}));
 
@@ -32,9 +33,9 @@ describe('saferota.data RequestService', function () {
 	 */
 	it('.create is a shortcut for create request', function () {
 		spyOn(RequestService, 'createRequest').and.returnValue($q.when());
-		RequestService.create(m1);
+		RequestService.create(m1, false);
 
-		expect(RequestService.createRequest).toHaveBeenCalledWith(m1, RequestService.TYPES.CREATE);
+		expect(RequestService.createRequest).toHaveBeenCalledWith(m1, RequestService.TYPES.CREATE, false);
 	});
 
 	/*
@@ -42,8 +43,8 @@ describe('saferota.data RequestService', function () {
 	 */
 	it('.update is a shortcut for update request', function () {
 		spyOn(RequestService, 'createRequest').and.returnValue($q.when());
-		RequestService.update(m1);
-		expect(RequestService.createRequest).toHaveBeenCalledWith(m1, RequestService.TYPES.UPDATE);
+		RequestService.update(m1, false);
+		expect(RequestService.createRequest).toHaveBeenCalledWith(m1, RequestService.TYPES.UPDATE, false);
 	});
 
 	/*
@@ -51,8 +52,8 @@ describe('saferota.data RequestService', function () {
 	 */
 	it('.remove is a shortcut for remove request', function () {
 		spyOn(RequestService, 'createRequest').and.returnValue($q.when());
-		RequestService.remove(m1);
-		expect(RequestService.createRequest).toHaveBeenCalledWith(m1, RequestService.TYPES.DELETE);
+		RequestService.remove(m1, false);
+		expect(RequestService.createRequest).toHaveBeenCalledWith(m1, RequestService.TYPES.DELETE, false);
 	});
 
 	/*
@@ -60,7 +61,7 @@ describe('saferota.data RequestService', function () {
 	 */
 	it('.createRequest pushes an item onto the queue', function (done) {
 
-		RequestService.createRequest(m1, RequestService.TYPES.CREATE).then(function () {
+		RequestService.createRequest(m1, RequestService.TYPES.CREATE, false).then(function () {
 			return RequestService.$queue.getNext();
 		}).then(function (item) {
 			expect(item.model.id).toBe(m1.id);
@@ -69,6 +70,31 @@ describe('saferota.data RequestService', function () {
 
 		$rootScope.$digest();
 	});
+
+	/*
+	 .find
+	 */
+	it('find calls find on the adapter', function () {
+		spyOn(RequestService.$adapter, 'find');
+		var options = {filter: {name: 'james'}};
+
+		RequestService.find(TestModel, options);
+
+		expect(RequestService.$adapter.find).toHaveBeenCalledWith(TestModel, options);
+	});
+
+
+	/*
+	 .get
+	 */
+	it('get calls get on the adapter', function () {
+		spyOn(RequestService.$adapter, 'get');
+
+		RequestService.get(TestModel, 2);
+
+		expect(RequestService.$adapter.get).toHaveBeenCalledWith(TestModel, 2);
+	});
+
 
 	/*
 	 .next
@@ -98,13 +124,32 @@ describe('saferota.data RequestService', function () {
 	});
 
 	/*
+	 Execute straight away
+	 */
+	it('.next can execute all requests and return a promise to all events being completed', function (done) {
+
+		RequestService.create(m1).then(function () {
+			return RequestService.create(m2);
+		}).then(function () {
+			return RequestService.next(true);
+		}).then(function () {
+			return RequestService.$queue.length();
+		}).then(function (len) {
+			expect(len).toBe(0);
+			done();
+		});
+		$rootScope.$digest();
+	});
+
+
+	/*
 	 ._handleResponse
 	 */
 	it('._handleResponse should be called with the response, set inProgress to false and resolve the transaction', function (done) {
 		spyOn(RequestService, '_handleResponse').and.callThrough();
 		spyOn(RequestService.$queue, 'resolveTransaction').and.callThrough();
 
-		RequestService.create(m1).then(function () {
+		RequestService.create(m1, false).then(function () {
 			return RequestService.next();
 		}).then(function () {
 			expect(RequestService.inProgress).toBe(false);

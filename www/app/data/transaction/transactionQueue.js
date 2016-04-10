@@ -115,12 +115,16 @@
 		function getNext() {
 			var self = this;
 			return self.ready.then(function () {
-				return self.$cache.keys()
+				return self.$cache.keys();
 			}).then(function (keys) {
-				//ensure got the lowest key
-				return self.$cache.get(_lowestVal(keys));
-			}).then(function (data) {
-				return $q.when(new Transaction(data));
+				if (keys.length < 1) {
+					return $q.when(null); //no keys to get
+				} else {
+					//ensure got the lowest key
+					return self.$cache.get(_lowestVal(keys)).then(function (data) {
+						return $q.when(new Transaction(data));
+					});
+				}
 			});
 		}
 
@@ -148,16 +152,16 @@
 				 */
 				if (!transaction.model.__existsRemotely) {
 					var localPos = 0;
-					angular.forEach(self.$localId[transaction.model.id], function (cacheVal, cacheKey) {
+					angular.forEach(self.$localId[transaction.model.getKey()], function (cacheVal, cacheKey) {
 						if (parseInt(cacheVal.position, 10) === parseInt(k, 10)) {
 							localPos = parseInt(cacheKey, 10);
 						}
 					});
-					self.$localId[transaction.model.id].splice(localPos, 1);
+					self.$localId[transaction.model.getKey()].splice(localPos, 1);
 
 					//if last one, remove
-					if (self.$localId[transaction.model.id].length < 1) {
-						delete self.$localId[transaction.model.id];
+					if (self.$localId[transaction.model.getKey()].length < 1) {
+						delete self.$localId[transaction.model.getKey()];
 					}
 				}
 
@@ -211,14 +215,14 @@
 				return self.pop();
 			}).then(function (latestTx) {
 				var p = $q.defer(),
-					oldId = latestTx.model.id;
+					oldId = latestTx.model.getKey();
 
 				transaction = latestTx;
 				transaction.resolve(data);
 
 				//see if any other transactions need updating
-				if (!transaction.model.__existsRemotely && self.$localId[transaction.model.id]) {
-					var keys = self.$localId[transaction.model.id];
+				if (!transaction.model.__existsRemotely && self.$localId[transaction.model.getKey()]) {
+					var keys = self.$localId[transaction.model.getKey()];
 					var fx = function (index) {
 						if (index < keys.length) {
 							var k = keys[index].position;
@@ -292,10 +296,10 @@
 		 */
 		function _addTransactionToLocalIdCache(tx, position, cache) {
 			if (!tx.model.__existsRemotely) {
-				if (typeof cache[tx.model.id] === 'undefined') {
-					cache[tx.model.id] = [];
+				if (typeof cache[tx.model.getKey()] === 'undefined') {
+					cache[tx.model.getKey()] = [];
 				}
-				cache[tx.model.id].push({
+				cache[tx.model.getKey()].push({
 					position: parseInt(position, 10),
 					type: 'P' //primary. @TODO: implement foreign
 				});

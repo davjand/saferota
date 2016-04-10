@@ -1,9 +1,10 @@
 describe('saferota.data LocalAdpatorLocalForage', function () {
 	beforeEach(module('saferota.data'));
 
-	var local, $rootScope;
+	var local, $rootScope, LocalAdapterLocalForage;
 
 	/*
+
 	 A little helper function to trigger digests
 
 	 Because this is actually an integration test with LocalForage
@@ -17,9 +18,6 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	 This creates an object (so passed by reference) to a flag
 	 When the flag is then set to true, the digest function stops executing
 	 It will keep executing until all the promises have been resolved
-
-
-
 
 	 */
 	var _digest = function (d) {
@@ -38,12 +36,12 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	/*
 	 Allow to create
 	 */
-	beforeEach(function () {
-		inject(function (LocalAdapterLocalForage, _$rootScope_) {
-			$rootScope = _$rootScope_;
-			local = new LocalAdapterLocalForage({name: 'test'});
-		});
-	});
+	beforeEach(inject(function (_LocalAdapterLocalForage_, _$rootScope_) {
+		LocalAdapterLocalForage = _LocalAdapterLocalForage_;
+		$rootScope = _$rootScope_;
+		local = new LocalAdapterLocalForage({name: 'test'});
+	}));
+
 
 	//clear After
 	afterEach(function () {
@@ -139,7 +137,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 			return local.remove('test');
 		}).then(function () {
 			return local.length();
-		}).then(function(len){
+		}).then(function (len) {
 			expect(len).toEqual(0);
 			d.done = true;
 			done();
@@ -183,14 +181,32 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 			return local.length();
 		}).then(function (l) {
 			expect(l).toEqual(-1);
-			d.flag = true;
 			d.done = true;
 			done();
 		});
 		_digest(d);
 	});
 
-
+	/*
+	 .clearAll
+	 */
+	// it('.clearAll can clear all', function (done) {
+	// 	var d = {done: false};
+	// 	var local2 = new LocalAdapterLocalForage({name: 'test2'});
+	//
+	// 	local.data({key1: 'test'}).then(function () {
+	// 		return local2.data({key2: 'test2'});
+	// 	}).then(function () {
+	// 		return local2.clearAll();
+	// 	}).then(function () {
+	// 		return local.length();
+	// 	}).then(function (len) {
+	// 		expect(len).toBe(0);
+	// 		d.done = true;
+	// 		done();
+	// 	});
+	// 	_digest(d);
+	// });
 
 
 	/*
@@ -210,7 +226,7 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 			expect(keys[0]).toBe('key1');
 			expect(keys[2]).toBe('key3');
 			expect(keys[3]).toBe('key4');
-			d.flag = true;
+			d.done = true;
 			done();
 		});
 		_digest(d);

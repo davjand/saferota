@@ -15,6 +15,7 @@
 
 		this.create = create;
 		this.get = getRepo;
+		this.getAll = getAll;
 		this.notify = notify;
 		this.clear = clear;
 		this.notify = notify;
@@ -66,6 +67,17 @@
 		 */
 		function clear() {
 			this.$cache = [];
+		}
+
+		/**
+		 * .getAll
+		 *
+		 * Returns all cached repos
+		 *
+		 * @returns {Array}
+		 */
+		function getAll() {
+			return this.$cache;
 		}
 
 		/**

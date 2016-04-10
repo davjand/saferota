@@ -46,6 +46,9 @@
 				this.time = (new Date()).getTime();
 				this.model = model;
 			}else{
+				if (typeof type.modelName === 'undefined') {
+					type.modelName = type.model.className();
+				}
 				this.fromObject(type);
 			}
 		};
@@ -104,7 +107,7 @@
 			this.type = obj.type;
 			this.time = obj.time;
 			this.modelName = obj.modelName;
-			this.model = ModelService.get(this.modelName).create(obj.model);
+			this.model = ModelService.get(this.modelName).create(obj.model, false, true);
 			this.resolveData = angular.merge({}, obj.resolveData);
 		}
 
