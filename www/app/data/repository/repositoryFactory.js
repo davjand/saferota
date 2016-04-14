@@ -95,7 +95,9 @@
 		 * @param $scope
 		 */
 		function registerModel(model, $scope) {
-			this._putMem(model, $scope)
+			if ($scope) {
+				this._putMem(model, $scope);
+			}
 		}
 
 
@@ -263,8 +265,8 @@
 					/*
 					 Get the model from memory
 					 */
-					var m = self._getMem(initialId);
-					m.setData(transaction.resolveData);
+					var memObj = self.$mem[initialId];
+					memObj.m.setData(transaction.resolveData);
 					/*
 					 Delete the old key (not the model, exists in m
 					 */
@@ -272,14 +274,14 @@
 					/*
 					 Put back into memory
 					 */
-					var newKey = m.getKey();
+					var newKey = memObj.m.getKey();
 					if (self._inMem(newKey)) {
 						//shouldn't exist
 						throw "RepositoryFactory.notify: Resolved transaction ID already exists: " + newKey;
 					}
-					self.$mem[newKey] = m;
+					self.$mem[newKey] = memObj;
 
-					m.emit('update');
+					memObj.m.emit('update');
 				}
 				return $q.when();
 			})
@@ -306,11 +308,11 @@
 		/**
 		 * get
 		 * @param id {String} - ID to retrieve
-		 * @param force {Boolean} - Forces to bypass the memory object
 		 * @param $scope {$scope} - to bind the object to
+		 * @param force {Boolean} - Forces to bypass the memory object
 		 * @returns {Promise}
 		 */
-		function get(id, force, $scope) {
+		function get(id, $scope, force) {
 			var self = this;
 			force = typeof force === 'undefined' ? false : force;
 
@@ -320,9 +322,8 @@
 			 */
 			if (self._inMem(id) && !force) {
 				var model = this._getMem(id);
-				if ($scope) {
-					self.registerModel(model, $scope);
-				}
+				self.registerModel(model, $scope);
+				
 				return $q.when(model);
 			}
 
@@ -360,14 +361,15 @@
 		 *
 		 * Find items in the local repository
 		 *
-		 * @param filter - see localInterface.filter for accepted parameters
+		 * @param options - {Object} see localInterface.filter for accepted parameters
 		 * @param $scope
 		 * @returns {Promise}
 		 */
-		function find(filter, $scope) {
+		function find(options, $scope) {
+			options = options || {};
 			var data = [],
 				self = this;
-			return this.$local.filter(filter).then(function (results) {
+			return this.$local.filter(options.filter, options.orderBy).then(function (results) {
 				angular.forEach(results, function (item) {
 					/*
 					 see if the item exists in the cache,
@@ -377,8 +379,8 @@
 					if (model === null) {
 						model = self._Model.create(item);
 					}
-					//register in cache
-					self._putMem(model, $scope);
+					//register in cache if scoped
+					self.registerModel(model, $scope);
 					data.push(model)
 				});
 				return $q.when(data);

@@ -90,7 +90,7 @@ describe('saferota.data DataStore', function () {
 	});
 	it('.create sets up a callback so whenever a model is created, it is cached in the repo', function () {
 		var TestModel10 = DataStore.create('test10').schema({name: 'david'});
-		var m1 = TestModel10.create({name: 'james'});
+		var m1 = TestModel10.create({name: 'james'}, $rootScope);
 
 		expect(RepositoryService.get(TestModel10)._getMem(m1.id).name).toBe('james');
 	});
@@ -102,7 +102,7 @@ describe('saferota.data DataStore', function () {
 		var model = TestModel1.create({
 			name: 'john',
 			city: 'New York'
-		});
+		}, $rootScope);
 		var repo = RepositoryService.get('test1');
 
 		DataStore.save(model, false).then(function () {
@@ -124,7 +124,7 @@ describe('saferota.data DataStore', function () {
 			model = TestModel1.create({
 				name: 'john',
 				city: 'New York'
-			});
+			}, $rootScope);
 		var initialId = model.getKey();
 
 		model.on('update', function () {
@@ -146,7 +146,7 @@ describe('saferota.data DataStore', function () {
 			model = TestModel1.create({
 				name: 'john',
 				city: 'New York'
-			});
+			}, $rootScope);
 		var initialId = model.getKey();
 
 		model.on('update', function () {
@@ -229,9 +229,22 @@ describe('saferota.data DataStore', function () {
 
 			done();
 		});
-
 		_d();
 	});
+
+	it('get fails if requested online and offline', function (done) {
+		RequestService.$adapter._setOnline(false);
+		createRemoteData();
+
+		DataStore.get(TestModel1, 1, false).then(function () {
+			expect(true).toBe(false);
+		}, function () {
+			expect(true).toBe(true);
+			done();
+		});
+		_d();
+	});
+
 
 	/*
 	 .find
@@ -250,12 +263,47 @@ describe('saferota.data DataStore', function () {
 		});
 		_d();
 	});
-	xit('.find will default to remote repo if no sync date', function () {
+	it('.find will default to remote repo if no sync date', function (done) {
 		createRemoteData();
+
+		spyOn(RequestService, 'find').and.callThrough();
+		spyOn(repo1, 'find').and.callThrough();
+
+		DataStore.find(TestModel1, {filter: {city: 'Newcastle'}}).then(function (models) {
+			expect(RequestService.find).toHaveBeenCalled();
+			expect(repo1.find).not.toHaveBeenCalled();
+			expect(models.length).toBe(2);
+
+			done();
+		});
 		_d();
 	});
-	xit('.find can be forced to look remotely and sync data back', function () {
+	it('.find can be forced to look remotely and sync data back', function (done) {
 		createRemoteData();
+
+		spyOn(RequestService, 'find').and.callThrough();
+		spyOn(repo1, 'find').and.callThrough();
+
+		DataStore.sync(TestModel1).then(function () {
+			return DataStore.find(TestModel1, {filter: {city: 'Newcastle'}}, false, true);
+		}).then(function (models) {
+			expect(RequestService.find).toHaveBeenCalled();
+			expect(repo1.find).not.toHaveBeenCalled();
+			expect(models.length).toBe(2);
+			done();
+		});
+		_d();
+	});
+	it('.find fails if requested online and offline', function (done) {
+		RequestService.$adapter._setOnline(false);
+		createRemoteData();
+
+		DataStore.find(TestModel1).then(function () {
+			expect(true).toBe(false);
+		}, function () {
+			expect(true).toBe(true);
+			done();
+		});
 		_d();
 	});
 
@@ -279,7 +327,6 @@ describe('saferota.data DataStore', function () {
 			done();
 		});
 		_d();
-
 	});
 	it('.sync does not store any models in memory', function (done) {
 		var repo = RepositoryService.get(TestModel1);
@@ -370,6 +417,21 @@ describe('saferota.data DataStore', function () {
 
 		_d();
 	});
+
+
+	it('.sync rejects if offline', function (done) {
+		RequestService.$adapter._setOnline(false);
+
+		DataStore.sync(TestModel1).then(function () {
+			expect(true).toBe(false);
+		}, function () {
+			expect(true).toBe(true);
+			done();
+		});
+		_d();
+	});
+
+	
 
 
 });

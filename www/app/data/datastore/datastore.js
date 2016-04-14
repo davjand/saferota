@@ -5,24 +5,25 @@
 		.module('saferota.data')
 		.service('DataStore', DataStore);
 
-	DataStore.$inject = ['ModelService', 'RepositoryService', 'RequestService', '$q'];
+	DataStore.$inject = ['ModelService', 'RepositoryService', 'RequestService', '$q', 'eventEmitter'];
 
 	/* @ngInject */
-	function DataStore(ModelService, RepositoryService, RequestService, $q) {
+	function DataStore(ModelService, RepositoryService, RequestService, $q, eventEmitter) {
 		var self = this;
 
-		//Module Definition
+
+		//Model Functions
 		self.create = create;
 		self.save = save;
 		self.sync = sync;
+		self.syncAll = syncAll;
 		self.get = get;
 		self.find = find;
 		self.clear = clear;
 
-
 		/////////////////////////////////////////
 
-		// Function Definitions
+		// Model Function Definitions
 
 		/////////////////////////////////////////
 
@@ -61,6 +62,8 @@
 			execute = typeof execute === 'undefined' ? true : execute;
 
 			return RepositoryService.get(model.className()).save(model).then(function () {
+				return RequestService.goOnline();
+			}).then(function () {
 				if (model.__existsRemotely) {
 					return RequestService.update(model, execute);
 				} else {
@@ -95,19 +98,38 @@
 				angular.merge(options.filter, modelConfig.sync);
 			}
 
-			/*
-			 Get the updated Date
-			 */
-			return repo.updatedAt()
-				.then(function (updatedAt) {
-					if (updatedAt !== null) {
-						options.updatedAt = updatedAt;
-					}
-					return RequestService.find(Model, options);
-				}).then(function (data) {
-					//save the data
-					return _saveResponseDataLocally(Model, data, true);
-				});
+			//ensure online
+			return RequestService.goOnline().then(function () {
+				/*
+				 Get the updated Date
+				 */
+				return repo.updatedAt();
+			}).then(function (updatedAt) {
+				if (updatedAt !== null) {
+					options.updatedAt = updatedAt;
+				}
+				return RequestService.find(Model, options);
+			}).then(function (data) {
+				//save the data
+				return _saveResponseDataLocally(Model, data, true);
+			});
+		}
+
+
+		/**
+		 * SyncAll
+		 *
+		 * Syncs all models
+		 *
+		 * @returns {*}
+		 */
+		function syncAll() {
+			var pArr = [],
+				self = this;
+			angular.forEach(ModelService.getAll(), function (Model) {
+				pArr.push(self.sync(Model));
+			});
+			return $q.all(pArr);
 		}
 
 		/**
@@ -131,6 +153,7 @@
 		function _saveResponseDataLocally(Model, data, sync, $scope) {
 			$scope = $scope || false;
 			sync = typeof sync !== 'undefined' ? sync : true;
+			var repo = RepositoryService.get(Model);
 			//construct models from them
 			if (data.length > 0) {
 				var models = [];
@@ -138,16 +161,17 @@
 					models.push(Model.create(item, false, true));
 				});
 				if (sync) {
-					return RepositoryService.get(Model).sync(models, $scope).then(function () {
+					return repo.sync(models, $scope).then(function () {
 						return $q.when(models);
 					});
 				} else {
-					return RepositoryService.get(Model).save(models, $scope).then(function () {
+					return repo.save(models, $scope).then(function () {
 						return $q.when(models);
 					})
 				}
 			} else {
-				return $q.when([]);
+				//no data but still need to update the repo
+				return repo.updatedAt(new Date(Date.now()));
 			}
 		}
 
@@ -163,6 +187,11 @@
 		 * @returns {Promise}
 		 */
 		function get(Model, id, $scope, forceRemote) {
+			if (typeof Model === 'string') {
+				Model = ModelService.get(Model);
+			}
+
+
 			var repo = RepositoryService.get(Model);
 
 			return repo.updatedAt().then(function (date) {
@@ -212,12 +241,49 @@
 		 * @param Model
 		 * @param options {Object} Expected keys .filter
 		 * @param $scope
+		 * @param forceRemote {Boolean}
 		 * @returns {Promise}
 		 */
-		function find(Model, options, $scope) {
+		function find(Model, options, $scope, forceRemote) {
+			if (typeof Model === 'string') {
+				Model = ModelService.get(Model);
+			}
+			
 			var repo = RepositoryService.get(Model);
 
-			return repo.find(options.filter, $scope);
+			return repo.updatedAt().then(function (date) {
+				if (date === null || forceRemote) {
+					return _findFromRemote(Model, options, $scope);
+				} else {
+					//get locally
+					return repo.find(options, $scope).then(function (models) {
+						if (models !== null) {
+							return $q.when(models);
+						}
+						return _getFromRemote(Model, options, $scope);
+					});
+				}
+			});
+		}
+
+
+		/**
+		 * _findFromRemote
+		 *
+		 * Finds from the remote and saves into the database
+		 *
+		 * @param Model
+		 * @param options
+		 * @param $scope
+		 * @returns {*}
+		 * @private
+		 */
+		function _findFromRemote(Model, options, $scope) {
+			return RequestService.find(Model, options).then(function (data) {
+				return _saveResponseDataLocally(Model, data, false, $scope);
+			}).then(function (models) {
+				return $q.when(models && models.length > 0 ? models : []);
+			});
 		}
 
 

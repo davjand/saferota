@@ -1,15 +1,16 @@
 describe('saferota.data RequestService', function () {
 	beforeEach(module('saferota.data'));
 
-	var RequestService, ModelService, RepositoryService, $rootScope, TestModel, $q, repo,
+	var RequestService, ModelService, RepositoryService, $rootScope, $timeout, TestModel, $q, repo,
 		m1, m2;
 
-	beforeEach(inject(function (_RequestService_, _ModelService_, _$rootScope_, _$q_, _RepositoryService_) {
+	beforeEach(inject(function (_RequestService_, _ModelService_, _$rootScope_, _$q_, _RepositoryService_, _$timeout_) {
 		RequestService = _RequestService_;
 		ModelService = _ModelService_;
 		$rootScope = _$rootScope_;
 		RepositoryService = _RepositoryService_;
 		$q = _$q_;
+		$timeout = _$timeout_;
 
 		TestModel = ModelService.create('test').schema({name: 'no name'});
 		repo = RepositoryService.create(TestModel);
@@ -23,10 +24,150 @@ describe('saferota.data RequestService', function () {
 		RepositoryService.clear();
 	});
 
+	/*
+
+	 Helper Functions
+
+	 */
+	function _d() {
+		$rootScope.$digest();
+	}
+
+	/*
+	 .init
+	 */
 	it('Can create a new object', function () {
 		expect(RequestService.$queue).not.toBeUndefined();
 		expect(RequestService.$adapter).not.toBeUndefined();
 	});
+	it('isOnline is false when created', function () {
+		expect(RequestService.isOnline).toBe(false);
+	});
+
+	/*
+	 .pingOnline
+	 */
+	it('.pingOnline returns a promise which resolves to true if online', function (done) {
+		RequestService.$adapter._setOnline(true);
+		RequestService.pingOnline().then(function (online) {
+			expect(RequestService.isOnline).toBe(true);
+
+			expect(online).toBe(true);
+			done();
+		});
+
+		_d();
+	});
+	it('.pingOnline emits an event if was online and now offline', function (done) {
+		var called = 0, $s = $rootScope.$new();
+		RequestService.on($s, 'goOnline', function () {
+			called++;
+		});
+
+		RequestService.pingOnline().then(function () {
+			//should have been called
+			expect(called).toBe(1);
+			return RequestService.pingOnline();
+		}).then(function () {
+			//should not have been called again
+			expect(called).toBe(1);
+			$s.$destroy();
+			done();
+		});
+		_d();
+	});
+
+	it('.pingOnline returns a promise which resolves to false if not online', function (done) {
+		RequestService.$adapter._setOnline(false);
+		RequestService.pingOnline().then(function (online) {
+			expect(RequestService.isOnline).toBe(false);
+			expect(online).toBe(false);
+			done();
+		});
+		_d();
+	});
+
+
+	it('.pingOnline can reject the promise if passed true and offline', function (done) {
+		RequestService.$adapter._setOnline(false);
+
+		RequestService.pingOnline(true).then(function () {
+			expect(false).toBe(true);
+		}, function () {
+			expect(true).toBe(true);
+			expect(RequestService.isOnline).toBe(false);
+			done();
+		});
+		_d();
+	});
+	it('.pingOnline emits an event if was offline and now online', function (done) {
+		RequestService.$adapter._setOnline(false);
+
+		var called = 0, $s = $rootScope.$new();
+		RequestService.on($s, 'goOffline', function () {
+			called++;
+		});
+
+		RequestService.pingOnline().then(function () {
+			//should have been called
+			expect(called).toBe(0);
+			RequestService.isOnline = true; //simulate a goOffline event
+			return RequestService.pingOnline();
+		}).then(function () {
+			//should not have been called again
+			expect(called).toBe(1);
+			$s.$destroy();
+			done();
+		});
+		_d();
+	});
+
+	/*
+	 .goOnline
+	 */
+	it('.goOnline resolves a promise if already online', function (done) {
+		RequestService.isOnline = true;
+		RequestService.goOnline().then(function () {
+			expect(true).toBe(true);
+			done();
+		});
+		_d();
+	});
+	it('a goOnline event causes the request queue to be executed', function (done) {
+		spyOn(RequestService, 'next');
+
+		RequestService.goOnline().then(function () {
+			expect(RequestService.next).toHaveBeenCalled();
+			done();
+		});
+		_d();
+	});
+
+	it('goOnline can schedule a retry if fails', function (done) {
+		RequestService.$adapter._setOnline(false);
+
+		spyOn(RequestService, 'pingOnline').and.callThrough();
+
+		//try to go online
+		RequestService.goOnline(true).then(function () {
+			//should have pinged Once
+			expect(RequestService.pingOnline.calls.count()).toBe(1);
+			return $q.when();
+		}).then(function () {
+		}, function () {
+
+			/*
+			 use setTimeout to execute code after digest cycle finishes
+			 */
+			setTimeout(function () {
+				$timeout.flush();
+				expect(RequestService.pingOnline.calls.count()).toBe(2);
+				done();
+			}, 0);
+		});
+		_d();
+	});
+
 
 	/*
 	 .create
@@ -74,25 +215,29 @@ describe('saferota.data RequestService', function () {
 	/*
 	 .find
 	 */
-	it('find calls find on the adapter', function () {
+	it('find calls find on the adapter', function (done) {
 		spyOn(RequestService.$adapter, 'find');
 		var options = {filter: {name: 'james'}};
 
-		RequestService.find(TestModel, options);
-
-		expect(RequestService.$adapter.find).toHaveBeenCalledWith(TestModel, options);
+		RequestService.find(TestModel, options).then(function () {
+			expect(RequestService.$adapter.find).toHaveBeenCalledWith(TestModel, options);
+			done();
+		});
+		$rootScope.$digest();
 	});
 
 
 	/*
 	 .get
 	 */
-	it('get calls get on the adapter', function () {
+	it('get calls get on the adapter', function (done) {
 		spyOn(RequestService.$adapter, 'get');
 
-		RequestService.get(TestModel, 2);
-
-		expect(RequestService.$adapter.get).toHaveBeenCalledWith(TestModel, 2);
+		RequestService.get(TestModel, 2).then(function () {
+			expect(RequestService.$adapter.get).toHaveBeenCalledWith(TestModel, 2);
+			done();
+		});
+		$rootScope.$digest();
 	});
 
 

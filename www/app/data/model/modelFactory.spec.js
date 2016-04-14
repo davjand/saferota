@@ -6,7 +6,7 @@ describe('saferota.data Model', function () {
 	beforeEach(inject(function (_Model_) {
 		Model = _Model_;
 	}));
-	
+
 	/*
 	 Constructor
 	 */
@@ -70,7 +70,7 @@ describe('saferota.data Model', function () {
 	});
 
 	/*
-	 .createRelationship
+	 .relationship
 	 */
 	it('Can Set a relationship object', function () {
 		var m = new Model('test');
@@ -82,6 +82,20 @@ describe('saferota.data Model', function () {
 		expect(m._rel.category.model).toEqual('Category');
 		expect(m._rel.category.type).toEqual('hasOne');
 
+	});
+
+	it('.relationship can determine if key is local for on foreign object', function () {
+		var m = new Model('test');
+		m.relationship('hasOne', 'category', 'Category');
+		expect(m._rel.category.keyType).toBe('local');
+		expect(m._rel.category.model).toBe('Category');
+
+		var Profile = new Model('profile');
+		Profile.relationship('hasOne', 'user', 'User.profile');
+
+		expect(Profile._rel.user.model).toBe('User');
+		expect(Profile._rel.user.keyType).toBe('foreign');
+		expect(Profile._rel.user.key).toBe('profile');
 	});
 
 	/*
@@ -242,6 +256,23 @@ describe('saferota.data Model', function () {
 		expect(m2.updatedDate).toBe(date);
 	});
 
+	it('setData will set relationship data for hasOne local', function () {
+		var Test = new Model('test')
+			.schema({name: 'default'})
+			.relationship('hasOne', 'category', 'Category')
+			.relationship('hasOne', 'owner', 'Owner.test');
+
+		var m = Test.create({
+			id: 1,
+			name: 'james',
+			category: 10,
+			owner: 5 //this should be on the other object
+		});
+
+		expect(m.category).toBe(10);
+		expect(m.owner).toBeUndefined();
+	});
+
 	/*
 	 localID and __existsRemotely functionality
 	 */
@@ -251,7 +282,7 @@ describe('saferota.data Model', function () {
 		var m = Test.create();
 
 		expect(m.__existsRemotely).toBe(false);
-		expect(m.id.length).toEqual(36);
+		expect(m.id.length).toEqual(42);
 	});
 
 	it('Test __existsRemotely functionality', function () {
@@ -300,6 +331,30 @@ describe('saferota.data Model', function () {
 		expect(d4.id).toBe(d3.id);
 		expect(d4.__existsRemotely).toBe(true);
 
+	});
+
+	it('.toObject can omit the local id', function () {
+		var Test = new Model('test').schema({name: 'default'});
+		var m1 = Test.create();
+
+		expect(m1.toObject(false, false).id).toBeUndefined();
+	});
+
+	it('.toObject includes relationship data', function () {
+		var Test = new Model('test')
+			.schema({name: 'default'})
+			.relationship('hasOne', 'category', 'Category')
+			.relationship('hasOne', 'owner', 'Owner.test');
+
+		var m = Test.create({
+			id: 1,
+			name: 'james',
+			category: 10,
+			owner: 5 //this should be on the other object
+		});
+
+		var d = m.toObject();
+		expect(d.category).toBe(10);
 	});
 
 	/*
@@ -366,7 +421,10 @@ describe('saferota.data Model', function () {
 	 Objects the same
 	 */
 	it('.isEqual determines if models are the same or not', function () {
-		var Test = new Model('test').schema({name: '', city: ''});
+		var Test = new Model('test')
+			.schema({name: '', city: ''})
+			.relationship('hasOne', 'country', 'Country');
+
 		var Test2 = new Model('test2').schema({name: '', city: ''});
 
 		var m1 = Test.create({name: 'james'});
@@ -393,6 +451,14 @@ describe('saferota.data Model', function () {
 		m3.name = {first: 'james', last: 'bone'};
 		expect(m1.isEqual(m3)).toBe(false);
 
+		//relationships
+		var m4 = Test.create({name: 'james', country: 5});
+		var m5 = Test.create({name: 'james', country: 3});
+
+		expect(m4.isEqual(m5)).toBe(false);
+
+
+
 	});
-	
+
 });

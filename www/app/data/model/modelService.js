@@ -16,6 +16,9 @@
 		self.create = create;
 		self.get = getModel;
 		self.clear = clear;
+		self.getAll = function () {
+			return self.$cache
+		};
 		
 		////////////////
 

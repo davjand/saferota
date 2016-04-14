@@ -23,9 +23,18 @@
 	 Relationship types
 
 	 */
-	var RELS = ['hasOne', 'hasMany', 'belongsOne', 'belongsMany'];
+	var RELS = ['hasOne', 'hasMany'];
 	var allowedRel = function (key) {
 		return RELS.indexOf(key) !== -1;
+	};
+
+	var REL_KEY_TYPES = {
+		LOCAL: 'local',
+		FOREIGN: 'foreign'
+	};
+	var REL_TYPES = {
+		HAS_ONE: 'hasOne',
+		HAS_MANY: 'hasMany'
 	};
 
 
@@ -151,22 +160,52 @@
 		 *
 		 * Set a belongs to relationship
 		 *
-		 * @param type - the relationship type (hasOne etc
-		 * @param key - the relationship key
-		 * @param options {Object | String} - configuration options
+		 * @param type - {String} the relationship type (hasOne etc
+		 * @param key - {String} the relationship key
+		 * @param model - {String}
 		 * @returns {*}
+		 *
+		 *
+		 * key should contain the key to the related item.
+		 * If it lies on the other model it should be
+		 * Foreign.owner
+		 *
+		 * Possile usages
+		 *
+		 * .relationship('hasOne','key','Object.key')
+		 * .relationship('hasOne','key', 'Object')
+		 * 
 		 */
-		function relationship(type, key, options) {
-			//allow shorthand
-			if (typeof options === 'string') {
-				options = {
-					model: options
+		function relationship(type, key, model) {
+
+			var options = {
+				type: type,
+				keyType: REL_KEY_TYPES.LOCAL
+			};
+
+			/*
+			 * See where the key is
+			 */
+			if (model.indexOf('.') !== -1) {
+				model = model.split('.');
+				options.key = model[1];
+				options.model = model[0];
+
+				//prevent issues if This.key is passed
+				if (options.model === this.className()) {
+					options.model = model
+				} else {
+					options.keyType = REL_KEY_TYPES.FOREIGN;
 				}
+
+			} else {
+				options.key = key;
+				options.model = model;
 			}
-			var rel = {};
-			rel[key] = angular.extend(options, {type: type});
 
 			if (allowedRel(type)) {
+				var rel = {};
+				rel[key] = options;
 				this.config(rel, '_rel');
 			}
 			return this;
@@ -280,6 +319,12 @@
 				this[this.getPrimaryKey()] = key;
 				this.__existsRemotely = remote;
 			};
+			Model.prototype.getRelationship = function (key) {
+				return this._rel[key] || {};
+			};
+			Model.prototype.REL_KEY_TYPES = REL_KEY_TYPES;
+			Model.prototype.REL_TYPES = REL_TYPES;
+
 
 			Model.prototype.setData = setData;
 			Model.prototype.getData = getData;
@@ -288,6 +333,9 @@
 			Model.prototype.guid = guid;
 			Model.prototype.resolveWithRemote = resolveWithRemote;
 			Model.prototype.isEqual = isEqual;
+
+			//Set a pointer to the factory
+			Model.prototype.factory = factory;
 
 			//Callback
 			Model.prototype._onCreate = factory._onCreate;
@@ -333,6 +381,17 @@
 						thisModel[key] = d[key] || val;
 					} else if (d[key]) {
 						thisModel[key] = d[key];
+					}
+				});
+				//set for relationships
+				angular.forEach(self._rel, function (relationship) {
+					if (relationship.keyType === 'local') {
+						var key = relationship.key;
+						if (typeof d[key] !== 'undefined') {
+							thisModel[key] = d[key];
+						} else {
+							thisModel[key] = null;
+						}
 					}
 				});
 
@@ -403,10 +462,14 @@
 			 * sets className / updatedDate/createdDate if withMeta is true
 			 *
 			 * @param withMeta {Boolean} - Defaults to true
+			 * @param withLocalId {Boolean} - Defaults to true. If false omits local ids
 			 * @returns {{}}
 			 */
-			function toObject(withMeta) {
-				withMeta = typeof withMeta === 'undefined' ? true : withMeta;
+			function toObject(withMeta, withLocalId) {
+				//default
+				withMeta = typeof withMeta !== 'undefined' ? withMeta : true;
+				withLocalId = typeof withLocalId !== 'undefined' ? withLocalId : true;
+
 				var data = {},
 					self = this;
 
@@ -422,8 +485,18 @@
 					}
 					data[key] = self[key];
 				});
+				//parse the relationsips
+				angular.forEach(self._rel, function (relationship) {
+					if (relationship.keyType === 'local') {
+						var k = relationship.key;
+						data[k] = self[k];
+					}
+				});
+
 				//add id
-				data[this.getPrimaryKey()] = this.getKey();
+				if (this.__existsRemotely || withLocalId) {
+					data[this.getPrimaryKey()] = this.getKey();
+				}
 				return data;
 			}
 		}
@@ -446,7 +519,7 @@
 					.substring(1);
 			}
 
-			return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+			return 'local-' + s4() + s4() + '-' + s4() + '-' + s4() + '-' +
 				s4() + '-' + s4() + s4() + s4();
 
 		}
@@ -514,7 +587,16 @@
 					schemaMatch = schemaMatch && v1 === v2;
 				}
 			});
-			return schemaMatch;
+
+			//match relationships
+			var relMatch = true;
+			angular.forEach(self._rel, function (rel) {
+				if (rel.keyType === REL_KEY_TYPES.LOCAL) {
+					relMatch = relMatch && self[rel.key] === model[rel.key];
+				}
+			});
+
+			return schemaMatch && relMatch;
 		}
 
 	}

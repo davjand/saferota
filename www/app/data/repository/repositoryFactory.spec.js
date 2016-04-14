@@ -224,7 +224,7 @@ describe('saferota.data Repository', function () {
 	});
 
 	it('.save can take an array', function (done) {
-		repo.save([m1, m2, m3]).then(function () {
+		repo.save([m1, m2, m3], $rootScope).then(function () {
 			expect(Object.keys(repo.$mem).length).toBe(3);
 
 			return repo.$local.length();
@@ -245,7 +245,7 @@ describe('saferota.data Repository', function () {
 			called = true;
 		});
 
-		repo.save([m1, m2, m3]).then(function () {
+		repo.save([m1, m2, m3], $rootScope).then(function () {
 			//create some new objects but tweak them
 			var m12 = TestModel.create(m1.toObject(), false, true);
 			var m22 = TestModel.create(m2.toObject(), false, true);
@@ -283,7 +283,7 @@ describe('saferota.data Repository', function () {
 	 */
 	it('.get can retrieve a model from memory if is in memory', function (done) {
 
-		repo.save([m1, m2, m3]).then(function () {
+		repo.save([m1, m2, m3], $rootScope).then(function () {
 			//spu on here as save may use get
 			spyOn(repo.$local, 'get').and.callThrough();
 
@@ -301,12 +301,12 @@ describe('saferota.data Repository', function () {
 	it('.get can retrieve a model from the cache if forced (and update local object)', function (done) {
 		spyOn(repo.$local, 'get').and.callThrough();
 
-		repo.save([m1, m2]).then(function () {
+		repo.save([m1, m2], $rootScope).then(function () {
 
 			//do some hacking to make sure updates
 			repo.$local.$cache[m2.id].name = "New Name";
 
-			return repo.get(m2.id, true);
+			return repo.get(m2.id, $rootScope, true);
 		}).then(function (model2) {
 			//should have gone to the local adapter
 			expect(repo.$local.get).toHaveBeenCalled();
@@ -327,7 +327,7 @@ describe('saferota.data Repository', function () {
 			$s.$destroy(); //should destroy the in memory copy
 			expect(repo._inMem(m1)).toBe(false);
 
-			return repo.get(m1.id);
+			return repo.get(m1.id, $rootScope);
 		}).then(function (newModel) {
 			expect(repo._inMem(m1)).toBe(true);
 			expect(newModel.name).toBe(m1.name);
@@ -383,7 +383,7 @@ describe('saferota.data Repository', function () {
 	 */
 	it('.find filters the local repo and returns items', function (done) {
 		repo.save([m1, m2, m3, m4]).then(function () {
-			return repo.find({town: 'newcastle'});
+			return repo.find({filter: {town: 'newcastle'}});
 		}).then(function (models) {
 			expect(models.length).toBe(2);
 			done();
@@ -396,7 +396,7 @@ describe('saferota.data Repository', function () {
 
 		repo.save([m1, m2, m3, m4], $s1).then(function () {
 			$s1.$destroy();
-			return repo.find({town: 'newcastle'}, $s2);
+			return repo.find({filter: {town: 'newcastle'}}, $s2);
 		}).then(function () {
 
 			expect(repo._inMem(m1)).toBe(false);
@@ -433,13 +433,13 @@ describe('saferota.data Repository', function () {
 
 		tx.resolve({id: '999-999', updatedDate: date});
 
-		repo.save([m3, m4, m5]).then(function () {
+		repo.save([m3, m4, m5], $rootScope).then(function () {
 			return repo.notify(tx);
 		}).then(function () {
 			expect(m5.id).toBe('999-999');
-			expect(repo.$mem[m5.id]).toBe(m5);
-			expect(repo.$mem[m5.id].id).toBe(m5.id);
-			expect(repo.$mem[m5.id].updatedDate).toEqual(date);
+			expect(repo.$mem[m5.id].m).toBe(m5);
+			expect(repo.$mem[m5.id].m.id).toBe(m5.id);
+			expect(repo.$mem[m5.id].m.updatedDate).toEqual(date);
 
 			expect(flag).toBe(true);
 			$s.$destroy();

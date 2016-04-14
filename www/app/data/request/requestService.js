@@ -5,12 +5,30 @@
 		.module('saferota.data')
 		.service('RequestService', RequestService);
 
-	RequestService.$inject = ['TransactionQueue', '$injector', 'Transaction', 'DataConfig', '$q'];
+	RequestService.$inject = [
+		'TransactionQueue',
+		'$injector',
+		'Transaction',
+		'DataConfig',
+		'$q',
+		'eventEmitter',
+		'$timeout'];
 
 	/* @ngInject */
-	function RequestService(TransactionQueue, $injector, Transaction, DataConfig, $q) {
+	function RequestService(TransactionQueue,
+							$injector,
+							Transaction,
+							DataConfig,
+							$q,
+							eventEmitter,
+							$timeout) {
 
 		var self = this;
+
+
+		//Online / Offline Functions
+		self.pingOnline = pingOnline;
+		self.goOnline = goOnline;
 
 		//Module Definition
 		self.createRequest = createRequest;
@@ -21,6 +39,13 @@
 		self.get = get;
 		self.next = next;
 
+		/*
+		 Event Functions
+		 .on
+		 .emit
+		 */
+		eventEmitter.inject(self);
+
 		//Static
 		self.TYPES = Transaction.TYPES;
 
@@ -30,6 +55,7 @@
 		//Initialize
 		initialize();
 
+
 		////////////////////////////////
 
 		// Function Definitions
@@ -38,8 +64,104 @@
 
 		function initialize() {
 			self.$queue = new TransactionQueue;
-			self.$adapter = new ($injector.get(DataConfig.remote))();
+			self.$adapter = new ($injector.get(DataConfig.remote))(DataConfig.remoteConfig);
 			self.inProgress = false;
+			self.isOnline = false;
+
+			self.on('goOnline', function () {
+				self.next(true);
+			});
+
+			//a little bit of logic to allow promise chaining
+			self.on('queueStart', function () {
+				self.ready = $q.defer();
+				self.inProgess = true;
+			});
+			self.on('queueComplete', function (error) {
+				self.inProgress = false;
+				if (error) {
+					self.ready.reject();
+					//reset the promise to a resolved promise for future chaining
+					self.ready = $q.when();
+				} else {
+					self.ready.resolve();
+				}
+			});
+		}
+
+
+		/////////////////////////////////////////
+
+		// Online/Offline Function Definitions
+
+		/////////////////////////////////////////
+
+		/**
+		 * pingOnline
+		 *
+		 * If passed true then will reject the promise if offline
+		 *
+		 * @param rejectPromise {Boolean}
+		 *
+		 * @returns {Promise}
+		 */
+		function pingOnline(rejectPromise) {
+			rejectPromise = typeof rejectPromise !== 'undefined' ? rejectPromise : false;
+			var p = $q.defer(),
+				self = this;
+
+			/*
+
+			 */
+			self.$adapter.online().then(function () {
+				if (!self.isOnline) {
+					self.isOnline = true;
+					self.emit('goOnline');
+				}
+				p.resolve(true);
+			}, function () {
+				if (self.isOnline) {
+					self.isOnline = false;
+					self.emit('goOffline');
+				}
+				rejectPromise ? p.reject() : p.resolve(false);
+			});
+			return p.promise;
+		}
+
+		/**
+		 * goOnline
+		 *
+		 * Attempts to go online
+		 *
+		 * If does then resolves the promise. Otherwise rejects
+		 *
+		 * @param retry
+		 * @param interval
+		 * @returns {Promise}
+		 */
+		function goOnline(retry, interval) {
+			retry = typeof retry !== 'undefined' ? retry : false;
+			interval = interval || 1000 * 30; //30 seconds
+
+			var self = this;
+
+			if (self.isOnline) {
+				return $q.when();
+			}
+
+			return self.pingOnline().then(function (online) {
+				if (!online && retry) {
+					$timeout(function () {
+						self.goOnline(retry, interval)
+					}, interval);
+				}
+				if (online) {
+					return $q.when();
+				} else {
+					return $q.reject();
+				}
+			})
 		}
 
 		/**
@@ -98,8 +220,11 @@
 			execute = typeof execute === 'undefined' ? true : execute;
 
 			return this.$queue.push(new Transaction(type, model)).then(function () {
-				if (execute) {
+				if (execute && self.isOnline) {
 					return self.next();
+				} else if (execute) {
+					self.goOnline(); //going online should trigger
+					return $q.when();
 				}
 				return $q.when();
 			});
@@ -111,12 +236,16 @@
 		 *
 		 * get request for data
 		 *
+		 * Rejects if offline
+		 *
 		 * @param Model
 		 * @param id
 		 * @returns {*}
 		 */
 		function get(Model, id) {
-			return self.$adapter.get(Model, id);
+			return this.goOnline().then(function () {
+				return self.$adapter.get(Model, id);
+			});
 		}
 
 
@@ -130,7 +259,9 @@
 		 * @returns {Promise}
 		 */
 		function find(Model, options) {
-			return self.$adapter.find(Model, options);
+			return this.goOnline().then(function () {
+				return self.$adapter.find(Model, options);
+			});
 		}
 
 
@@ -146,7 +277,12 @@
 		 */
 		function next(processAll) {
 			var self = this;
-			self.inProgress = true;
+
+			if (!self.inProgress) {
+				self.inProgress = true;
+				self.emit('queueStart');
+			}
+
 			return this.$queue.length().then(function (length) {
 				if (length > 0) {
 					return self.$queue.getNext().then(function (next) {
@@ -166,6 +302,7 @@
 						return self._handleError(error);
 					});
 				} else {
+					self.emit('queueComplete');
 					return $q.when();
 				}
 			});
@@ -180,11 +317,11 @@
 		 */
 		function _handleResponse(data, processAll) {
 			var self = this;
-			self.inProgress = false;
 			return self.$queue.resolveTransaction(data).then(function () {
 				if (processAll) {
 					return self.next(processAll);
 				}
+				self.emit('queueComplete', processAll);
 				return $q.when();
 			});
 		}

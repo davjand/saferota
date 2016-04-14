@@ -22,6 +22,7 @@
 
 		return RemoteAdapterInterface({
 			initialize: initialize,
+			online: online,
 			get: get,
 			find: find,
 			save: save,
@@ -35,13 +36,33 @@
 
 		////////////////////////////////
 
+		/**
+		 * initialize
+		 *
+		 * Constructor
+		 *
+		 */
 		function initialize() {
+
 			this.$cache = {};
+			this.$online = true;
 
 			//additional functions
 			this._getCache = _getCache;
+			this._setOnline = _setOnline;
+
+
 		}
 
+		/**
+		 * _getCache
+		 *
+		 * get a cache or create if doesn't exist
+		 *
+		 * @param name
+		 * @returns {*}
+		 * @private
+		 */
 		function _getCache(name) {
 			if (typeof this.$cache[name] === 'undefined') {
 				this.$cache[name] = [];
@@ -88,12 +109,39 @@
 			var data = this._getCache(Model.className());
 
 			if (typeof options.filter !== 'undefined') {
-				data = $filter('filter')(data, options.filter);
+				var foundData = [];
+
+				/*
+				 Loop through models
+				 */
+				angular.forEach(data, function (model) {
+					var match = true;
+					/*
+					 Loop through filters
+					 */
+					angular.forEach(options.filter, function (filterVal, filterKey) {
+						var matchFilter = false;
+						/*
+						 Match multiple vals
+						 */
+						angular.forEach(
+							angular.isArray(filterVal) ? filterVal : [filterVal],
+							function (f) {
+								matchFilter = matchFilter || model[filterKey] == f;
+							});
+						match = match && matchFilter;
+					});
+					if (match) {
+						foundData.push(model);
+					}
+				});
+				data = foundData;
+				//data = $filter('filter')(data, options.filter);
 			}
 			if (typeof options.orderBy !== 'undefined') {
 				data = $filter('orderBy')(data, options.orderBy);
 			}
-			return _wrapInPromise(data);
+			return $q.when(data);
 		}
 
 		/**
@@ -111,18 +159,18 @@
 					var obj = m.toObject(false);
 					obj.id = _guid();
 					self._getCache(m.className()).push(obj);
-					return {id: obj.id};
+					return {id: obj.id, updatedDate: new Date()};
 				};
 
-			if(angular.isArray(model)){
+			if (angular.isArray(model)) {
 				resolved = [];
 				angular.forEach(model, function (item) {
 					resolved.push(storeModel(item));
 				});
-			}else{
+			} else {
 				resolved = storeModel(model);
 			}
-			return _wrapInPromise(resolved);
+			return $q.when(resolved);
 		}
 
 		/**
@@ -141,11 +189,11 @@
 				}
 			});
 
-			if(currentIndex !== null){
+			if (currentIndex !== null) {
 				this._getCache(model.className())[currentIndex] = model;
 			}
 
-			return _wrapInPromise(model);
+			return $q.when(model);
 
 		}
 
@@ -164,23 +212,34 @@
 					currentIndex = index;
 				}
 			});
-			return _wrapInPromise(this._getCache(model.className()).splice(currentIndex, 1)[0]);
+			return $q.when(this._getCache(model.className()).splice(currentIndex, 1)[0]);
 		}
 
 
 		/**
+		 * online
 		 *
-		 * _wrapInPromise
+		 * Resolves the promise if online, rejects if not
 		 *
-		 * Function to return a value in a promise. As the memory store is essentially
-		 * a mocked object, return promises as the specification requires.
-		 *
-		 * @private
+		 * @returns {*|Promise}
 		 */
-		function _wrapInPromise(value) {
-			return $q.when(value);
+		function online() {
+			var p = $q.defer();
+			p[this.$online ? 'resolve' : 'reject']();
+			return p.promise;
 		}
 
+		/**
+		 * _setOnline
+		 *
+		 * Set the online status for testing
+		 *
+		 * @param online
+		 * @private
+		 */
+		function _setOnline(online) {
+			this.$online = online;
+		}
 
 		/**
 		 * guid

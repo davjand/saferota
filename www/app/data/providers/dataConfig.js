@@ -22,29 +22,39 @@
 		 */
 		var localProvider = 'LocalAdapterMemory';
 		var remoteProvider = 'RemoteAdapterMemory';
+		var localConfig = {};
+		var remoteConfig = {};
 
 		/**
 		 * SetLocal Provider
 		 * @param provider {String}
+		 * @param config {Object}
 		 */
-		this.setLocal = function (provider) {
+		this.setLocal = function (provider, config) {
+			config = config || {};
 			localProvider = provider;
+			remoteConfig = angular.merge({}, config);
 		};
 
 		/**
 		 * Set Remote Provider
 		 *
 		 * @param provider {String}
+		 * @param config {Object}
 		 */
-		this.setRemote = function (provider) {
+		this.setRemote = function (provider, config) {
+			config = config || {};
 			remoteProvider = provider;
+			remoteConfig = angular.merge({}, config);
 		};
 
 
 		this.$get = function () {
 			return {
 				local: localProvider,
-				remote: remoteProvider
+				localConfig: localConfig,
+				remote: remoteProvider,
+				remoteConfig: remoteConfig
 			};
 
 		};

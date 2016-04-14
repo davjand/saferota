@@ -311,6 +311,22 @@ describe('saferota.data LocalAdapterMemory', function () {
 		$rootScope.$digest();
 	});
 
+	/*
+	 .filter Sorting
+	 */
+	it('Can sort data using .filter', function (done) {
+		local.data(filterData).then(function () {
+			return local.filter(null, 'age');
+		}).then(function (data) {
+			expect(data[0].age).toBe(5);
+			expect(data[1].age).toBe(5);
+			expect(data[2].age).toBe(10);
+			expect(data[3].age).toBe(10);
+			done();
+		});
+		$rootScope.$digest();
+	});
+
 
 	/*
 	 .keys

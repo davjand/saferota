@@ -48,10 +48,10 @@
 		'clearAll'
 	];
 
-	LocalAdapterInterface.$inject = ['$q'];
+	LocalAdapterInterface.$inject = ['$q', '$filter'];
 
 	/* @ngInject */
-	function LocalAdapterInterface($q) {
+	function LocalAdapterInterface($q, $filter) {
 
 		return function (options) {
 
@@ -255,19 +255,20 @@
 		 * $this - to allow filtering of the whole object (ie if just a string)
 		 *
 		 * @param filter
+		 * @param orderBy @TODO Implement Sort
 		 *
 		 * @returns {Promise}
 		 */
-		function filter(filter) {
+		function filter(filter, orderBy) {
 
-			//if nothing then just return
-			if (!filter) {
-				return this.iterate(function () {
-					return true;
-				});
+			var $$OR = 'OR', $$AND = ' AND', applyFilter = true;
+
+			if (!filter ||
+				filter === '' ||
+				angular.isObject(filter) && Object.keys(filter).length === 0) {
+				applyFilter = false;
+				filter = {};
 			}
-
-			var $$OR = 'OR', $$AND = ' AND';
 
 			//shortcuts
 			if (typeof filter === 'string') {
@@ -277,7 +278,20 @@
 				filter.$logic = $$AND;
 			}
 
+			/*
+			 * Do the filter
+			 */
 			return this.iterate(function (value, currentKey) {
+				/*
+				 * Bypass the logic if needed
+				 */
+				if (!applyFilter) {
+					return true;
+				}
+
+				/*
+				 * Otherwise filter
+				 */
 				var matches = filter.$logic === $$AND; //start as true if an AND, false if OR
 				currentKey = currentKey || true;
 
@@ -322,28 +336,22 @@
 								}
 							}
 						}
-
 					});
 				}
 				if (matches) {
 					return currentKey;
 				}
+			}).then(function (data) {
+				/*
+				 * Now do the sort if set
+				 */
+				return $q.when(
+					orderBy ?
+						$filter('orderBy')(data, orderBy) :
+						data
+				);
+
 			});
-
-
-			/*var data = {};
-
-			 if(callback) {
-			 angular.forEach(this.$cache, function (value, key) {
-			 if (callback.call(this, value, key)) {
-			 data[key] = value;
-			 }
-			 });
-			 }else{
-			 data = this.$cache;
-			 }
-			 return _wrapInPromise(data);*/
-
 		}
 
 

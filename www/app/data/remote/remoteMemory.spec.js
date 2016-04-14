@@ -56,6 +56,49 @@ describe('saferota.data RemoteAdaptorMemory', function () {
 	});
 
 	/*
+	 .find
+	 */
+	function buildFindData() {
+		remote.$cache.test = [
+			{id: 1, name: 'david', town: 'newcastle'},
+			{id: 2, name: 'john', town: 'newcastle'},
+			{id: 3, name: 'paul', town: 'newcastle'},
+			{id: 4, name: 'david', town: 'london'},
+			{id: 5, name: 'paul', town: 'london'},
+			{id: 6, name: 'john', town: 'glasgow'},
+			{id: 7, name: 'david', town: 'glasgow'},
+			{id: 8, name: 'paul', town: 'glasgow'}
+		];
+	}
+
+
+	it('.find can filter by an array of values', function (done) {
+		buildFindData();
+
+		remote.find(TestModel, {
+			filter: {
+				name: ['david', 'john']
+			}
+		}).then(function (data) {
+			expect(data.length).toBe(5);
+
+			return remote.find(TestModel, {
+				filter: {
+					town: ['newcastle', 'london'],
+					name: 'paul'
+				}
+			});
+		}).then(function (data) {
+			expect(data.length).toBe(2);
+			done();
+		});
+
+		$rootScope.$digest();
+
+	});
+
+
+	/*
 	 .save
 	 */
 	it('Can save a model into the array', function (done) {
@@ -111,4 +154,45 @@ describe('saferota.data RemoteAdaptorMemory', function () {
 		});
 		$rootScope.$digest();
 	});
+
+	/*
+	 ._setOnline
+	 */
+	it('_setOnline can set the online status', function () {
+		expect(remote.$online).toBe(true);
+
+		remote._setOnline(false);
+		expect(remote.$online).toBe(false);
+
+		remote._setOnline(true);
+
+		expect(remote.$online).toBe(true);
+	});
+
+	/*
+	 .online
+	 */
+	it('.online resolves a promise if online', function (done) {
+		remote.online().then(function () {
+			expect(true).toBe(true);
+			done();
+		}, function () {
+			expect(false).toBe(true);
+		});
+
+		$rootScope.$digest();
+	});
+	it('.online rejects a promise if not online', function (done) {
+		remote._setOnline(false);
+
+		remote.online().then(function () {
+			expect(false).toBe(true);
+		}, function () {
+			expect(true).toBe(true);
+			done();
+		});
+
+		$rootScope.$digest();
+	});
+
 });

@@ -7,6 +7,7 @@
 
 	var REQUIRED = [
 		'initialize',
+		'online',
 		'get',
 		'find',
 		'save',
