@@ -156,10 +156,14 @@
 			var self = this,
 				resolved = {},
 				storeModel = function (m) {
-					var obj = m.toObject(false);
-					obj.id = _guid();
+					var obj = m.toObject(false),
+						pKey = m.getPrimaryKey();
+					obj[pKey] = _guid();
 					self._getCache(m.className()).push(obj);
-					return {id: obj.id, updatedDate: new Date()};
+					var ret = {};
+					ret[pKey] = obj[pKey];
+					ret.updatedDate = new Date();
+					return ret;
 				};
 
 			if (angular.isArray(model)) {
@@ -181,10 +185,11 @@
 		 */
 		function update(model) {
 			var id = model.getKey();
+			var key = model.getPrimaryKey();
 			var currentIndex = null;
 
 			angular.forEach(this._getCache(model.className()), function (item, index) {
-				if (item.id === id) {
+				if (item[key] === id) {
 					currentIndex = index;
 				}
 			});
@@ -205,10 +210,11 @@
 		 * @returns {*}
 		 */
 		function remove(model) {
-			var id = model.id;
+			var id = model.getKey();
+			var key = model.getPrimaryKey();
 			var currentIndex = null;
 			angular.forEach(this._getCache(model.className()), function (item, index) {
-				if (item.id === id) {
+				if (item[key] === id) {
 					currentIndex = index;
 				}
 			});

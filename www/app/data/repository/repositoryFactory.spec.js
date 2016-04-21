@@ -471,6 +471,29 @@ describe('saferota.data Repository', function () {
 		_d();
 	});
 
+	/*
+	 .notifyUpdate
+	 */
+	xit('.notifyUpdate can update a model in the data store from passed data', function (done) {
+		var $s = $rootScope.$new(),
+			flag = false;
+
+		m1.$on('update', function () {
+			flag = true;
+		});
+
+		repo.save([m1, m2, m3], $s).then(function () {
+			m1.name = 'John';
+			return repo.notifyUpdate(m1);
+		}).then(function () {
+			expect(repo.$local[1].name).toEqual('John');
+			expect(flag).toBe(true);
+			done();
+		});
+
+		_d();
+	});
+
 
 	/*
 	 clear

@@ -1,7 +1,9 @@
 describe('saferota.data TransactionQueue', function () {
 	beforeEach(module('saferota.data'));
 
-	var TransactionQueue, Transaction, RepositoryService, TestModel, ModelService, queue, $rootScope,
+	var TransactionQueue, Transaction, RepositoryService,
+		TestModel, TestModelPet,
+		ModelService, queue, $rootScope, $q,
 		m1, m2, m3, t1, t2, t3, t4, t5, t6;
 
 
@@ -14,16 +16,23 @@ describe('saferota.data TransactionQueue', function () {
 								_Transaction_,
 								_RepositoryService_,
 								_ModelService_,
-								_$rootScope_) {
+								_$rootScope_,
+								_$q_) {
 
 		TransactionQueue = _TransactionQueue_;
 		Transaction = _Transaction_;
 		$rootScope = _$rootScope_;
 		RepositoryService = _RepositoryService_;
 		ModelService = _ModelService_;
+		$q = _$q_;
 
-		
-		TestModel = ModelService.create('test').schema({firstName: 'John', lastName: 'Doe'});
+
+		TestModel = ModelService.create('test')
+			.schema({firstName: 'John', lastName: 'Doe'});
+
+		TestModelPet = ModelService.create('testPet')
+			.schema({name: ''})
+			.relationship('hasOne', 'owner', 'test');
 
 		queue = new TransactionQueue('LocalAdapterMemory');
 
@@ -57,6 +66,20 @@ describe('saferota.data TransactionQueue', function () {
 		expect(queue.$cache).not.toBeNull();
 	});
 
+	it('Can initialise with the last index', function (done) {
+		queue.$cache.$cache[0] = 'item';
+		queue.$cache.$cache[1] = 'item';
+		queue.$cache.$cache[3] = 'item';
+
+
+		queue.ready.then(function () {
+			expect(queue.$lastIndex).toBe(3);
+			done();
+		});
+
+		_d();
+	});
+
 	/*
 	 .push
 	 */
@@ -71,6 +94,20 @@ describe('saferota.data TransactionQueue', function () {
 			return queue.length();
 		}).then(function (len) {
 			expect(len).toBe(2);
+			done();
+		});
+		_d();
+	});
+
+	it('.push can concurrently add items onto an array', function (done) {
+
+		$q.all([queue.push(t1),
+			queue.push(t2),
+			queue.push(t3)]
+		).then(function () {
+			return queue.$cache.keys();
+		}).then(function (keys) {
+			expect(keys.length).toBe(3);
 			done();
 		});
 		_d();
@@ -296,4 +333,148 @@ describe('saferota.data TransactionQueue', function () {
 	});
 
 
-});
+	/* Foreign Key Caching
+	 *
+	 * Support for saving and updating foreign keys in the queue
+	 *
+	 * Say for instance
+	 *
+	 *  ModelA hasOne ModelB via ModelB.owner (a and b are instances)
+	 *
+	 *  (Offline)
+	 *  a is created locally (ID local-a)
+	 *  b is created locally (ID local-b)
+	 *
+	 *  b.owner = local-a (relationship set)
+	 *
+	 *  The transaction queue will thus contain
+	 *
+	 *  (1) CREATE: ModelA {id: local-a}
+	 *  (2) CREATE: ModelB {id: local-b, owner: local-a}
+	 *
+	 *  When (1) Resolves it will have a server ID
+	 *
+	 *  (1) Resolves to {id: remote-a}
+	 *
+	 *  The queue is now
+	 *
+	 *  (2) CREATE: ModelB {id: local-b, owner: local-a}
+	 *
+	 *  So the queue must process the resolution of (1) to transform the queue to
+	 *
+	 * (2) CREATE: ModelB {id: local-b, owner: remote-a}
+	 *
+	 * Then the process can continue
+	 *
+	 */
+	it('_addTransactionToLocalIdCache throws an error if a related model has not been saved', function (done) {
+		var p1 = TestModelPet.create({name: 'dog', owner: m1.id});
+		var tp1 = new Transaction(Transaction.TYPES.CREATE, p1);
+
+		queue.push(tp1).then(
+			function () {
+				expect(false).toBe(true);
+				done();
+			},
+			function (error) {
+				expect(error).toBeUndefined();
+				expect(true).toBe(true);
+				done();
+			});
+
+		_d();
+	});
+
+	it('_addTransactionToLocalIdCache can add a foreign key to the internal cache_', function (done) {
+		var p1 = TestModelPet.create({name: 'dog', owner: m1.id});
+		var tp1 = new Transaction(Transaction.TYPES.CREATE, p1);
+
+		queue.pushArray([t1, tp1]).then(function () {
+
+			var cache = queue.$localId[m1.id];
+
+			expect(cache.length).toBe(2);
+			expect(cache[1].position).toBe(1);
+			expect(cache[1].type).toBe('F');
+			expect(cache[1].relKey).toBe('owner');
+
+			done();
+		});
+		_d();
+	});
+
+	it('_buildLocalIdCache can build an array with foriegn keys', function (done) {
+		var p1 = TestModelPet.create({name: 'dog', owner: m1.id});
+		var tp1 = new Transaction(Transaction.TYPES.CREATE, p1);
+
+		queue.pushArray([t1, tp1]).then(function () {
+			return queue._buildLocalIdCache()
+		}).then(function (cache) {
+
+			cache = cache[m1.id];
+
+			expect(cache.length).toBe(2);
+			expect(cache[1].position).toBe(1);
+			expect(cache[1].type).toBe('F');
+			expect(cache[1].relKey).toBe('owner');
+
+			done();
+		});
+		_d();
+
+	});
+
+
+	/*
+	 .resolveTransaction for Foreign Keys
+	 */
+	it('.resolveTransaction can resolve foreign keys', function (done) {
+		var $s = $rootScope.$new(),
+			flag = false;
+		var p1 = TestModelPet.create({name: 'dog', owner: m1.id}, $s);
+		var tp1 = new Transaction(Transaction.TYPES.CREATE, p1);
+		var tp2 = new Transaction(Transaction.TYPES.UPDATE, p1);
+
+		p1.on('update', function () {
+			flag = true;
+		});
+
+		spyOn(RepositoryService, 'notify');
+
+		queue.pushArray([t1, tp1, tp2]).then(function () {
+			return queue.resolveTransaction({id: 17});
+		}).then(function () {
+			//two models have been updated
+			expect(RepositoryService.notify.calls.count()).toBe(2);
+
+			//local cache should have been removed now
+			expect(Object.keys(queue.$localId).length).toBe(1);
+
+			//next transaction should be updated
+			return queue.getNext();
+		}).then(function (tx) {
+			expect(tx.model.owner).toBe('17');
+
+			//resolve the next transaction
+			return queue.resolveTransaction({id: 5});
+		}).then(function () {
+			//should be nothing in the local cache now
+			expect(Object.keys(queue.$localId).length).toBe(0);
+			//next transaction should be updated twice now
+			return queue.getNext();
+		}).then(function (tx) {
+			expect(tx.model.owner).toBe('17');
+			expect(tx.model.id).toBe('5');
+
+			done();
+		}, function (error) {
+			//shouldn't be called
+			expect(error).toBe(null); //for debug purposes
+			done();
+		});
+
+		_d();
+
+	});
+})
+;

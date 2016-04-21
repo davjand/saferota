@@ -6,7 +6,7 @@
 xdescribe('saferota.data RemoteAdapterBackendless', function () {
 
 	var remote, ModelService, $rootScope, TestModel, $q,
-		m1, m2, m3,
+	//m1, m2, m3,
 		Backendless = window.Backendless;
 
 	/*
@@ -188,6 +188,7 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			d.done = true;
 			done();
 		}, function (error) {
+			expect(error).toBeUndefined();
 			expect(false).toBe(true);
 			done();
 		});
@@ -265,6 +266,7 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			d.done = true;
 			done();
 		}, function (error) {
+			expect(error).toBeUndefined();
 			expect(false).toBe(true);
 
 			d.done = true;
@@ -285,6 +287,11 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			expect(data.length).toBe(4);
 			d.done = true;
 			done();
+		}, function (error) {
+			expect(error).toBeUndefined();
+			expect(false).toBe(true);
+			d.done = true;
+			done();
 		});
 
 		_digest(d, 100);
@@ -298,6 +305,11 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			return remote.find(TestModel, {filter: {name: ['David', 'John'], city: 'Newcastle'}});
 		}).then(function (data) {
 			expect(data.length).toBe(2);
+			d.done = true;
+			done();
+		}, function (error) {
+			expect(error).toBeUndefined();
+			expect(false).toBe(true);
 			d.done = true;
 			done();
 		});
@@ -324,6 +336,11 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			return remote.get(TestModel, id);
 		}).then(function (data) {
 			expect(data.name).toBe('John');
+			d.done = true;
+			done();
+		}, function (error) {
+			expect(error).toBeUndefined();
+			expect(false).toBe(true);
 			d.done = true;
 			done();
 		});

@@ -31,4 +31,17 @@ describe('saferota.data ModelService', function () {
 		expect(ModelService.get('test')).toEqual(Test);
 	});
 
+	/*
+	 .isLocalId
+	 */
+	it('.isLocalId takes a local id and returns true if the model is local', function () {
+		var TestModel = ModelService.create('test').schema({name: ''});
+
+		var t1 = TestModel.create({id: 1, name: 'James'}),
+			t2 = TestModel.create({name: 'Local'});
+
+		expect(ModelService.isLocalId(t1.id)).toBe(false);
+		expect(ModelService.isLocalId(t2.id)).toBe(true);
+	});
+
 });

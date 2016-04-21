@@ -16,6 +16,7 @@
 		self.create = create;
 		self.get = getModel;
 		self.clear = clear;
+		self.isLocalId = isLocalId;
 		self.getAll = function () {
 			return self.$cache
 		};
@@ -55,6 +56,18 @@
 				throw('Error: ModelService.get "'+name+'" could not be found');
 			}
 			return self.$cache[name];
+		}
+
+		/**
+		 * isLocalId
+		 *
+		 * Crude method of determining if a local Id is local or not.
+		 *
+		 * @param id
+		 * @returns {boolean}
+		 */
+		function isLocalId(id) {
+			return id && id.indexOf('local') !== -1 && id.length === 42;
 		}
 
 		/**

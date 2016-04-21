@@ -30,6 +30,7 @@
 		self.pingOnline = pingOnline;
 		self.goOnline = goOnline;
 
+
 		//Module Definition
 		self.createRequest = createRequest;
 		self.create = create;
@@ -65,20 +66,19 @@
 		function initialize() {
 			self.$queue = new TransactionQueue;
 			self.$adapter = new ($injector.get(DataConfig.remote))(DataConfig.remoteConfig);
-			self.inProgress = false;
-			self.isOnline = false;
-
-			self.on('goOnline', function () {
-				self.next(true);
-			});
+			self.$inProgress = false;
+			self.$processing = false;
+			self.$isOnline = false;
+			self.$goingOnline = false;
+			self.$onlinePromise = null;
 
 			//a little bit of logic to allow promise chaining
 			self.on('queueStart', function () {
 				self.ready = $q.defer();
-				self.inProgess = true;
+				self.$inProgress = true;
 			});
 			self.on('queueComplete', function (error) {
-				self.inProgress = false;
+				self.$inProgress = false;
 				if (error) {
 					self.ready.reject();
 					//reset the promise to a resolved promise for future chaining
@@ -114,14 +114,14 @@
 
 			 */
 			self.$adapter.online().then(function () {
-				if (!self.isOnline) {
-					self.isOnline = true;
+				if (!self.$isOnline) {
+					self.$isOnline = true;
 					self.emit('goOnline');
 				}
 				p.resolve(true);
 			}, function () {
-				if (self.isOnline) {
-					self.isOnline = false;
+				if (self.$isOnline) {
+					self.$isOnline = false;
 					self.emit('goOffline');
 				}
 				rejectPromise ? p.reject() : p.resolve(false);
@@ -138,30 +138,55 @@
 		 *
 		 * @param retry
 		 * @param interval
+		 * @param execute {Boolean} if true, will clear the queue as part of the promise
 		 * @returns {Promise}
 		 */
-		function goOnline(retry, interval) {
+		function goOnline(retry, interval, execute) {
 			retry = typeof retry !== 'undefined' ? retry : false;
 			interval = interval || 1000 * 30; //30 seconds
+			execute = typeof execute !== 'undefined' ? execute : true;
 
 			var self = this;
 
-			if (self.isOnline) {
+			/*
+			 * If Online then return
+			 */
+			if (self.$isOnline) {
 				return $q.when();
 			}
+			/*
+			 * If going online, return a single promise
+			 */
+			else if (self.$goingOnline) {
+				return self.$onlinePromise.promise;
+			}
 
-			return self.pingOnline().then(function (online) {
+			/*
+			 * Otherwise attempt to go online
+			 */
+			self.$onlinePromise = $q.defer();
+			self.$goingOnline = true;
+
+			self.pingOnline().then(function (online) {
+				self.$goingOnline = false;
+
 				if (!online && retry) {
 					$timeout(function () {
-						self.goOnline(retry, interval)
+						self.goOnline(retry, interval, execute)
 					}, interval);
 				}
+
 				if (online) {
-					return $q.when();
+					execute ?
+						self.$onlinePromise.resolve(self.next()) :
+						self.$onlinePromise.resolve();
+
 				} else {
-					return $q.reject();
+					self.$onlinePromise.reject();
 				}
-			})
+			});
+
+			return self.$onlinePromise.promise;
 		}
 
 		/**
@@ -220,11 +245,10 @@
 			execute = typeof execute === 'undefined' ? true : execute;
 
 			return this.$queue.push(new Transaction(type, model)).then(function () {
-				if (execute && self.isOnline) {
-					return self.next();
+				if (execute && self.$isOnline) {
+					return self.next(true);
 				} else if (execute) {
-					self.goOnline(); //going online should trigger
-					return $q.when();
+					return self.goOnline(); //going online should trigger
 				}
 				return $q.when();
 			});
@@ -276,12 +300,20 @@
 		 * @returns {$q.promise}
 		 */
 		function next(processAll) {
+			processAll = typeof processAll !== 'undefined' ? processAll : true;
+
 			var self = this;
 
-			if (!self.inProgress) {
-				self.inProgress = true;
+			if (self.$processing) {
+				return self.ready.promise; //prevent parallel processing
+			}
+			self.$processing = true;
+
+			if (!self.$inProgress) {
+				self.$inProgress = true;
 				self.emit('queueStart');
 			}
+
 
 			return this.$queue.length().then(function (length) {
 				if (length > 0) {
@@ -302,6 +334,7 @@
 						return self._handleError(error);
 					});
 				} else {
+					self.$processing = false;
 					self.emit('queueComplete');
 					return $q.when();
 				}
@@ -318,6 +351,8 @@
 		function _handleResponse(data, processAll) {
 			var self = this;
 			return self.$queue.resolveTransaction(data).then(function () {
+				self.$processing = false;
+
 				if (processAll) {
 					return self.next(processAll);
 				}
@@ -335,7 +370,8 @@
 		 * @private
 		 */
 		function _handleError(error) {
-			self.inProgress = false;
+			self.$inProgress = false;
+			self.$processing = false;
 
 			var p = $q.defer();
 			p.reject(error);

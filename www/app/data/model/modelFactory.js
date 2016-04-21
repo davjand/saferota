@@ -5,7 +5,7 @@
 		.module('saferota.data')
 		.factory('Model', ModelFactory);
 
-	ModelFactory.$inject = ['eventEmitter'];
+	ModelFactory.$inject = ['eventEmitter', 'RelationshipService'];
 
 
 	/*
@@ -39,7 +39,7 @@
 
 
 	/* @ngInject */
-	function ModelFactory(eventEmitter) {
+	function ModelFactory(eventEmitter, RelationshipService) {
 
 		/**
 		 *
@@ -170,11 +170,18 @@
 		 * If it lies on the other model it should be
 		 * Foreign.owner
 		 *
-		 * Possile usages
+		 * Stores in the following format within _rel
+		 * localKey: {
+		 *    model: 'Object'
+		 *    key: 'key' {can be different from the localKey if is stored on foreign object}
+		 *    keyType {FOREIGN | LOCAL}
+		 * }
+		 *
+		 * Possible usages
 		 *
 		 * .relationship('hasOne','key','Object.key')
 		 * .relationship('hasOne','key', 'Object')
-		 * 
+		 *
 		 */
 		function relationship(type, key, model) {
 
@@ -343,6 +350,9 @@
 			//Add event emitter
 			eventEmitter.inject(Model);
 
+			//Add Relationships
+			RelationshipService.decorate(Model);
+
 
 			/*
 			 Cache the model
@@ -389,7 +399,7 @@
 						var key = relationship.key;
 						if (typeof d[key] !== 'undefined') {
 							thisModel[key] = d[key];
-						} else {
+						} else if (typeof thisModel[key] === 'undefined') {
 							thisModel[key] = null;
 						}
 					}
@@ -413,9 +423,9 @@
 					thisModel.setKey(d[self.getPrimaryKey()], true);
 				}
 				/*
-				 3) new object, generate new ID
+				 3) new object, generate new ID (if not set)
 				 */
-				else {
+				else if (!thisModel.getKey()) {
 					thisModel.setKey(self.guid(), false);
 				}
 

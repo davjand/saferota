@@ -5,10 +5,10 @@
 		.module('saferota.data')
 		.service('DataStore', DataStore);
 
-	DataStore.$inject = ['ModelService', 'RepositoryService', 'RequestService', '$q', 'eventEmitter'];
+	DataStore.$inject = ['ModelService', 'RepositoryService', 'RequestService', '$q', 'RelationshipService'];
 
 	/* @ngInject */
-	function DataStore(ModelService, RepositoryService, RequestService, $q, eventEmitter) {
+	function DataStore(ModelService, RepositoryService, RequestService, $q, RelationshipService) {
 		var self = this;
 
 
@@ -20,6 +20,10 @@
 		self.get = get;
 		self.find = find;
 		self.clear = clear;
+
+		//Initialisation
+		RelationshipService.registerDataStore(this);
+
 
 		/////////////////////////////////////////
 
@@ -54,22 +58,38 @@
 		 *
 		 * Saves a model
 		 *
-		 * @param model
+		 * Supports arrays
+		 *
+		 * @param models
 		 * @param execute
 		 * @returns {*}
 		 */
-		function save(model, execute) {
+		function save(models, execute) {
 			execute = typeof execute === 'undefined' ? true : execute;
+			models = angular.isArray(models) ? models : [models];
 
-			return RepositoryService.get(model.className()).save(model).then(function () {
-				return RequestService.goOnline();
-			}).then(function () {
-				if (model.__existsRemotely) {
-					return RequestService.update(model, execute);
+			/*
+			 * Recurse to call synchronously
+			 */
+			function fx(i) {
+				if (i < models.length) {
+					var model = models[i];
+					return RepositoryService.get(model.className()).save(model).then(function () {
+						if (model.__existsRemotely) {
+							return RequestService.update(model, execute);
+						} else {
+							return RequestService.create(model, execute);
+						}
+					}).then(function () {
+						return fx(i + 1);
+					});
+
 				} else {
-					return RequestService.create(model, execute);
+					return $q.when();
 				}
-			});
+			}
+
+			return fx(0);
 		}
 
 
@@ -248,7 +268,7 @@
 			if (typeof Model === 'string') {
 				Model = ModelService.get(Model);
 			}
-			
+
 			var repo = RepositoryService.get(Model);
 
 			return repo.updatedAt().then(function (date) {
@@ -263,6 +283,8 @@
 						return _getFromRemote(Model, options, $scope);
 					});
 				}
+			}, function (error) {
+				p.reject(error);
 			});
 		}
 

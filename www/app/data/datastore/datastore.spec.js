@@ -2,7 +2,7 @@ describe('saferota.data DataStore', function () {
 	beforeEach(module('saferota.data'));
 
 	var DataStore, RepositoryService, ModelService, RequestService, $rootScope,
-		TestModel1, TestModel2,
+		TestModel1, TestModel2, TestModelPet,
 		repo1;
 
 	beforeEach(inject(function (_DataStore_, _RepositoryService_, _ModelService_, _RequestService_, _$rootScope_) {
@@ -12,8 +12,15 @@ describe('saferota.data DataStore', function () {
 		RequestService = _RequestService_;
 		$rootScope = _$rootScope_;
 
-		TestModel1 = DataStore.create('test1').schema({name: '', city: ''});
+		TestModel1 = DataStore.create('test1').schema({
+			name: '',
+			city: ''
+		}).relationship('hasMany', 'pets', 'pet.owner');
+
 		TestModel2 = DataStore.create('test2').schema({name: '', city: ''}).key('objectId');
+
+		TestModelPet = DataStore.create('pet').schema({name: ''}).relationship('hasOne', 'owner', 'test1');
+
 
 		repo1 = RepositoryService.get(TestModel1);
 
@@ -359,7 +366,6 @@ describe('saferota.data DataStore', function () {
 		createRemoteData();
 
 		DataStore.sync(TestModel2).then(function () {
-
 			return DataStore.save(m);
 		}).then(function () {
 			return repo.find();
@@ -431,7 +437,167 @@ describe('saferota.data DataStore', function () {
 		_d();
 	});
 
-	
+
+	/*
+	 *
+	 *
+	 *
+	 *
+	 * End to End Testing of sync and transactions
+	 *
+	 *
+	 *
+	 *
+	 */
+	it('Can resolve relationships and keep models related from local to remote', function (done) {
+		var $s = $rootScope.$new();
+		var m1 = TestModel1.create({name: 'james'}, $s),
+			m2 = TestModel1.create({name: 'bob'}, $s);
+
+		var p1 = TestModelPet.create({name: 'Rover'}, $s),
+			p2 = TestModelPet.create({name: 'Ralph'}, $s),
+			p3 = TestModelPet.create({name: 'Smoke'}, $s);
+
+		var m1ID = m1.id;
+		var p1ID = p1.id;
+
+		var update = 0;
+
+		m1.on('update', function () {
+			update++;
+		});
+		m2.on('update', function () {
+			update++;
+		});
+		p1.on('update', function () {
+			update++;
+		});
+		p2.on('update', function () {
+			update++;
+		});
+		p3.on('update', function () {
+			update++;
+		});
+
+
+		//don't execute immediately, to ensure that the datastore works
+		DataStore.syncAll().then(function () {
+			return DataStore.save(m1, false)
+		}).then(function () {
+			expect(m1.id).toBe(m1ID);
+			return m1.$set('pets', [p1, p2, p3]);
+		}).then(function () {
+			//by this point all the ids should have been resolved to server ids
+			expect(m1.id).not.toBe(m1ID);
+			expect(p1.id).not.toBe(p1ID);
+			expect(p1.owner).not.toBe(m1ID);
+
+			//4 callbacks should have been called
+			expect(update).toEqual(7);
+
+			return m1.$get('pets');
+		}).then(function (pets) {
+			expect(pets.length).toBe(3);
+			expect(pets[0]).toBe(p1);
+			expect(pets[1]).toBe(p2);
+			expect(pets[2]).toBe(p3);
+
+			return p1.$get('owner');
+		}).then(function (owner) {
+			expect(owner).toBe(m1);
+
+			done();
+		}, function (error) {
+			//should error
+			expect(error).toBeUndefined();
+			expect(true).toBe(false);
+			done();
+		});
+
+		_d();
+	});
+
+
+	/*
+	 *
+	 *
+	 *
+	 * End to End Testing of Memory Management
+	 *
+	 *
+	 *
+	 *
+	 */
+	it('Stores models in memory only when needed and uploads', function (done) {
+		var $s1 = $rootScope.$new(),
+			$s2 = $rootScope.$new(),
+			$s3 = $rootScope.$new();
+
+		var m1 = TestModel1.create({name: 'james'}, $s1),
+			m2 = TestModel1.create({name: 'bob'}, $s1);
+
+		var p1 = TestModelPet.create({name: 'Rover'}, $s1),
+			p2 = TestModelPet.create({name: 'Ralph'}, $s1),
+			p3 = TestModelPet.create({name: 'Smoke'}, $s1);
+
+		var repo1 = RepositoryService.get('test1'),
+			repoPet = RepositoryService.get('pet');
+
+
+		expect(Object.keys(repo1.$mem).length).toBe(2);
+
+		DataStore.syncAll().then(function () {
+			/*
+			 * Ensure in memory
+			 */
+			expect(Object.keys(repo1.$mem).length).toBe(2);
+			return DataStore.save([m1, m2]);
+		}).then(function () {
+			$s1.$destroy();
+			/*
+			 * When scope is destroyed, should all be out of memory
+			 */
+			expect(Object.keys(repo1.$mem).length).toBe(0);
+			expect(Object.keys(repoPet.$mem).length).toBe(0);
+
+			return m1.$set('pets', [p1, p2, p3]);
+		}).then(function () {
+			//should still be nothing
+			expect(Object.keys(repo1.$mem).length).toBe(0);
+			expect(Object.keys(repoPet.$mem).length).toBe(0);
+
+			return DataStore.find(TestModel1, {}, $s2);
+		}).then(function (found) {
+
+			expect(found.length).toBe(2);
+
+			//should now be in scope
+			expect(Object.keys(repo1.$mem).length).toBe(2);
+
+			//relationships
+			return found[0].$get('pets', $s3);
+		}).then(function (pets) {
+			expect(pets.length).toBe(3);
+
+			expect(Object.keys(repo1.$mem).length).toBe(2);
+			expect(Object.keys(repoPet.$mem).length).toBe(3);
+
+			//destroy scopes
+			$s2.$destroy();
+			expect(Object.keys(repo1.$mem).length).toBe(0);
+			expect(Object.keys(repoPet.$mem).length).toBe(3);
+
+			$s3.$destroy();
+			expect(Object.keys(repo1.$mem).length).toBe(0);
+			expect(Object.keys(repoPet.$mem).length).toBe(0);
+
+
+			done();
+
+		});
+
+		_d();
+	});
 
 
 });

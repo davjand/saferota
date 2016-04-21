@@ -88,8 +88,10 @@
 		 * @param transaction {Transaction}
 		 */
 		function notify(transaction) {
-			self.get(transaction.modelName).notify(transaction);
+			return self.get(transaction.modelName).notify(transaction);
 		}
+
+
 	}
 
 })();

@@ -287,6 +287,7 @@
 			})
 		}
 
+
 		/**
 		 * remove
 		 *
@@ -585,9 +586,17 @@
 					this.$mem[id].c++;
 					this.$mem[id].s.push($scope);
 
-					//register the callback
+					/*
+					 * Register the destroy callback
+					 *
+					 * We need to do this against the in memory object rather
+					 * than the id primitive. Otherwise if a model is resolved
+					 * and it's id updated, we will be trying to deregister the wrong
+					 * model id.
+					 */
+					var m = this.$mem[id].m;
 					$scope.$on('$destroy', function () {
-						self._deregScope(id, $scope);
+						self._deregScope(_modelId(m), $scope);
 					})
 				}
 			}

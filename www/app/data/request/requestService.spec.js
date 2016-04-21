@@ -41,7 +41,7 @@ describe('saferota.data RequestService', function () {
 		expect(RequestService.$adapter).not.toBeUndefined();
 	});
 	it('isOnline is false when created', function () {
-		expect(RequestService.isOnline).toBe(false);
+		expect(RequestService.$isOnline).toBe(false);
 	});
 
 	/*
@@ -50,7 +50,7 @@ describe('saferota.data RequestService', function () {
 	it('.pingOnline returns a promise which resolves to true if online', function (done) {
 		RequestService.$adapter._setOnline(true);
 		RequestService.pingOnline().then(function (online) {
-			expect(RequestService.isOnline).toBe(true);
+			expect(RequestService.$isOnline).toBe(true);
 
 			expect(online).toBe(true);
 			done();
@@ -77,10 +77,41 @@ describe('saferota.data RequestService', function () {
 		_d();
 	});
 
+	/*
+	 * Go Online should only allow one concurrent going online attempt
+	 * It should store one central promise that resolves for all attempts
+	 */
+	it('.goOnline only allows a single request at the same time, instead it returns a promise', function (done) {
+		var p = $q.defer();
+		spyOn(RequestService, 'pingOnline').and.returnValue(p.promise);
+		var called = false;
+
+		RequestService.goOnline().then(function () {
+			called = true;
+		});
+		RequestService.goOnline().then(function () {
+			expect(RequestService.pingOnline.calls.count()).toBe(1);
+			expect(called).toBe(true);
+			expect(RequestService.$goingOnline).toBe(false);
+			done();
+		}, function (error) {
+			//error handling
+			expect(error).toBeUndefined();
+			expect(false).toBe(true);
+			done();
+		});
+
+		expect(RequestService.$goingOnline).toBe(true);
+		p.resolve(true);
+		_d();
+	});
+
+
+
 	it('.pingOnline returns a promise which resolves to false if not online', function (done) {
 		RequestService.$adapter._setOnline(false);
 		RequestService.pingOnline().then(function (online) {
-			expect(RequestService.isOnline).toBe(false);
+			expect(RequestService.$isOnline).toBe(false);
 			expect(online).toBe(false);
 			done();
 		});
@@ -95,7 +126,7 @@ describe('saferota.data RequestService', function () {
 			expect(false).toBe(true);
 		}, function () {
 			expect(true).toBe(true);
-			expect(RequestService.isOnline).toBe(false);
+			expect(RequestService.$isOnline).toBe(false);
 			done();
 		});
 		_d();
@@ -111,7 +142,7 @@ describe('saferota.data RequestService', function () {
 		RequestService.pingOnline().then(function () {
 			//should have been called
 			expect(called).toBe(0);
-			RequestService.isOnline = true; //simulate a goOffline event
+			RequestService.$isOnline = true; //simulate a goOffline event
 			return RequestService.pingOnline();
 		}).then(function () {
 			//should not have been called again
@@ -126,7 +157,7 @@ describe('saferota.data RequestService', function () {
 	 .goOnline
 	 */
 	it('.goOnline resolves a promise if already online', function (done) {
-		RequestService.isOnline = true;
+		RequestService.$isOnline = true;
 		RequestService.goOnline().then(function () {
 			expect(true).toBe(true);
 			done();
@@ -248,13 +279,17 @@ describe('saferota.data RequestService', function () {
 		spyOn(RequestService, '_handleResponse');
 		spyOn(RequestService.$adapter, 'save').and.callThrough();
 
-		RequestService.create(m1).then(function () {
+		RequestService.create(m1, false).then(function () {
 			return RequestService.next();
 		}).then(function () {
-			expect(RequestService.inProgress).toBe(true);
+			expect(RequestService.$inProgress).toBe(true);
 			expect(RequestService.$adapter.save).toHaveBeenCalled();
 			expect(RequestService._handleResponse).toHaveBeenCalled();
 
+			done();
+		}, function (error) {
+			expect(error).toBeUndefined();
+			expect(false).toBe(true);
 			done();
 		});
 
@@ -273,7 +308,7 @@ describe('saferota.data RequestService', function () {
 	 */
 	it('.next can execute all requests and return a promise to all events being completed', function (done) {
 
-		RequestService.create(m1).then(function () {
+		RequestService.create(m1, false).then(function () {
 			return RequestService.create(m2);
 		}).then(function () {
 			return RequestService.next(true);
@@ -290,14 +325,14 @@ describe('saferota.data RequestService', function () {
 	/*
 	 ._handleResponse
 	 */
-	it('._handleResponse should be called with the response, set inProgress to false and resolve the transaction', function (done) {
+	it('._handleResponse should be called with the response, set processing to false and resolve the transaction', function (done) {
 		spyOn(RequestService, '_handleResponse').and.callThrough();
 		spyOn(RequestService.$queue, 'resolveTransaction').and.callThrough();
 
 		RequestService.create(m1, false).then(function () {
 			return RequestService.next();
 		}).then(function () {
-			expect(RequestService.inProgress).toBe(false);
+			expect(RequestService.$processing).toBe(false);
 			expect(RequestService._handleResponse).toHaveBeenCalled();
 			expect(RequestService.$queue.resolveTransaction).toHaveBeenCalled();
 
@@ -330,7 +365,7 @@ describe('saferota.data RequestService', function () {
 			done();
 		}, function () {
 			expect(RequestService._handleError).toHaveBeenCalled();
-			expect(RequestService.inProgress).toBe(false);
+			expect(RequestService.$inProgress).toBe(false);
 
 			done();
 		});

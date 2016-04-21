@@ -20,8 +20,6 @@
 		self.removeRelated = removeRelated;
 		self.decorate = decorate;
 
-		self.decorateAll = decorateAll; //@TODO might be better in ModelService
-
 
 		initialize();
 
@@ -55,7 +53,7 @@
 		 * @param model
 		 * @param key
 		 * @param foreignModel
-		 * @param push {Boolean}    for hasMany relationships only,
+		 * @param clear {Boolean}    for hasMany relationships only,
 		 *                            if push then will add to existing rather than reset
 		 *
 		 * @returns {Promise}
@@ -99,16 +97,21 @@
 				/*
 				 HasMany / Foreign
 				 */
-				if (!angular.isArray(foreignModel)) {
-					foreignModel = [foreignModel]
+				var removePromise = $q.when();
+				if (clear) {
+					removePromise = self.removeRelated(model, key);
 				}
-				var pArr = [];
-				angular.forEach(foreignModel, function (fm) {
-					fm[r.key] = model.getKey();
-					pArr.push(self.$store.save(fm));
+				return removePromise.then(function () {
+					if (!angular.isArray(foreignModel)) {
+						foreignModel = [foreignModel]
+					}
+					var pArr = [];
+					angular.forEach(foreignModel, function (fm) {
+						fm[r.key] = model.getKey();
+						pArr.push(self.$store.save(fm));
+					});
+					return $q.all(pArr);
 				});
-				return $q.all(pArr);
-
 			}
 		}
 
@@ -120,9 +123,9 @@
 		 *
 		 * @param model
 		 * @param key
-		 * @param foreignModel
+		 * @param foreignModel {Object} - Model to remove for has Many
 		 */
-		function removeRelated(model, key) {
+		function removeRelated(model, key, foreignModel) {
 			var r = model.getRelationship(key),
 				self = this;
 
@@ -160,6 +163,25 @@
 				/*
 				 HasMany / Foreign
 				 */
+				var p;
+				if (!foreignModel) {
+					//All
+					p = self.getRelated(model, key);
+				} else {
+					//Single or multiple passed
+					foreignModel = angular.isArray(foreignModel) ? foreignModel : [foreignModel];
+					p = $q.when(foreignModel);
+				}
+				return p.then(function (models) {
+					if (!models) {
+						return $q.when();
+					}
+					var pArr = [];
+					angular.forEach(models, function (m) {
+						pArr.push(self.removeRelated(m, r.key));
+					});
+					return $q.all(pArr);
+				});
 
 			}
 			else {
@@ -170,7 +192,8 @@
 
 		function getRelated(model, key, $scope) {
 			var r = model.getRelationship(key),
-				self = this;
+				self = this,
+				filter;
 
 			if (r.keyType === model.REL_KEY_TYPES.LOCAL &&
 				r.type === model.REL_TYPES.HAS_ONE) {
@@ -190,7 +213,7 @@
 				 HasOne / Foreign
 				 */
 				//build a filter to match
-				var filter = {filter: {}};
+				filter = {filter: {}};
 				filter.filter[r.key] = model.getKey();
 
 				return self.$store.find(r.model, filter, $scope).then(function (models) {
@@ -209,9 +232,12 @@
 				/*
 				 HasMany / Foreign
 				 */
-
+				filter = {filter: {}};
+				filter.filter[r.key] = model.getKey();
+				return self.$store.find(r.model, filter, $scope).then(function (models) {
+					return $q.when(models.length > 0 ? models : null);
+				});
 			}
-
 		}
 
 
@@ -220,17 +246,32 @@
 		 *
 		 * Decorates the model prototypes with accessors for their relationships
 		 *
+		 * Creates a $get / $set / $remove method on the model constructor
+		 * which call getRelated, setRelated and removeRelated
+		 * respectively. Binds the calling model to be the first parameter
+		 * in these functions.
 		 *
-		 * @param Model
+		 * @param ModelConstructor
 		 */
-		function decorate(Model) {
+		function decorate(ModelConstructor) {
+			var self = this,
+				getArgs = function (that, args) {
+					var a = Array.prototype.slice.call(args);
+					a.unshift(that);
+					return a;
+				};
 
+			ModelConstructor.prototype.$get = function () {
+				return self.getRelated.apply(self, getArgs(this, arguments));
+			};
+			ModelConstructor.prototype.$set = function () {
+				return self.setRelated.apply(self, getArgs(this, arguments));
+			};
+			ModelConstructor.prototype.$remove = function () {
+				return self.removeRelated.apply(self, getArgs(this, arguments));
+			};
 		}
 
-
-		function decorateAll() {
-
-		}
 	}
 
 })();
