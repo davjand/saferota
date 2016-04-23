@@ -37,13 +37,18 @@
 	<script src="lib/angularbknd-sdk/dist/backand.min.js"></script>
 	<script src="lib/angular-auto-validate/dist/jcs-auto-validate.js"></script>
 	<script src="lib/backendless/libs/backendless.js"></script>
+	<script src="lib/localforage/dist/localforage.js"></script>
+	<script src="lib/angular-localforage/dist/angular-localForage.js"></script>
+	<script src="lib/angular-tiny-eventemitter/dist/angular-tiny-eventemitter.js"></script>
 	<!-- endbower -->
 
 
 	<!-- injector:js -->
 	<script src="/app/app.module.js"></script>
 	<script src="/app/auth/auth.module.js"></script>
+	<script src="/app/backendless/backendless.module.js"></script>
 	<script src="/app/core/core.module.js"></script>
+	<script src="/app/data/data.module.js"></script>
 	<script src="/app/auth/config.js"></script>
 	<script src="/app/auth/config.routes.js"></script>
 	<script src="/app/auth/constants.js"></script>
@@ -53,9 +58,30 @@
 	<script src="/app/auth/services/session.js"></script>
 	<script src="/app/auth/services/user.js"></script>
 	<script src="/app/auth/signup.js"></script>
+	<script src="/app/backendless/config.js"></script>
 	<script src="/app/core/config.js"></script>
 	<script src="/app/core/constants.js"></script>
-	<script src="/app/core/services/dataService.js"></script>
+	<script src="/app/core/services/rotaOrganisationService.js"></script>
+	<script src="/app/core/services/rotaRoleService.js"></script>
+	<script src="/app/core/services/rotaService.js"></script>
+	<script src="/app/core/services/rotaSpecialityService.js"></script>
+	<script src="/app/data/config.js"></script>
+	<script src="/app/data/datastore/datastore.js"></script>
+	<script src="/app/data/local/localForage.js"></script>
+	<script src="/app/data/local/localInterface.js"></script>
+	<script src="/app/data/local/localMemory.js"></script>
+	<script src="/app/data/model/modelFactory.js"></script>
+	<script src="/app/data/model/modelService.js"></script>
+	<script src="/app/data/providers/dataConfig.js"></script>
+	<script src="/app/data/relationship/relationshipService.js"></script>
+	<script src="/app/data/remote/remoteBackendless.js"></script>
+	<script src="/app/data/remote/remoteInterface.js"></script>
+	<script src="/app/data/remote/remoteMemory.js"></script>
+	<script src="/app/data/repository/repositoryFactory.js"></script>
+	<script src="/app/data/repository/repositoryService.js"></script>
+	<script src="/app/data/request/requestService.js"></script>
+	<script src="/app/data/transaction/transactionFactory.js"></script>
+	<script src="/app/data/transaction/transactionQueue.js"></script>
 	<!-- endinjector -->
 </head>
 <body ng-app="saferota">

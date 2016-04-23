@@ -278,7 +278,6 @@
 
 									//remove the item from the array
 
-
 									//set the data that needs to be stored back into the cache
 									tx.model.setData(resolveData, false);
 									return self.$cache.set(k, tx.toObject());

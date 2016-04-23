@@ -3,11 +3,11 @@
 
 	angular
 		.module('saferota.auth', [
-			'saferota.core',
 			'angular-cache',
 			'ui.router',
 			'jcs-autoValidate',
-			'angular-ladda'
+			'angular-ladda',
+			'saferota.backendless'
 		]);
 
 

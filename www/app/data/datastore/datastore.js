@@ -19,6 +19,7 @@
 		self.syncAll = syncAll;
 		self.get = get;
 		self.find = find;
+		self.remove = remove;
 		self.clear = clear;
 
 		//Initialisation
@@ -114,8 +115,14 @@
 			 */
 			var modelConfig = Model.getConfig();
 			if (typeof modelConfig.sync !== 'undefined') {
+
+				var syncSettings = modelConfig.sync;
+				if (angular.isFunction(syncSettings)) {
+					syncSettings = syncSettings();
+				}
+				
 				options.filter = options.filter || {};
-				angular.merge(options.filter, modelConfig.sync);
+				angular.merge(options.filter, syncSettings);
 			}
 
 			//ensure online
@@ -290,6 +297,22 @@
 
 
 		/**
+		 * remove
+		 *
+		 * @TODO To Spec and code
+		 *
+		 * @param model
+		 * @param options
+		 *
+		 * @
+		 */
+		function remove(model, options) {
+			options = options || {};
+			throw "DataStore.remove is not yet implemented";
+		}
+
+
+		/**
 		 * _findFromRemote
 		 *
 		 * Finds from the remote and saves into the database
@@ -339,8 +362,6 @@
 				}
 			}
 		}
-
-
 	}
 })
 ();

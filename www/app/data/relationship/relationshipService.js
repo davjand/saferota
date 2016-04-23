@@ -14,7 +14,6 @@
 
 		//Module Definition
 		self.registerDataStore = registerDataStore;
-
 		self.setRelated = setRelated;
 		self.getRelated = getRelated;
 		self.removeRelated = removeRelated;
@@ -190,6 +189,16 @@
 		}
 
 
+		/**
+		 * getRelated
+		 *
+		 * Retrieves a promise to a related object
+		 *
+		 * @param model
+		 * @param key
+		 * @param $scope
+		 * @returns {Promise}
+		 */
 		function getRelated(model, key, $scope) {
 			var r = model.getRelationship(key),
 				self = this,

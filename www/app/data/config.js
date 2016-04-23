@@ -3,8 +3,7 @@
 
 	angular
 		.module('saferota.data')
-		.config(configureLocalForage)
-		.config(configureData);
+		.config(configureLocalForage);
 
 
 	// LocalForage Init
