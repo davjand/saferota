@@ -12,6 +12,9 @@
 		var self = this;
 
 		//Public
+		self.getSession = getSession;
+		self.isReady = isReady;
+		
 		self.login = login;
 		self.signup = signup;
 		self.logout = logout;
@@ -28,6 +31,21 @@
 
 			Session.start();
 		}
+
+		/**
+		 * getSession
+		 *
+		 * Returns the current session
+		 * @returns {*}
+		 */
+		function getSession() {
+			return Session;
+		}
+
+		function isReady() {
+			return Session.getReady();
+		}
+
 
 		/*
 

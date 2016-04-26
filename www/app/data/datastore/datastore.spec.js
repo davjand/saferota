@@ -439,6 +439,26 @@ describe('saferota.data DataStore', function () {
 
 
 	/*
+	 .sync does nothing if config .sync is set to false
+	 */
+	it('.sync does nothing if a model type is set to not sync', function (done) {
+		var NoSyncModel = DataStore.create('no-sync').schema({'name': ''}).config({sync: false});
+
+		spyOn(RequestService, 'goOnline');
+		spyOn(RequestService, 'find');
+
+		DataStore.sync(NoSyncModel).then(function () {
+			expect(RequestService.goOnline).not.toHaveBeenCalled();
+			expect(RequestService.find).not.toHaveBeenCalled();
+
+			done();
+		});
+
+		_d();
+	});
+
+
+	/*
 	 *
 	 *
 	 *

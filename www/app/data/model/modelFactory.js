@@ -340,6 +340,9 @@
 			Model.prototype.guid = guid;
 			Model.prototype.resolveWithRemote = resolveWithRemote;
 			Model.prototype.isEqual = isEqual;
+			Model.prototype.config = function () {
+				return this._config;
+			};
 
 			//Set a pointer to the factory
 			Model.prototype.factory = factory;

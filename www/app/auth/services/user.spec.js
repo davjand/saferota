@@ -1,4 +1,4 @@
-describe('SafeRota Auth: User Object', function () {
+xdescribe('SafeRota Auth: User Object', function () {
 
 	beforeEach(module('saferota.auth'));
 

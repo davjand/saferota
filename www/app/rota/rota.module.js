@@ -2,10 +2,9 @@
 	'use strict';
 
 	angular
-		.module('saferota', [
+		.module('saferota.rota', [
 			'saferota.core',
 			'saferota.auth',
-			'saferota.rota',
-			'saferota.rota-new'
+			'ui.router'
 		]);
 })();

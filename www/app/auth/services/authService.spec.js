@@ -1,4 +1,4 @@
-describe('saferota.auth AuthService', function () {
+xdescribe('saferota.auth AuthService', function () {
 	beforeEach(module('saferota.auth'));
 
 	it('Can Parse a name into a firstname and surname', inject(function (AuthService) {

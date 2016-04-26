@@ -18,8 +18,6 @@ $dark:                            #444 !default;
 // The path for our ionicons font files, relative to the built CSS in www/css
 $ionicons-font-path: "../lib/ionic/fonts" !default;
 
-
-
 /*
 
 
@@ -32,30 +30,36 @@ $royal: #7E5FA9;
 $balancedBorder: #498F24;
 $assertive: #ef473a;
 
-
 $errorBg: #FFDFDF;
 
-
-// Modules
-@import "www/app/auth/style";
-
-
+// Deps
+@import 'www/lib/font-awesome/scss/font-awesome.scss';
 
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 
-.button{
+//Modules
+@import "www/app/auth/style";
+@import "www/app/rota-new/style";
+
+/*
+
+	Generic
+
+
+*/
+.button {
 
 }
 
-.button.button-balanced{
+.button.button-balanced {
 	border: 1px solid $balancedBorder;
-	box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
-.button.button-light{
+
+.button.button-light {
 	border: 1px solid #DDDDDD;
 }
-
 
 /*
 
@@ -66,28 +70,28 @@ $errorBg: #FFDFDF;
 
 
 */
-form{
-	label.form-group.has-error{
+form {
+	label.form-group.has-error {
 		//border-bottom: 2px solid $assertive;
 		//margin-bottom: 1px;
 		background: $errorBg;
 	}
 
-	span.error-msg{
+	span.error-msg {
 		display: inline-block;
 		color: $assertive;
 		font-size: 12px;
 		padding-right: 15px;
 	}
 
-	.form-error{
+	.form-error {
 		text-align: center;
 		font-weight: 700;
 		color: $assertive;
 		background: $errorBg;
 		padding: 10px;
 	}
-	.form-success{
+	.form-success {
 		text-align: center;
 		font-weight: 700;
 		color: #fff;

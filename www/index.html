@@ -40,6 +40,12 @@
 	<script src="lib/localforage/dist/localforage.js"></script>
 	<script src="lib/angular-localforage/dist/angular-localForage.js"></script>
 	<script src="lib/angular-tiny-eventemitter/dist/angular-tiny-eventemitter.js"></script>
+	<script src="lib/angular-animate/angular-animate.js"></script>
+	<script src="lib/angular-sanitize/angular-sanitize.js"></script>
+	<script src="lib/angular-ui-router/release/angular-ui-router.js"></script>
+	<script src="lib/ionic/js/ionic.js"></script>
+	<script src="lib/ionic/js/ionic-angular.js"></script>
+	<script src="lib/ionic-datepicker/dist/ionic-datepicker.bundle.min.js"></script>
 	<!-- endbower -->
 
 
@@ -49,6 +55,8 @@
 	<script src="/app/backendless/backendless.module.js"></script>
 	<script src="/app/core/core.module.js"></script>
 	<script src="/app/data/data.module.js"></script>
+	<script src="/app/rota-new/rota-new.module.js"></script>
+	<script src="/app/rota/rota.module.js"></script>
 	<script src="/app/auth/config.js"></script>
 	<script src="/app/auth/config.routes.js"></script>
 	<script src="/app/auth/constants.js"></script>
@@ -61,6 +69,8 @@
 	<script src="/app/backendless/config.js"></script>
 	<script src="/app/core/config.js"></script>
 	<script src="/app/core/constants.js"></script>
+	<script src="/app/core/modal-select/modalSelect.js"></script>
+	<script src="/app/core/services/rotaDataService.js"></script>
 	<script src="/app/core/services/rotaOrganisationService.js"></script>
 	<script src="/app/core/services/rotaRoleService.js"></script>
 	<script src="/app/core/services/rotaService.js"></script>
@@ -82,6 +92,11 @@
 	<script src="/app/data/request/requestService.js"></script>
 	<script src="/app/data/transaction/transactionFactory.js"></script>
 	<script src="/app/data/transaction/transactionQueue.js"></script>
+	<script src="/app/rota-new/config.routes.js"></script>
+	<script src="/app/rota-new/new.js"></script>
+	<script src="/app/rota/app.js"></script>
+	<script src="/app/rota/config.routes.js"></script>
+	<script src="/app/rota/main.js"></script>
 	<!-- endinjector -->
 </head>
 <body ng-app="saferota">
@@ -94,8 +109,6 @@
 </ion-nav-bar>
 <!--
   The views will be rendered in the <ion-nav-view> directive below
-  Templates are in the /templates folder (but you could also
-  have templates inline in this html file if you'd like).
 -->
 <ion-nav-view></ion-nav-view>
 </body>

@@ -18,7 +18,9 @@
     "backendless": "*",
     "localforage": "^1.4.0",
     "angular-localforage": "^1.2.5",
-    "angular-tiny-eventemitter": "^1.1.0"
+    "angular-tiny-eventemitter": "^1.1.0",
+    "ionic-datepicker": "^1.1.0",
+    "font-awesome": "fontawesome#^4.6.1"
   },
   "resolutions": {
     "angular": "1.5.0",

@@ -139,6 +139,39 @@ describe('saferota.data Repository', function () {
 		expect(Object.keys(repo.$mem).length).toBe(2);
 	});
 
+	/*
+	 * .registerModel
+	 */
+	it('.registerModel throws an error if the passed scope is invalid (not if false or undefined)', function () {
+		var $s = $rootScope.$new();
+
+
+		repo.registerModel(m1); //should execute fine
+		repo.registerModel(m2, false); //should execute fine
+
+		var flag = false;
+		try {
+			repo.registerModel(m3, m4);
+		} catch (error) {
+			expect(error).toContain("Invalid $scope");
+			expect(error).not.toBeUndefined();
+			flag = true;
+		}
+		expect(flag).toBe(true);
+	});
+
+	/* Offline Enabled */
+	it('.offlineEnabled returns the offline setting from the model', function () {
+		var NoSyncModel = ModelService.create('noSync').config({offline: false});
+		var noSyncRepo = RepositoryService.create(NoSyncModel);
+
+		//should be false
+		expect(noSyncRepo.offlineEnabled()).toBe(false);
+
+		//for the repo created above, should be true
+		expect(repo.offlineEnabled()).toBe(true);
+	});
+
 
 	/*
 	 _inMem
@@ -174,7 +207,7 @@ describe('saferota.data Repository', function () {
 
 
 	});
-	
+
 	/*
 	 _deregScope
 	 */
@@ -206,7 +239,25 @@ describe('saferota.data Repository', function () {
 	/*
 	 save
 	 */
-	it('save can save a model into the repository, if not registered, will register them', function (done) {
+	it('.save throws an error if incorrect models passed to it', function () {
+		var flag = false;
+		try {
+			var M2 = ModelService.create('Model2').schema({name: ''});
+			var m = M2.create({name: 'james'});
+
+			repo.save(m);
+
+			expect(false).toBe(true);
+		}
+		catch (error) {
+			console.log(error);
+			expect(error).not.toBeUndefined();
+			flag = true;
+		}
+		expect(flag).toBe(true);
+
+	});
+	it('.save can save a model into the repository, if not registered, will register them', function (done) {
 		var $s = $rootScope.$new(true);
 
 		//save
@@ -222,7 +273,6 @@ describe('saferota.data Repository', function () {
 
 		_d();
 	});
-
 	it('.save can take an array', function (done) {
 		repo.save([m1, m2, m3], $rootScope).then(function () {
 			expect(Object.keys(repo.$mem).length).toBe(3);
@@ -236,7 +286,6 @@ describe('saferota.data Repository', function () {
 		_d();
 
 	});
-
 	it('.save will use the object with the latest update date if an object already exists', function (done) {
 		var called = false;
 
@@ -276,7 +325,24 @@ describe('saferota.data Repository', function () {
 		});
 		_d();
 	});
+	it('.save will not save into the localStorage if a model config.offline is set to false', function (done) {
+		var NoSyncModel = ModelService.create('noSync').schema({
+			name: ''
+		}).config({offline: false});
 
+		var noSyncRepo = RepositoryService.create(NoSyncModel);
+
+		var ns1 = NoSyncModel.create({name: 'test'}),
+			ns2 = NoSyncModel.create({name: 'test2'});
+
+		spyOn(noSyncRepo.$local, 'data');
+
+		noSyncRepo.save([ns1, ns2]).then(function () {
+			expect(noSyncRepo.$local.data).not.toHaveBeenCalled();
+			done();
+		});
+		_d();
+	});
 
 	/*
 	 get
@@ -336,6 +402,21 @@ describe('saferota.data Repository', function () {
 
 		_d();
 	});
+	it('.get bypasses local memory if the object is set to offline=false', function (done) {
+		var NoSyncModel = ModelService.create('noSync').schema({
+			name: ''
+		}).config({offline: false});
+		var noSyncRepo = RepositoryService.create(NoSyncModel);
+
+		spyOn(noSyncRepo.$local, 'data');
+
+		noSyncRepo.get('test').then(function (item) {
+			expect(item).toBe(null);
+			expect(noSyncRepo.$local.data).not.toHaveBeenCalled();
+			done();
+		});
+		_d();
+	});
 
 	/*
 	 .remove
@@ -365,7 +446,6 @@ describe('saferota.data Repository', function () {
 		});
 		_d();
 	});
-
 	it('.remove removes from the local repository', function (done) {
 		repo.save(m1).then(function () {
 			return repo.remove(m1);
@@ -376,6 +456,18 @@ describe('saferota.data Repository', function () {
 			done();
 		});
 		_d();
+	});
+	it('.remove can bypass local storage if model is offline disabled', function () {
+		var NoSyncModel = ModelService.create('noSync').config({offline: false});
+		var noSyncRepo = RepositoryService.create(NoSyncModel);
+		var m = NoSyncModel.create();
+
+		spyOn(noSyncRepo.$local, 'remove');
+
+		noSyncRepo.remove(m);
+
+		expect(noSyncRepo.$local.remove).not.toHaveBeenCalled();
+
 	});
 
 	/*
@@ -411,7 +503,16 @@ describe('saferota.data Repository', function () {
 		});
 		_d();
 	});
+	it('.find returns [] if in offline Mode', function () {
+		var NoSyncModel = ModelService.create('noSync').config({offline: false});
+		var noSyncRepo = RepositoryService.create(NoSyncModel);
 
+		spyOn(noSyncRepo.$local, 'filter');
+
+		noSyncRepo.find();
+
+		expect(noSyncRepo.$local.filter).not.toHaveBeenCalled();
+	});
 
 	/*
 	 notify

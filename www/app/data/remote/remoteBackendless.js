@@ -46,20 +46,23 @@
 			config = config || {};
 
 			//init Backendless
-			Backendless.initApp(
-				config.application,
-				config.secret,
-				config.version);
+			if (!Backendless.UserService) {
+				Backendless.initApp(
+					config.application,
+					config.secret,
+					config.version
+				);
+			}
 
 			//extra functions
 			self._wrapPromise = _wrapPromise;
 			self._getClass = _getClass;
 			self._persistance = _persistance;
+			self._xhr = _xhr;
 
 			//only for testing expose this
 			if (window.module) {
 				self._bulkDelete = _bulkDelete;
-				self._xhr = _xhr;
 			}
 
 			self.$modelCache = [];
@@ -106,7 +109,11 @@
 			options = options || {};
 			var self = this;
 
-			var query = {},
+			var query = {
+					options: {
+						pageSize: 100
+					}
+				},
 				conditions = [];
 
 			/*

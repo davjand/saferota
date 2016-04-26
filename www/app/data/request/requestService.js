@@ -29,6 +29,9 @@
 		//Online / Offline Functions
 		self.pingOnline = pingOnline;
 		self.goOnline = goOnline;
+		self.scheduleRetryGoOnline = scheduleRetryGoOnline;
+		self.stayOffline = stayOffline;
+		self.goBackOnline = goBackOnline;
 
 
 		//Module Definition
@@ -66,10 +69,53 @@
 		function initialize() {
 			self.$queue = new TransactionQueue;
 			self.$adapter = new ($injector.get(DataConfig.remote))(DataConfig.remoteConfig);
+
+			/*
+			 * If in the progress of a sync (ie multiple things happening
+			 */
 			self.$inProgress = false;
+			/*
+			 * If processing a single transaction.
+			 * Will get set true/false multiple times if syncing multiple things
+			 */
 			self.$processing = false;
+			/*
+			 * Self Explanatory - true if thinks is online
+			 */
 			self.$isOnline = false;
+			/*
+			 * True if a retry (via $timeout) is scheduled to attempt to go online
+			 */
+			self.$retryScheduled = false;
+			/*
+			 * Number of retrys that have failed when trying to go back online
+			 */
+			self.$retryCount = 0;
+			/*
+			 * Limit, number of retrys before gives up
+			 */
+			self.$RETRY_LIMIT = 5;
+			/*
+			 * A promise to the retry event
+			 */
+			self.$retryPromise = null;
+			/*
+			 * set to true if no intention of going back online unless
+			 * reattemptOnline is called
+			 * 
+			 * can be set by calling stayOffline();
+			 * unset via reattemptOnline
+			 */
+			self.$stayOffline = false;
+
+			/*
+			 * True if currently attempting to go online
+			 */
 			self.$goingOnline = false;
+			/*
+			 * Promise that resolves true when the current 
+			 * going online attempt succeeds
+			 */
 			self.$onlinePromise = null;
 
 			//a little bit of logic to allow promise chaining
@@ -139,12 +185,13 @@
 		 * @param retry
 		 * @param interval
 		 * @param execute {Boolean} if true, will clear the queue as part of the promise
+		 * @param rejectPromise {Boolean} Defaults to true. If false will resolve the promise with false rather then reject if fails
 		 * @returns {Promise}
 		 */
-		function goOnline(retry, interval, execute) {
+		function goOnline(retry, interval, execute, rejectPromise) {
 			retry = typeof retry !== 'undefined' ? retry : false;
-			interval = interval || 1000 * 30; //30 seconds
 			execute = typeof execute !== 'undefined' ? execute : true;
+			rejectPromise = typeof rejectPromise !== 'undefined' ? rejectPromise : true;
 
 			var self = this;
 
@@ -162,6 +209,15 @@
 			}
 
 			/*
+			 * If stayOffline then cancel
+			 */
+			if (self.$stayOffline) {
+				return rejectPromise ?
+					$q.reject() :
+					$q.when(false);
+			}
+
+			/*
 			 * Otherwise attempt to go online
 			 */
 			self.$onlinePromise = $q.defer();
@@ -171,23 +227,105 @@
 				self.$goingOnline = false;
 
 				if (!online && retry) {
-					$timeout(function () {
-						self.goOnline(retry, interval, execute)
-					}, interval);
+					self.scheduleRetryGoOnline(interval, execute);
 				}
 
 				if (online) {
+					//reset the retry data
+					self.$scheduledRetry = false;
+					self.$retryPromise = null;
+					self.$retryCount = 0;
+					
 					execute ?
 						self.$onlinePromise.resolve(self.next()) :
 						self.$onlinePromise.resolve();
 
 				} else {
-					self.$onlinePromise.reject();
+					rejectPromise ?
+						self.$onlinePromise.reject() :
+						self.$onlinePromise.resolve(false);
 				}
 			});
 
 			return self.$onlinePromise.promise;
 		}
+
+		/**
+		 * scheduleRetryGoOnline
+		 *
+		 * Schedules a retry to go online.
+		 * If already scheduled returns false
+		 * If retry limit is reached, return false and set to permenant offline mode
+		 *
+		 * @param interval
+		 * @param execute
+		 */
+		function scheduleRetryGoOnline(interval, execute) {
+			var self = this;
+
+			//Defaults
+			interval = interval || 1000 * 60; //60 seconds
+			execute = typeof execute !== 'undefined' ? execute : true;
+
+			//Retry Again
+			if (!self.$retryScheduled) {
+
+				self.$retryCount++;
+
+				if (self.$retryCount > self.$RETRY_LIMIT) {
+					self.$retryCount = 0;
+					self.stayOffline();
+					return false;
+				}
+
+
+				self.$retryScheduled = true;
+				self.$retryPromise = $timeout(function () {
+					self.$retryScheduled = false;
+					self.goOnline(true, interval, execute)
+				}, interval);
+				return true;
+			}
+			return false;
+		}
+
+		/**
+		 * stayOffline
+		 *
+		 * Sets stayoffline to true
+		 *
+		 * If a retry of going online is scheduled, cancel it
+		 *
+		 */
+		function stayOffline() {
+			this.$stayOffline = true;
+			if (this.$retryPromise) {
+				if ($timeout.cancel(this.$retryPromise)) {
+					this.$retryPromise = null;
+					this.$retryCount = 0;
+					this.$retryScheduled = false;
+				}
+			}
+		}
+
+		/**
+		 * goBackOnline
+		 *
+		 * After a stayOffline call, use this to cancel the
+		 * stayOffline status and retry going back online
+		 *
+		 * @returns {Promise|*}
+		 */
+		function goBackOnline() {
+			this.$stayOffline = false;
+			return this.goOnline();
+		}
+
+		//////////////////////////////////////////////////////////////
+
+		// Request Functions
+
+		//////////////////////////////////////////////////////////////
 
 		/**
 		 * create

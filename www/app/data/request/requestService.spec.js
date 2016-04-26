@@ -77,34 +77,6 @@ describe('saferota.data RequestService', function () {
 		_d();
 	});
 
-	/*
-	 * Go Online should only allow one concurrent going online attempt
-	 * It should store one central promise that resolves for all attempts
-	 */
-	it('.goOnline only allows a single request at the same time, instead it returns a promise', function (done) {
-		var p = $q.defer();
-		spyOn(RequestService, 'pingOnline').and.returnValue(p.promise);
-		var called = false;
-
-		RequestService.goOnline().then(function () {
-			called = true;
-		});
-		RequestService.goOnline().then(function () {
-			expect(RequestService.pingOnline.calls.count()).toBe(1);
-			expect(called).toBe(true);
-			expect(RequestService.$goingOnline).toBe(false);
-			done();
-		}, function (error) {
-			//error handling
-			expect(error).toBeUndefined();
-			expect(false).toBe(true);
-			done();
-		});
-
-		expect(RequestService.$goingOnline).toBe(true);
-		p.resolve(true);
-		_d();
-	});
 
 
 
@@ -173,11 +145,11 @@ describe('saferota.data RequestService', function () {
 		});
 		_d();
 	});
-
-	it('goOnline can schedule a retry if fails', function (done) {
+	it('.goOnline can schedule a retry if fails', function (done) {
 		RequestService.$adapter._setOnline(false);
 
 		spyOn(RequestService, 'pingOnline').and.callThrough();
+		spyOn(RequestService, 'scheduleRetryGoOnline'); 
 
 		//try to go online
 		RequestService.goOnline(true).then(function () {
@@ -186,17 +158,163 @@ describe('saferota.data RequestService', function () {
 			return $q.when();
 		}).then(function () {
 		}, function () {
-
-			/*
-			 use setTimeout to execute code after digest cycle finishes
-			 */
-			setTimeout(function () {
-				$timeout.flush();
-				expect(RequestService.pingOnline.calls.count()).toBe(2);
-				done();
-			}, 0);
+			expect(RequestService.scheduleRetryGoOnline).toHaveBeenCalled();
+			done();
 		});
 		_d();
+	});
+
+	/*
+	 * Go Online should only allow one concurrent going online attempt
+	 * It should store one central promise that resolves for all attempts
+	 */
+	it('.goOnline only allows a single request at the same time, instead it returns a promise', function (done) {
+		var p = $q.defer();
+		spyOn(RequestService, 'pingOnline').and.returnValue(p.promise);
+		var called = false;
+
+		RequestService.goOnline().then(function () {
+			called = true;
+		});
+		RequestService.goOnline().then(function () {
+			expect(RequestService.pingOnline.calls.count()).toBe(1);
+			expect(called).toBe(true);
+			expect(RequestService.$goingOnline).toBe(false);
+			done();
+		}, function (error) {
+			//error handling
+			expect(error).toBeUndefined();
+			expect(false).toBe(true);
+			done();
+		});
+
+		expect(RequestService.$goingOnline).toBe(true);
+		p.resolve(true);
+		_d();
+	});
+
+	//.stayOffline
+	it('.stayOffline sets $stayOffline to be true', function () {
+		RequestService.stayOffline();
+		expect(RequestService.$stayOffline).toBe(true);
+	});
+
+	//goBackOnline
+	it('.goBackOnline will set $stayOffline to false and call goOnline', function (done) {
+		spyOn(RequestService, 'goOnline').and.callThrough();
+
+		RequestService.stayOffline();
+		RequestService.goBackOnline().then(function () {
+			expect(RequestService.goOnline).toHaveBeenCalled();
+			done();
+		});
+		_d();
+	});
+
+
+	//.scheduleRetryGoOnline
+	it('.scheduleRetryGoOnline can increment the retry counter and set retryScheduled to false', function (done) {
+		RequestService.$adapter._setOnline(false);
+
+		spyOn(RequestService, 'goOnline').and.callThrough();
+
+		expect(RequestService.scheduleRetryGoOnline()).toBe(true);
+
+		//set retryCount / flag and promise
+		expect(RequestService.$retryCount).toBe(1);
+		expect(RequestService.$retryScheduled).toBe(true);
+		expect(RequestService.$retryPromise).not.toBe(null);
+
+		//use setTimeout to execute code after digest cycle finishes
+		setTimeout(function () {
+			$timeout.flush();
+			expect(RequestService.goOnline.calls.count()).toBe(1);
+			done();
+		}, 0);
+
+		_d();
+	});
+	it('.scheduleRetryGoOnline will not schedule and will set stayOffline to false if at retry limit', function () {
+		RequestService.$adapter._setOnline(false);
+		RequestService.$retryCount = 10;
+
+		expect(RequestService.scheduleRetryGoOnline()).toBe(false);
+
+		expect(RequestService.$retryCount).toBe(0);
+		expect(RequestService.$retryScheduled).toBe(false);
+		expect(RequestService.$retryPromise).toBe(null);
+	});
+
+	/*
+	 * Functional Testing of goOnline functionality
+	 *
+	 * We'll goOffline and try to go online 3 times until hit limit, then should be offline
+	 *
+	 * We'll then goOnline and try again and all the data should be reset
+	 *
+	 */
+	it('.goOnline functional testing', function (done) {
+
+		/*
+		 * We need to do a bit of promise trickery to get the code to run in a testing manner
+		 *
+		 * We schedule a timeout flush after the current digest cycle
+		 * Once this is done, we resolve the promise that then next bit of code is
+		 * depending on
+		 * We then trigger a digest cycle to force the next block to execute!!
+		 */
+		var p;
+
+		function flushTimeout() {
+			p = $q.defer();
+			setTimeout(function () {
+				$timeout.flush();
+				p.resolve();
+				_d();
+			}, 0);
+		}
+
+		var RS = RequestService; //shorthand
+
+		RS.$adapter._setOnline(false);
+		RS.$RETRY_LIMIT = 2;
+
+		RS.goOnline(true, 100, true, false).then(function () {
+			//attempt 1
+			expect(RS.$retryScheduled).toBe(true);
+			expect(RS.$stayOffline).toBe(false);
+			flushTimeout();
+			return p.promise;
+		}).then(function () {
+			//attempt 2
+			expect(RS.$retryScheduled).toBe(true);
+			expect(RS.$stayOffline).toBe(false);
+			flushTimeout();
+			return p.promise;
+		}).then(function () {
+			//attempt 3 - should have failed
+			expect(RS.$retryScheduled).toBe(false);
+			expect(RS.$retryCount).toBe(0);
+			expect(RS.$stayOffline).toBe(true);
+
+			//now go back online
+			RS.$adapter._setOnline(true);
+			return RS.goBackOnline();
+		}).then(function () {
+			//should now be online
+			expect(RS.$stayOffline).toBe(false);
+			expect(RS.$isOnline).toBe(true);
+			done();
+		}, function (error) {
+
+			//error handling
+			expect(error).toBeUndefined();
+			expect(false).toBe(true);
+			done();
+		});
+
+		_d();
+
 	});
 
 

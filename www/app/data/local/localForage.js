@@ -172,7 +172,16 @@
 		 * @returns {*}
 		 */
 		function iterate(callback) {
-			return this.$cache.iterate(callback);
+			var data = [];
+			return this.$cache.iterate(function (value, key) {
+				if (key !== CONFIG_KEY) {
+					if (callback(value, key)) {
+						data.push(value);
+					}
+				}
+			}).then(function () {
+				return $q.when(data);
+			})
 		}
 
 		/**

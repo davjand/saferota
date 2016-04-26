@@ -377,7 +377,7 @@ describe('saferota.data TransactionQueue', function () {
 				done();
 			},
 			function (error) {
-				expect(error).toBeUndefined();
+				expect(error).not.toBeUndefined();
 				expect(true).toBe(true);
 				done();
 			});

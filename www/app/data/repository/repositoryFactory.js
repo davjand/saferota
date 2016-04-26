@@ -37,7 +37,15 @@
 			 Create the adapters
 			 */
 			this.$mem = {};
+
+			/*
+			 * create local adapter
+			 *
+			 * @TODO 	Do not create local adapter if this.onlineEnabled() = false.
+			 * @TODO	Other elements of the repository need refactoring to achieve this
+			 */
 			this.$local = new ($injector.get(localAdapter || DataConfig.local))(this._Model._config);
+
 
 			//init
 			this._initConfig();
@@ -65,6 +73,9 @@
 		Repository.prototype.ready = function () {
 			return this._ready.promise;
 		};
+
+		//is offline
+		Repository.prototype.offlineEnabled = offlineEnabled;
 
 
 		//Internal Memory Management
@@ -95,6 +106,12 @@
 		 * @param $scope
 		 */
 		function registerModel(model, $scope) {
+			if ($scope && !$scope.$destroy) {
+				throw(    'Repository for "' +
+					this._Model.className() +
+					'": Invalid $scope passed to registerModel'
+				);
+			}
 			if ($scope) {
 				this._putMem(model, $scope);
 			}
@@ -121,6 +138,21 @@
 					return self.$local.updatedAt(date);
 				}
 			});
+		}
+
+
+		/**
+		 * offlineEnabled
+		 *
+		 * Returns true if the model is set to allow offline mode
+		 * Defaults to true if the model hasn't had this property set
+		 *
+		 * @returns {*}
+		 */
+		function offlineEnabled() {
+			return typeof this._Model.getConfig().offline !== 'undefined' ?
+				this._Model.getConfig().offline :
+				true;
 		}
 
 
@@ -154,6 +186,15 @@
 			//get a list of keys of the models
 			var modelIndex = {};
 			angular.forEach(model, function (item) {
+
+				//type check
+				if (item.className() !== self._Model.className()) {
+					throw(    'RepositoryFactory.save TypeError: Cannot save model of type: "' +
+					item.className() +
+					'" into repository of type: "' +
+					self._Model.className() + '"');
+				}
+
 				// Add a timestamp to each model
 				if (setUpdatedDate) {
 					item.updatedDate = new Date(Date.now());
@@ -161,36 +202,17 @@
 				modelIndex[item.getKey()] = item;
 			});
 
-			//see which are in local storage
-			return self.$local.data(Object.keys(modelIndex)).then(function (data) {
-				angular.forEach(modelIndex, function (modelVal, modelKey) {
-					/*
-					 if not found, we'll save the new one
-					 */
-					if (!data[modelKey] || data[modelKey] === null) {
-						toSave[modelKey] = modelVal;
-					}
-					/*
-					 If found then do a diff sync
-					 */
-					else {
-						var localModel = self._Model.create(data[modelKey], false, true);
-						if (!localModel.isEqual(modelVal)) {
-							if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
-								localModel.setData(modelVal.toObject());
-							}
-						}
-						toSave[modelKey] = localModel;
-					}
-
-				});
-				//save into the database
-				return self.$local.data(toSave);
-			}).then(function () {
+			/*
+			 *
+			 * Helper function to save to memory
+			 *
+			 * Returns a promise to allow promise chaining
+			 */
+			function saveMemory(modelsToSave) {
 				/*
 				 Now review all the models in memory and updated if needed
 				 */
-				angular.forEach(toSave, function (savedModel, key) {
+				angular.forEach(modelsToSave, function (savedModel, key) {
 					if ($scope !== false) {
 						self.registerModel(savedModel, $scope);
 					}
@@ -204,9 +226,50 @@
 						}
 					}
 				});
-
 				return $q.when();
-			});
+			}
+
+
+			/*
+			 * See if offline is disabled, defaults to true
+			 */
+			if (!self.offlineEnabled()) {
+				/*
+				 * If offline is set to false, then just save to memory
+				 */
+				return saveMemory(modelIndex)
+			} else {
+				/*
+				 * Otherwise save to local storage first
+				 */
+				return self.$local.data(Object.keys(modelIndex)).then(function (data) {
+					angular.forEach(modelIndex, function (modelVal, modelKey) {
+						/*
+						 if not found, we'll save the new one
+						 */
+						if (!data[modelKey] || data[modelKey] === null) {
+							toSave[modelKey] = modelVal;
+						}
+						/*
+						 If found then do a diff sync
+						 */
+						else {
+							var localModel = self._Model.create(data[modelKey], false, true);
+							if (!localModel.isEqual(modelVal)) {
+								if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
+									localModel.setData(modelVal.toObject());
+								}
+							}
+							toSave[modelKey] = localModel;
+						}
+
+					});
+					//save into the database
+					return self.$local.data(toSave);
+				}).then(function () {
+					return saveMemory(toSave);
+				});
+			}
 		}
 
 		/**
@@ -303,7 +366,11 @@
 			model.emit('delete');
 			this._delMem(model);
 
-			return this.$local.remove(model.getKey());
+			if (this.offlineEnabled()) {
+				return this.$local.remove(model.getKey());
+			} else {
+				return $q.when();
+			}
 		}
 
 		/**
@@ -318,18 +385,24 @@
 			force = typeof force === 'undefined' ? false : force;
 
 			/*
-			 In Memory
-			 Register the new scope if applicable
+			 * In Memory
+			 * Register the new scope if applicable
 			 */
 			if (self._inMem(id) && !force) {
 				var model = this._getMem(id);
 				self.registerModel(model, $scope);
-				
 				return $q.when(model);
 			}
 
 			/*
-			 Retrieve from cache
+			 * If offline, don't go looking in the cache if not found
+			 */
+			if (!self.offlineEnabled()) {
+				return $q.when(null);
+			}
+
+			/*
+			 * Retrieve from cache
 			 */
 			return self.$local.data(id).then(function (data) {
 				if (data === null) {
@@ -370,6 +443,11 @@
 			options = options || {};
 			var data = [],
 				self = this;
+
+			if (!self.offlineEnabled()) {
+				return $q.when();
+			}
+
 			return this.$local.filter(options.filter, options.orderBy).then(function (results) {
 				angular.forEach(results, function (item) {
 					/*
@@ -544,6 +622,8 @@
 
 		/**
 		 * _delMem
+		 *
+		 * Emits a delete event on the model
 		 *
 		 * @param model
 		 * @private

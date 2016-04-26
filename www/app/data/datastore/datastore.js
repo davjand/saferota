@@ -110,17 +110,33 @@
 			options = options || {};
 			var repo = RepositoryService.get(Model);
 
-			/*
-			 Add in default filter settings
-			 */
+
 			var modelConfig = Model.getConfig();
+
+			/*
+			 * Add in default filter settings
+			 */
 			if (typeof modelConfig.sync !== 'undefined') {
 
+				/*
+				 * Cancel sync if model not syncing
+				 */
+				if (modelConfig.sync === false) {
+					return $q.when();
+				}
+
 				var syncSettings = modelConfig.sync;
+
+				/*
+				 * If a function, execute
+				 */
 				if (angular.isFunction(syncSettings)) {
 					syncSettings = syncSettings();
 				}
-				
+
+				/*
+				 * Make into a filter object
+				 */
 				options.filter = options.filter || {};
 				angular.merge(options.filter, syncSettings);
 			}
@@ -198,7 +214,10 @@
 				}
 			} else {
 				//no data but still need to update the repo
-				return repo.updatedAt(new Date(Date.now()));
+				if (sync) {
+					return repo.updatedAt(new Date(Date.now()));
+				}
+				return $q.when();
 			}
 		}
 

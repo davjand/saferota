@@ -12,7 +12,7 @@
 		var self = this;
 
 		//Public
-		self.isLoggedIn = _isLoggedIn();
+		self.isLoggedIn = false;
 		self.user = null;
 		self.data = {};
 
@@ -60,7 +60,7 @@
 						_handleError));
 			}
 			else {
-				self._ready.reject('Not Logged In');
+				self._ready.resolve();
 			}
 
 			return self._ready.promise;
@@ -80,7 +80,11 @@
 		 */
 
 		function _isLoggedIn() {
-			return Backendless.UserService.getCurrentUser() !== null;
+			try {
+				return Backendless.UserService.getCurrentUser() !== null;
+			} catch (error) {
+				return false;
+			}
 		}
 
 		function _handleDescribeUserClass(data) {
@@ -90,7 +94,7 @@
 		}
 
 		function _handleError(error) {
-			self._ready.reject(error.message);
+			self._ready.resolve(error.message);
 		}
 	}
 

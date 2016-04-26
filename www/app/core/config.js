@@ -4,8 +4,7 @@
 	angular
 		.module('saferota.core')
 		.config(laddaConfig)
-		.run(ionicRun)
-		.run(dataConfig);
+		.run(ionicRun);
 
 
 	/*
@@ -41,15 +40,6 @@
 			spinnerSize: 35,
 			spinnerColor: '#ffffff'
 		});
-	}
-
-
-	/*
-	 * Configure Data Service
-	 */
-	function dataConfig(DataConfigProvider) {
-		DataConfigProvider.setLocal('LocalAdapterLocalForage');
-		DataConfigProvider.setRemote('RemoteAdapterBackendless');
 	}
 
 

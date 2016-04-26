@@ -3,7 +3,7 @@
 
 	angular
 		.module('saferota.core')
-		.service('rotaRoleService', rotaRoleService);
+		.service('RotaRoleService', rotaRoleService);
 
 	rotaRoleService.$inject = ['DataStore'];
 
