@@ -276,9 +276,13 @@
 										notified.push(unique);
 									}
 
-									//remove the item from the array
-
-									//set the data that needs to be stored back into the cache
+									/*
+									 * Set the data that needs to be stored back into the cache
+									 *
+									 * Ensure that we are replacing the old value with new one, if the
+									 * value in the transaction is different then we don't need to adjust it
+									 *
+									 */
 									tx.model.setData(resolveData, false);
 									return self.$cache.set(k, tx.toObject());
 								}

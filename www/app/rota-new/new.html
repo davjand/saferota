@@ -8,19 +8,34 @@
 			   href="#"
 			   ng-click="vm.selectOrganisation()">
 				Organisation
-				<span class="item-note">Please Select</span>
+				<span class="item-note">
+					<span ng-if="vm.organisation.name">
+						{{vm.organisation.name}}
+					</span>
+					<span ng-if="!vm.organisation.name">Please Select</span>
+				</span>
 			</a>
 			<a class="item"
 			   href="#"
 			   ng-click="vm.selectSpeciality()">
 				Speciality
-				<span class="item-note">Please Select</span>
+				<span class="item-note">
+					<span ng-if="vm.speciality.title">
+						{{vm.speciality.title}}
+					</span>
+					<span ng-if="!vm.speciality.title">Please Select</span>
+				</span>
 			</a>
 			<a class="item"
 			   href="#"
 			   ng-click="vm.selectRole()">
 				Role
-				<span class="item-note">Please Select</span>
+				<span class="item-note">
+					<span ng-if="vm.role.title">
+						{{vm.role.title}}
+					</span>
+					<span ng-if="!vm.role.title">Please Select</span>
+				</span>
 			</a>
 
 			<div class="item-divider item">Contract Information</div>
@@ -69,6 +84,12 @@
 
 			</a>
 
+		</div>
+		<div class="padding">
+			<button class="button button-full button-balanced"
+					ng-click="vm.save()">
+				Next - Set Location
+			</button>
 		</div>
 	</ion-content>
 </ion-view>

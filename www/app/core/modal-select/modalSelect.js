@@ -10,7 +10,8 @@
 	/* @ngInject */
 	function ModalSelect($rootScope, $ionicModal, $q) {
 		var self = this,
-			modal = null;
+			modal = null,
+			offScope = null;
 
 
 		self.show = show;
@@ -22,12 +23,16 @@
 		 * show
 		 *
 		 * Shows a model select box
-		 * Expects options to contain
 		 *
-		 * items - Array of items
-		 * selected - Currently selected
-		 * title - The title for the modal
-		 * callback - A function that will be called with the value
+		 * Expects options to contain
+		 * - items - Array of items
+		 * - selected - Currently selected
+		 * - title - The title for the modal
+		 * - callback - A function that will be called with the value
+		 *
+		 * Optional
+		 * - nameKey - The key where the name can be reached
+		 * - valueKey - The key were the value van be reached
 		 *
 		 * @param options
 		 * @param $currentScope - Used to bind a destroy if needed @TODO
@@ -82,6 +87,15 @@
 				modal = createdModal;
 				modal.show();
 			});
+
+			/*
+			 * Bind Scope
+			 */
+			if ($currentScope && $currentScope.$on) {
+				offScope = $currentScope.$on('$destroy', function () {
+					hide();
+				});
+			}
 		}
 
 		/**
@@ -92,6 +106,11 @@
 		 */
 
 		function hide() {
+			if (offScope) {
+				offScope();
+				offScope = null;
+			}
+
 			if (modal) {
 				modal.hide();
 			}

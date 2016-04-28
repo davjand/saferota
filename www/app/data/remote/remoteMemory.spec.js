@@ -94,7 +94,25 @@ describe('saferota.data RemoteAdaptorMemory', function () {
 		});
 
 		$rootScope.$digest();
+	});
 
+	it('.find has support for pagination', function (done) {
+		buildFindData();
+		remote.find(TestModel, {
+			limit: 2,
+			offset: 2
+		}).then(function (data) {
+			expect(data.data.length).toBe(2);
+			expect(data.length).toBe(2);
+			expect(data.count).toBe(8);
+			expect(data.offset).toBe(2);
+
+			expect(data.data[0].id).toBe(3);
+			expect(data.data[1].id).toBe(4);
+
+			done();
+		});
+		$rootScope.$digest();
 	});
 
 

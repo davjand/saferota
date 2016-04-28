@@ -5,7 +5,7 @@
 		.module('saferota.data')
 		.factory('Model', ModelFactory);
 
-	ModelFactory.$inject = ['eventEmitter', 'RelationshipService'];
+	ModelFactory.$inject = ['eventEmitter'];
 
 
 	/*
@@ -39,7 +39,9 @@
 
 
 	/* @ngInject */
-	function ModelFactory(eventEmitter, RelationshipService) {
+	function ModelFactory(eventEmitter) {
+
+		var decorators = [];
 
 		/**
 		 *
@@ -83,6 +85,13 @@
 		};
 		CreateModel.prototype.getKey = function () {
 			return this._config.key;
+		};
+
+		/*
+		 * Register decorators for the model constructor
+		 */
+		CreateModel.addDecorator = function (decorator) {
+			decorators.push(decorator);
 		};
 
 
@@ -282,9 +291,12 @@
 				if (model.createdDate === null) {
 					model.createdDate = new Date();
 				}
+
+				/*
+				 don't set update date - we can use this to know if it has been saved or not
 				if (model.updatedDate === null) {
 					model.updatedDate = new Date();
-				}
+				 }*/
 
 				//callbacks when created
 				if (angular.isFunction(Model.prototype._onCreate) && !stopCallback) {
@@ -353,8 +365,10 @@
 			//Add event emitter
 			eventEmitter.inject(Model);
 
-			//Add Relationships
-			RelationshipService.decorate(Model);
+			//Add Decorators
+			angular.forEach(decorators, function (fx) {
+				fx(Model);
+			});
 
 
 			/*

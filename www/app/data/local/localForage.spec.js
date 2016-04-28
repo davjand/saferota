@@ -1,7 +1,7 @@
 describe('saferota.data LocalAdpatorLocalForage', function () {
 	beforeEach(module('saferota.data'));
 
-	var local, $rootScope, LocalAdapterLocalForage;
+	var local, $rootScope, LocalAdapterLocalForage, ModelService, $q;
 
 	/*
 
@@ -36,9 +36,12 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	/*
 	 Allow to create
 	 */
-	beforeEach(inject(function (_LocalAdapterLocalForage_, _$rootScope_) {
+	beforeEach(inject(function (_LocalAdapterLocalForage_, _$rootScope_, _ModelService_, _$q_) {
 		LocalAdapterLocalForage = _LocalAdapterLocalForage_;
 		$rootScope = _$rootScope_;
+		ModelService = _ModelService_;
+		$q = _$q_;
+
 		local = new LocalAdapterLocalForage({name: 'test'});
 	}));
 
@@ -188,25 +191,72 @@ describe('saferota.data LocalAdpatorLocalForage', function () {
 	});
 
 	/*
-	 .clearAll
+	 .filter
 	 */
-	// it('.clearAll can clear all', function (done) {
-	// 	var d = {done: false};
-	// 	var local2 = new LocalAdapterLocalForage({name: 'test2'});
-	//
-	// 	local.data({key1: 'test'}).then(function () {
-	// 		return local2.data({key2: 'test2'});
-	// 	}).then(function () {
-	// 		return local2.clearAll();
-	// 	}).then(function () {
-	// 		return local.length();
-	// 	}).then(function (len) {
-	// 		expect(len).toBe(0);
-	// 		d.done = true;
-	// 		done();
-	// 	});
-	// 	_digest(d);
-	// });
+	var Model, m1, m2, m3, m4, m5, m6;
+
+	//Helper function to create and save data
+	function createFilterData(saveData) {
+		Model = ModelService.create('test')
+			.schema({name: '', city: ''})
+			.key('objectId');
+
+		m1 = Model.create({name: 'James', city: 'Newcastle'});
+		m2 = Model.create({name: 'David', city: 'Newcastle'});
+		m3 = Model.create({name: 'Fred', city: 'Newcastle'});
+		m4 = Model.create({name: 'James', city: 'London'});
+		m5 = Model.create({name: 'David', city: 'London'});
+		m6 = Model.create({name: 'Fred', city: 'London'});
+
+		//save all the data into
+		saveData = typeof saveData !== 'undefined' ? safeDave : true;
+		if (saveData) {
+			var indexedModels = {};
+			angular.forEach([m1, m2, m3, m4, m5, m6], function (item) {
+				indexedModels[item.getKey()] = item;
+			});
+			return local.data(indexedModels);
+		}
+		return $q.when();
+	}
+
+	it('.filter can get all items', function (done) {
+		var d = {done: false};
+
+		createFilterData().then(function () {
+			return local.filter();
+		}).then(function (data) {
+			expect(data.length).toBe(6);
+			d.done = true;
+			done();
+		});
+		_digest(d);
+	});
+	it('.filter does not return config', function (done) {
+		var d = {done: false};
+		local.setConfig({test: 'test'}).then(function () {
+			return createFilterData();
+		}).then(function () {
+			return local.filter();
+		}).then(function (data) {
+			expect(data.length).toBe(6);
+			d.done = true;
+			done();
+		});
+		_digest(d);
+	});
+	it('.filter can filter the objects', function (done) {
+		var d = {done: false};
+		createFilterData().then(function () {
+			return local.filter({name: 'David'});
+		}).then(function (data) {
+			expect(data.length).toBe(2);
+			d.done = true;
+			done();
+		});
+		_digest(d);
+	});
+
 
 
 	/*

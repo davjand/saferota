@@ -6,6 +6,8 @@ describe('saferota.data DataStore', function () {
 		repo1;
 
 	beforeEach(inject(function (_DataStore_, _RepositoryService_, _ModelService_, _RequestService_, _$rootScope_) {
+
+
 		DataStore = _DataStore_;
 		RepositoryService = _RepositoryService_;
 		ModelService = _ModelService_;
@@ -18,7 +20,6 @@ describe('saferota.data DataStore', function () {
 		}).relationship('hasMany', 'pets', 'pet.owner');
 
 		TestModel2 = DataStore.create('test2').schema({name: '', city: ''}).key('objectId');
-
 		TestModelPet = DataStore.create('pet').schema({name: ''}).relationship('hasOne', 'owner', 'test1');
 
 
@@ -381,6 +382,7 @@ describe('saferota.data DataStore', function () {
 			date = new Date(2016, 1, 1);
 
 		createRemoteData();
+		spyOn(RequestService, 'findChunked').and.callThrough();
 
 		DataStore.sync(TestModel1).then(function () {
 			return repo.updatedAt();
@@ -401,11 +403,11 @@ describe('saferota.data DataStore', function () {
 			return repo.updatedAt(date);
 		}).then(function () {
 			//do another sync
-			spyOn(RequestService, 'find').and.callThrough();
+
 			return DataStore.sync(TestModel1);
 		}).then(function () {
 			//should have made the correct call to request service
-			expect(RequestService.find).toHaveBeenCalledWith(TestModel1, {updatedAt: date});
+			expect(RequestService.findChunked).toHaveBeenCalledWith(TestModel1, {updatedAt: date, offset: 0});
 			return repo.find();
 		}).then(function (models) {
 			//data should have been updated
@@ -457,6 +459,143 @@ describe('saferota.data DataStore', function () {
 		_d();
 	});
 
+	//Sync All
+	it('.syncAll sets a promise on the datastore that resolves when complete', function (done) {
+		var p = false;
+		DataStore.syncAll().then(function () {
+			expect(p).toBe(true);
+			done();
+		});
+		expect(DataStore.$syncInProgress).toBe(true);
+
+		DataStore.$syncComplete.then(function () {
+			p = true;
+		});
+		_d();
+	});
+
+	it('syncAll will not execute if already in progress', function (done) {
+		spyOn(DataStore, 'sync').and.callThrough();
+
+		DataStore.syncAll().then(function () {
+			done();
+		});
+
+		expect(DataStore.sync.calls.count()).toBe(3);
+
+		//should still only be 3
+		DataStore.syncAll();
+		expect(DataStore.sync.calls.count()).toBe(3);
+
+		_d();
+
+	});
+
+	//Response to goOnline event and attempt sync (if not already online)
+	it('DataStore listens to RequestService.goOnline event and starts sync', function (done) {
+		spyOn(DataStore, 'syncAll').and.callThrough();
+
+		RequestService.goOnline().then(function () {
+			expect(DataStore.syncAll.calls.count()).toBe(1);
+			done();
+		});
+
+		_d();
+
+	});
+
+	//decorating functions
+	it('.decorateFactory adds $get function onto the factory', function () {
+
+		spyOn(DataStore, 'get');
+
+		//the decorating should have been called by datastore as part of the .creat
+		var $s = $rootScope.$new();
+
+		TestModel1.$get("2", $s, true);
+		expect(DataStore.get).toHaveBeenCalledWith(
+			TestModel1,
+			"2",
+			$s,
+			true
+		);
+	});
+	it('.decorateFactory adds $find function onto the factory', function () {
+		spyOn(DataStore, 'find');
+
+		//the decorating should have been called by datastore as part of the .creat
+		var $s = $rootScope.$new();
+		var filter = {filter: {test: 'test'}};
+
+		TestModel1.$find(filter, $s);
+
+		expect(DataStore.find).toHaveBeenCalledWith(
+			TestModel1,
+			filter,
+			$s
+		);
+
+	});
+	it('.decorateFactory adds $sync function onto the factory', function () {
+
+		spyOn(DataStore, 'sync');
+
+		//the decorating should have been called by datastore as part of the .creat
+
+		TestModel1.$sync('test');
+
+		expect(DataStore.sync).toHaveBeenCalledWith(
+			TestModel1,
+			'test'
+		);
+	});
+
+
+	it('.decorateModel adds $save, $register and $remove functions to a model', function () {
+		spyOn(DataStore, 'save');
+		spyOn(DataStore, 'remove');
+		spyOn(DataStore, 'registerScope');
+
+		var m = TestModel1.create({name: 'James'});
+
+		m.$save(true);
+
+		expect(DataStore.save).toHaveBeenCalledWith(
+			m,
+			true
+		);
+
+		m.$remove(true);
+
+		expect(DataStore.remove).toHaveBeenCalledWith(
+			m,
+			true
+		);
+
+		m.$register(true);
+
+		expect(DataStore.registerScope).toHaveBeenCalledWith(
+			m,
+			true
+		);
+
+	});
+
+	//RegisterScope
+	it('.registerScope can register scope for a model', function () {
+		spyOn(RepositoryService.get('test1'), 'registerModel');
+
+		var $s = $rootScope.$new();
+		var m1 = TestModel1.create({name: 'james'});
+
+		DataStore.registerScope(m1, $s);
+
+		expect(RepositoryService.get('test1').registerModel).toHaveBeenCalled();
+
+	});
+
+
+
 
 	/*
 	 *
@@ -469,6 +608,28 @@ describe('saferota.data DataStore', function () {
 	 *
 	 *
 	 */
+
+	it('Can resolve IDS for has Many relationships', function (done) {
+		var $s = $rootScope.$new();
+		var model = TestModel1.create({firstName: 'David'}, $s);
+		var pet1 = TestModelPet.create({name: 'cat', owner: model.id}, $s),
+			pet2 = TestModelPet.create({name: 'dog', owner: model.id}, $s),
+			pet3 = TestModelPet.create({name: 'rabbit', owner: model.id}, $s);
+
+
+		DataStore.save([model, pet1, pet2, pet3], false).then(function () {
+			return RequestService.$queue.resolveTransaction({id: 'ABCDE'});
+		}).then(function () {
+			expect(pet1.owner).toBe('ABCDE');
+			expect(pet2.owner).toBe('ABCDE');
+			expect(pet3.owner).toBe('ABCDE');
+
+			done();
+		});
+
+		_d();
+	});
+
 	it('Can resolve relationships and keep models related from local to remote', function (done) {
 		var $s = $rootScope.$new();
 		var m1 = TestModel1.create({name: 'james'}, $s),
@@ -502,10 +663,12 @@ describe('saferota.data DataStore', function () {
 
 		//don't execute immediately, to ensure that the datastore works
 		DataStore.syncAll().then(function () {
-			return DataStore.save(m1, false)
+			return DataStore.save([m1, m2, p1, p2, p3], false)
 		}).then(function () {
 			expect(m1.id).toBe(m1ID);
-			return m1.$set('pets', [p1, p2, p3]);
+			return m1.$setRel('pets', [p1, p2, p3]);
+		}).then(function () {
+			return RequestService.next(true);
 		}).then(function () {
 			//by this point all the ids should have been resolved to server ids
 			expect(m1.id).not.toBe(m1ID);
@@ -513,16 +676,16 @@ describe('saferota.data DataStore', function () {
 			expect(p1.owner).not.toBe(m1ID);
 
 			//4 callbacks should have been called
-			expect(update).toEqual(7);
+			expect(update).toEqual(11);
 
-			return m1.$get('pets');
+			return m1.$getRel('pets');
 		}).then(function (pets) {
 			expect(pets.length).toBe(3);
 			expect(pets[0]).toBe(p1);
 			expect(pets[1]).toBe(p2);
 			expect(pets[2]).toBe(p3);
 
-			return p1.$get('owner');
+			return p1.$getRel('owner');
 		}).then(function (owner) {
 			expect(owner).toBe(m1);
 
@@ -580,7 +743,7 @@ describe('saferota.data DataStore', function () {
 			expect(Object.keys(repo1.$mem).length).toBe(0);
 			expect(Object.keys(repoPet.$mem).length).toBe(0);
 
-			return m1.$set('pets', [p1, p2, p3]);
+			return m1.$setRel('pets', [p1, p2, p3]);
 		}).then(function () {
 			//should still be nothing
 			expect(Object.keys(repo1.$mem).length).toBe(0);
@@ -595,7 +758,7 @@ describe('saferota.data DataStore', function () {
 			expect(Object.keys(repo1.$mem).length).toBe(2);
 
 			//relationships
-			return found[0].$get('pets', $s3);
+			return found[0].$getRel('pets', $s3);
 		}).then(function (pets) {
 			expect(pets.length).toBe(3);
 

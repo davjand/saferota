@@ -11944,7 +11944,12 @@ a.button {
 
 /*
 
+
+
+
 	Generic
+
+
 
 
 */
@@ -11954,6 +11959,18 @@ a.button {
 
 .button.button-light {
   border: 1px solid #DDDDDD; }
+
+/*
+ * Maps
+*/
+.scroll {
+  height: 100%;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
 
 /*
 

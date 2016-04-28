@@ -28,7 +28,8 @@ describe('saferota.data TransactionQueue', function () {
 
 
 		TestModel = ModelService.create('test')
-			.schema({firstName: 'John', lastName: 'Doe'});
+			.schema({firstName: 'John', lastName: 'Doe'})
+			.relationship('hasMany', 'pets', 'testPet.owner');
 
 		TestModelPet = ModelService.create('testPet')
 			.schema({name: ''})
@@ -476,5 +477,7 @@ describe('saferota.data TransactionQueue', function () {
 		_d();
 
 	});
+
+
 })
 ;

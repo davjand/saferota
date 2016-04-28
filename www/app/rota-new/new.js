@@ -6,37 +6,37 @@
 		.controller('NewRotaController', NewRotaController);
 
 	NewRotaController.$inject = [
-		'RotaService',
+		'$scope',
+		'$state',
+		'NewRotaService',
+		'Rota',
 		'ionicDatePicker',
 		'ModalSelect',
-		'RotaDataService'];
+		'RotaRole',
+		'RotaOrganisation',
+		'RotaSpeciality'];
 
 	/* @ngInject */
-	function NewRotaController(RotaService,
+	function NewRotaController($scope,
+							   $state,
+							   NewRotaService,
+							   Rota,
 							   ionicDatePicker,
 							   ModalSelect,
-							   RotaDataService) {
+							   RotaRole,
+							   RotaOrganisation,
+							   RotaSpeciality) {
 		var vm = this;
 
-		vm.BANDING = [
-			{name: 'None', value: 0},
-			{name: '1c', value: 30},
-			{name: '1b', value: 40},
-			{name: '1a', value: 50}
-		];
+		vm.BANDING = Rota.BANDING_OPTIONS;
 
-		vm.data = {
-			organisation: null,
-			speciality: null,
-			role: null,
-			label: '',
-			hours: 40,
-			dateStart: new Date(),
-			dateEnd: null,
-			banding: vm.BANDING[0]
-		};
+		vm.rota = NewRotaService.create($scope);
 
+		vm.role = {};
+		vm.organisation = {};
+		vm.speciality = {};
 
+		vm.save = save;
 		vm.selectOrganisation = selectOrganisation;
 		vm.selectRole = selectRole;
 		vm.selectSpeciality = selectSpeciality;
@@ -45,19 +45,20 @@
 		vm.clearEnd = clearEnd;
 
 
-		activate();
-
-
 		////////////////////////////////////////////////////////////////
 
 		// Function Definitions
 
 		////////////////////////////////////////////////////////////////
 
-		function activate() {
-
+		/**
+		 * save
+		 *
+		 * Saves a rota and progresses to next screen
+		 */
+		function save() {
+			$state.go('app.new-location');
 		}
-
 
 		/**
 		 * selectOrganisation
@@ -67,43 +68,73 @@
 		 */
 		function selectOrganisation() {
 			ModalSelect.show({
-				items: RotaDataService.Organisations.get(),
-				selected: vm.data.organisation,
+				items: RotaOrganisation.$find({orderBy: 'name'}),
+				selected: vm.rota.organisation,
 				title: 'Select Organisation',
 				callback: function (value) {
-					vm.data.organisation = value;
+					vm.rota.organisation = value;
+					vm.rota.$getRel('organisation').then(function (organisation) {
+						vm.organisation = organisation;
+					});
 				}
-			});
+			}, this);
 		}
 
 		function selectRole() {
-
+			ModalSelect.show({
+				items: RotaRole.$find({orderBy: 'title'}),
+				selected: vm.rota.role,
+				title: 'Select Role',
+				nameKey: 'title',
+				callback: function (value) {
+					vm.rota.role = value;
+					vm.rota.$getRel('role').then(function (role) {
+						vm.role = role;
+					});
+				}
+			}, this);
 		}
 
 		function selectSpeciality() {
-
+			ModalSelect.show({
+				items: RotaSpeciality.$find({orderBy: 'title'}),
+				selected: vm.rota.speciality,
+				title: 'Select Speciality',
+				nameKey: 'title',
+				callback: function (value) {
+					vm.rota.speciality = value;
+					vm.rota.$getRel('speciality').then(function (speciality) {
+						vm.speciality = speciality;
+					});
+				}
+			}, this);
 		}
 
+		/**
+		 *
+		 * Select Start Date
+		 *
+		 */
 		function selectStart() {
 			ionicDatePicker.openDatePicker({
-				inputDate: vm.data.dateStart,
+				inputDate: vm.rota.dateStart,
 				callback: function (val) {
-					vm.data.dateStart = val;
+					vm.rota.dateStart = val;
 				}
 			});
 		}
 
 		function selectEnd() {
 			ionicDatePicker.openDatePicker({
-				inputDate: vm.data.dateEnd || new Date(),
+				inputDate: vm.rota.dateEnd || new Date(),
 				callback: function (val) {
-					vm.data.dateEnd = val;
+					vm.rota.dateEnd = val;
 				}
 			});
 		}
 
 		function clearEnd(event) {
-			vm.data.dateEnd = null;
+			vm.rota.dateEnd = null;
 		}
 
 

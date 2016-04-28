@@ -22,7 +22,7 @@
 			initialize: initialize,
 			online: online,
 			get: get,
-			find: find,
+			query: query,
 			save: save,
 			update: update,
 			remove: remove
@@ -89,7 +89,7 @@
 		}
 
 		/**
-		 * find
+		 * query
 		 *
 		 * Find functionality
 		 *
@@ -99,19 +99,23 @@
 		 *  - orderBy: $filter.orderBy style parameter
 		 *  - filter: $filter style filtering
 		 *  - updateDate
+		 *  - options: {limit, offset}
 		 *
 		 * @param Model
 		 * @param options
 		 *
 		 * @return Promise
 		 */
-		function find(Model, options) {
+		function query(Model, options) {
 			options = options || {};
+			options.options = options.options || {};
+
 			var self = this;
 
 			var query = {
 					options: {
-						pageSize: 100
+						pageSize: options.limit || 100,
+						offset: options.offset || 0
 					}
 				},
 				conditions = [];
@@ -124,6 +128,14 @@
 					if (!angular.isArray(val)) {
 						val = [val];
 					}
+					/*
+					 * See if the keys are relational, if so then need to become
+					 * .objectId
+					 */
+					if (Model._rel[key]) {
+						key = key + '.objectId';
+					}
+
 					var thisCond = key + ' IN(';
 					for (var i = 0; i < val.length; i++) {
 						thisCond = thisCond + '\'' + val[i] + '\'';
@@ -135,13 +147,14 @@
 					conditions.push(thisCond);
 				});
 
+
 				query.condition = conditions.join(' and ');
 			}
 			/*
 			 * Sort
 			 */
 			if (options.orderBy) {
-				query.sortBy = angular.isArray(options.orderBy) ? options.orderBy : [options.orderBy];
+				query.options.sortBy = angular.isArray(options.orderBy) ? options.orderBy : [options.orderBy];
 			}
 
 			/*
@@ -156,15 +169,12 @@
 				}
 			}
 
+
 			return self._wrapPromise(
 				self._persistance(Model),
 				'find',
 				query
 			).then(function (response) {
-				/*
-				 @TODO support for paging etc
-				 */
-
 				/*
 				 * Process the data params (meta data)
 				 */
@@ -178,7 +188,13 @@
 
 					data.push(obj);
 				});
-				return data;
+				return $q.when({
+					data: data,
+					length: data.length,
+					count: response.totalObjects,
+					offset: response.offset,
+					limit: query.options.pageSize
+				});
 			})
 		}
 

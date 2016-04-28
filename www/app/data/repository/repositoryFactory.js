@@ -213,7 +213,7 @@
 				 Now review all the models in memory and updated if needed
 				 */
 				angular.forEach(modelsToSave, function (savedModel, key) {
-					if ($scope !== false) {
+					if ($scope && $scope !== false) {
 						self.registerModel(savedModel, $scope);
 					}
 
@@ -301,6 +301,7 @@
 		 * @returns a promise when complete
 		 */
 		function notify(transaction) {
+
 			var self = this,
 				initialId = transaction.model.getKey(),
 				model;
@@ -308,8 +309,13 @@
 			return this.$local.data(initialId).then(function (object) {
 				/*
 				 create a new model from data - or from transaction
+
+				 Has to be from the transaction to ensure data gets propogated
+				 correctly if relationships are set/unset
+
 				 */
-				model = self._Model.create(object === null ? transaction.model : object);
+				//model = self._Model.create(object === null ? transaction.model : object);
+				model = self._Model.create(transaction.model.toObject());
 				/*
 				 Apply the data
 				 */
@@ -329,7 +335,7 @@
 					 Get the model from memory
 					 */
 					var memObj = self.$mem[initialId];
-					memObj.m.setData(transaction.resolveData);
+					memObj.m.setData(model.toObject());
 					/*
 					 Delete the old key (not the model, exists in m
 					 */

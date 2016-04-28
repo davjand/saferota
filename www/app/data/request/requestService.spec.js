@@ -164,8 +164,7 @@ describe('saferota.data RequestService', function () {
 		_d();
 	});
 
-	/*
-	 * Go Online should only allow one concurrent going online attempt
+	/* Go Online should only allow one concurrent going online attempt
 	 * It should store one central promise that resolves for all attempts
 	 */
 	it('.goOnline only allows a single request at the same time, instead it returns a promise', function (done) {
@@ -375,6 +374,33 @@ describe('saferota.data RequestService', function () {
 		$rootScope.$digest();
 	});
 
+	//findChunks
+	it('.findChunked can download all paginated data', function (done) {
+		//pre-populate data
+		RequestService.$adapter.$cache['test'] = [
+			{name: 'A'},
+			{name: 'B'},
+			{name: 'C'},
+			{name: 'D'},
+			{name: 'E'},
+			{name: 'F'},
+			{name: 'G'},
+			{name: 'H'},
+			{name: 'I'},
+			{name: 'J'}
+		];
+
+		RequestService.findChunked(TestModel, {limit: 3}).then(function (data) {
+			expect(data.length).toBe(10);
+			//preserve order
+			expect(data[0].name).toBe('A');
+			expect(data[5].name).toBe('F');
+			expect(data[9].name).toBe('J');
+			done();
+		});
+
+		_d();
+	});
 
 	/*
 	 .get

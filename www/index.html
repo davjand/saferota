@@ -15,6 +15,7 @@
 	<!-- bower:css -->
 	<link rel="stylesheet" href="lib/ladda/dist/ladda-themeless.min.css" />
 	<link rel="stylesheet" href="lib/angular-toastr/dist/angular-toastr.css" />
+	<link rel="stylesheet" href="lib/ionic/css/ionic.css"/>
 	<!-- endbower -->
 
 
@@ -70,11 +71,11 @@
 	<script src="/app/core/config.js"></script>
 	<script src="/app/core/constants.js"></script>
 	<script src="/app/core/modal-select/modalSelect.js"></script>
-	<script src="/app/core/services/rotaDataService.js"></script>
-	<script src="/app/core/services/rotaOrganisationService.js"></script>
-	<script src="/app/core/services/rotaRoleService.js"></script>
-	<script src="/app/core/services/rotaService.js"></script>
-	<script src="/app/core/services/rotaSpecialityService.js"></script>
+	<script src="/app/core/services/rota.js"></script>
+	<script src="/app/core/services/rotaLocation.js"></script>
+	<script src="/app/core/services/rotaOrganisation.js"></script>
+	<script src="/app/core/services/rotaRole.js"></script>
+	<script src="/app/core/services/rotaSpeciality.js"></script>
 	<script src="/app/data/config.js"></script>
 	<script src="/app/data/datastore/datastore.js"></script>
 	<script src="/app/data/local/localForage.js"></script>
@@ -93,11 +94,18 @@
 	<script src="/app/data/transaction/transactionFactory.js"></script>
 	<script src="/app/data/transaction/transactionQueue.js"></script>
 	<script src="/app/rota-new/config.routes.js"></script>
+	<script src="/app/rota-new/location.js"></script>
 	<script src="/app/rota-new/new.js"></script>
+	<script src="/app/rota-new/newRotaService.js"></script>
 	<script src="/app/rota/app.js"></script>
 	<script src="/app/rota/config.routes.js"></script>
-	<script src="/app/rota/main.js"></script>
+	<script src="/app/rota/list.js"></script>
 	<!-- endinjector -->
+
+
+	<!-- Maps -->
+	<script src="http://maps.google.com/maps/api/js?key=AIzaSyAaAgNcYgRzVlSVKjH2bFOMeaWqlj_Po_w&sensor=true"></script>
+
 </head>
 <body ng-app="saferota">
 <!--

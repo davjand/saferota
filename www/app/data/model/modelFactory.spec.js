@@ -180,7 +180,7 @@ describe('saferota.data Model', function () {
 		var m = Test.create({id: 10});
 
 		expect(m.createdDate).not.toBeNull();
-		expect(m.updatedDate).not.toBeNull();
+		expect(m.updatedDate).toBeNull();
 	});
 
 	/*
@@ -213,7 +213,7 @@ describe('saferota.data Model', function () {
 		expect(data.id).toBe('1');
 		expect(data.name).toBe('default');
 		expect(data.createdDate).not.toBeNull();
-		expect(data.updatedDate).not.toBeNull();
+		expect(data.updatedDate).toBeNull();
 		expect(data.__className).toEqual('test');
 
 	});
@@ -456,8 +456,21 @@ describe('saferota.data Model', function () {
 		var m5 = Test.create({name: 'james', country: 3});
 
 		expect(m4.isEqual(m5)).toBe(false);
+	});
 
+	//Decorating Models
+	it('Can add decoraters to decorate a modle before it is created', function () {
+		Model.addDecorator(function (Constructor) {
+			Constructor.prototype.$test = function () {
+				return 'test';
+			}
+		});
 
+		var Test2 = new Model('test2').schema({name: '', city: ''});
+
+		var t = Test2.create({name: 'james'});
+
+		expect(t.$test()).toEqual('test');
 
 	});
 

@@ -26,26 +26,27 @@
 					}
 				}
 			})
-			.state('app.main', {
-				url: '/main',
-				templateUrl: 'app/rota/main.html',
-
+			.state('app.list', {
+				url: '/list',
+				templateUrl: 'app/rota/list.html',
+				controller: 'RotaListController',
+				controllerAs: 'vm',
 				resolve: {
 					/* @ngInject */
-					currentRotas: function (RotaService) {
+					userRotas: function (Rota) {
 						//Redirect to new if no rotas selected
-						return RotaService.getAll();
+						return Rota.$find();
 					}
 				},
 				/* @ngInject */
-				onEnter: function (currentRotas, $state) {
-					if (currentRotas.length < 1) {
+				onEnter: function (userRotas, $state) {
+					if (userRotas.length < 1) {
 						$state.go('app.new');
 					}
 				}
 			});
 
 		//by default go here
-		$urlRouterProvider.otherwise('/app/main');
+		$urlRouterProvider.otherwise('/app/list');
 	}
 })();

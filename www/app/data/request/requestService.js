@@ -39,9 +39,15 @@
 		self.create = create;
 		self.update = update;
 		self.remove = remove;
+		self.findChunked = findChunked;
 		self.find = find;
 		self.get = get;
+
 		self.next = next;
+
+		self.ready = function () {
+			return self.$ready.promise ? self.$ready.promise : self.$ready;
+		};
 
 		/*
 		 Event Functions
@@ -79,6 +85,11 @@
 			 * Will get set true/false multiple times if syncing multiple things
 			 */
 			self.$processing = false;
+			/*
+			 * A promise to when has finished processing
+			 */
+			self.$ready = $q.when();
+
 			/*
 			 * Self Explanatory - true if thinks is online
 			 */
@@ -120,17 +131,17 @@
 
 			//a little bit of logic to allow promise chaining
 			self.on('queueStart', function () {
-				self.ready = $q.defer();
+				self.$ready = $q.defer();
 				self.$inProgress = true;
 			});
 			self.on('queueComplete', function (error) {
 				self.$inProgress = false;
 				if (error) {
-					self.ready.reject();
+					self.$ready.reject();
 					//reset the promise to a resolved promise for future chaining
-					self.ready = $q.when();
+					self.$ready = $q.when();
 				} else {
-					self.ready.resolve();
+					self.$ready.resolve();
 				}
 			});
 		}
@@ -380,7 +391,7 @@
 		function createRequest(model, type, execute) {
 			var self = this;
 			type = type || this.TYPES.CREATE;
-			execute = typeof execute === 'undefined' ? true : execute;
+			execute = typeof execute === 'undefined' ? false : execute;
 
 			return this.$queue.push(new Transaction(type, model)).then(function () {
 				if (execute && self.$isOnline) {
@@ -428,6 +439,56 @@
 
 
 		/**
+		 * findChunked
+		 *
+		 * Retrieves chunked data from the server
+		 * Does a search and if more data is to come via pagination
+		 * then keeps calling until no more data
+		 *
+		 * @param Model
+		 * @param options
+		 * @returns {Promise} Returns a promise to the complete data set
+		 */
+		function findChunked(Model, options) {
+			var completeData = [];
+
+			/*
+			 * Recursive function gets a chunk of data using recursion
+			 * If more data is found. THe data is aggregated into the completeData array
+			 */
+			var fx = function (offset) {
+				options.offset = offset || 0;
+				/*
+				 * Call find
+				 */
+				return self.$adapter.find(Model, options).then(function (data) {
+					/*
+					 * Add the found results onto the array
+					 */
+					completeData = completeData.concat(data.data);
+
+					/*
+					 * See if need to do another find or if complete
+					 */
+					var totalFound = data.offset + data.length;
+					if (data.count > totalFound) {
+						return fx(totalFound);
+					} else {
+						return $q.when(completeData);
+					}
+				})
+			};
+
+			/*
+			 * Go Online and Start
+			 */
+			return this.goOnline().then(function () {
+				return fx(options.offset);
+			});
+		}
+
+
+		/**
 		 * next
 		 *
 		 * Gets the next item off the queue
@@ -443,7 +504,7 @@
 			var self = this;
 
 			if (self.$processing) {
-				return self.ready.promise; //prevent parallel processing
+				return self.$ready.promise; //prevent parallel processing
 			}
 			self.$processing = true;
 

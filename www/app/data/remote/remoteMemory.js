@@ -24,7 +24,7 @@
 			initialize: initialize,
 			online: online,
 			get: get,
-			find: find,
+			query: query,
 			save: save,
 			update: update,
 			remove: remove
@@ -83,12 +83,12 @@
 			options.filter[Model.getKey()] = id;
 
 			return this.find(Model, options).then(function (data) {
-				return $q.when(data.length > 0 ? data[0] : null)
+				return $q.when(data.length > 0 ? data.data[0] : null)
 			});
 		}
 
 		/**
-		 * find
+		 * query
 		 *
 		 * Find functionality
 		 *
@@ -97,13 +97,15 @@
 		 *  - None: Entire array is returned
 		 *  - orderBy: $filter.orderBy style parameter
 		 *  - filter: $filter style filtering
+		 *  - limit (Defaults to 100)
+		 *  - offset (Defaults to 0)
 		 *
 		 * @param Model
 		 * @param options
 		 *
 		 * @return Promise
 		 */
-		function find(Model, options) {
+		function query(Model, options) {
 			options = options || {};
 
 			var data = this._getCache(Model.className());
@@ -141,7 +143,28 @@
 			if (typeof options.orderBy !== 'undefined') {
 				data = $filter('orderBy')(data, options.orderBy);
 			}
-			return $q.when(data);
+
+			/*
+			 Do pagination
+			 */
+			var pageData = [],
+				offset = options.offset || 0,
+				limit = options.limit || 100;
+
+			angular.forEach(data, function (item, index) {
+				if (index >= offset &&
+					index < offset + limit) {
+					pageData.push(angular.merge({}, item)); //create a copy
+				}
+			});
+
+			return $q.when({
+				data: pageData,
+				length: pageData.length,
+				count: data.length,
+				offset: offset,
+				limit: limit
+			});
 		}
 
 		/**

@@ -12,6 +12,10 @@
 			.state('app.new', {
 				url: '/new',
 				templateUrl: 'app/rota-new/new.html'
+			})
+			.state('app.new-location', {
+				url: '/new/location',
+				templateUrl: 'app/rota-new/location.html'
 			});
 	}
 })();

@@ -54,13 +54,13 @@
 			allCaches.push(this.$cache);
 
 			//init the config
-			self.$cache.getItem(CONFIG_KEY).then(function(config){
-				if(angular.isObject(config)){
+			self.$cache.getItem(CONFIG_KEY).then(function (config) {
+				if (angular.isObject(config)) {
 					return $q.when();
-				}else{
-					return self.$cache.setItem(CONFIG_KEY,{});
+				} else {
+					return self.$cache.setItem(CONFIG_KEY, {});
 				}
-			}).then(function(){
+			}).then(function () {
 				self._ready.resolve();
 			})
 		}
@@ -133,16 +133,10 @@
 		 * @returns {*|boolean}
 		 */
 		function setConfig(config) {
-			var p = $q.defer();
 			var self = this;
-
-			self.isReady().then(function () {
+			return self.isReady().then(function () {
 				return self.$cache.setItem(CONFIG_KEY, config);
-			}).then(function () {
-				p.resolve();
-			}, self._err(p));
-
-			return p.promise;
+			});
 		}
 
 
@@ -152,17 +146,13 @@
 		 * @returns {*}
 		 */
 		function length() {
-			var p = $q.defer();
 			var self = this;
 
-			self.isReady().then(function () {
-					return self.$cache.length();
-				})
-				.then(function (value) {
-					p.resolve(value - 1); //factor in config length
-				}, self._err(p));
-
-			return p.promise;
+			return self.isReady().then(function () {
+				return self.$cache.length();
+			}).then(function (value) {
+				return $q.when(value - 1); //factor in config length
+			});
 		}
 
 		/**
@@ -190,18 +180,15 @@
 		 * Returns {}
 		 */
 		function keys() {
-			var p = $q.defer();
 			var self = this;
 
-			self.isReady().then(function () {
+			return self.isReady().then(function () {
 				return self.$cache.keys();
 			}).then(function (keys) {
 				//remove the config key from the array
 				keys.splice(keys.indexOf(CONFIG_KEY), 1);
-				p.resolve(keys);
-			}, self._err(p));
-
-			return p.promise;
+				return $q.when(keys);
+			});
 		}
 
 		/**
@@ -211,15 +198,10 @@
 		 * @returns {*}
 		 */
 		function clear() {
-			var p = $q.defer();
 			var self = this;
-			self.isReady().then(function () {
+			return self.isReady().then(function () {
 				return self.$cache.clear();
-			}).then(function () {
-				p.resolve();
-			}, self._err(p));
-
-			return p.promise;
+			});
 		}
 
 		/**
@@ -244,15 +226,10 @@
 		 * @param id
 		 */
 		function remove(id) {
-			var p = $q.defer();
 			var self = this;
-			self.isReady().then(function () {
+			return self.isReady().then(function () {
 				return self.$cache.removeItem(id);
-			}).then(function () {
-				p.resolve();
-			}, self._err(p));
-
-			return p.promise;
+			});
 		}
 	}
 

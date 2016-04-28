@@ -5,10 +5,10 @@
 		.module('saferota.data')
 		.service('DataStore', DataStore);
 
-	DataStore.$inject = ['ModelService', 'RepositoryService', 'RequestService', '$q', 'RelationshipService'];
+	DataStore.$inject = ['ModelService', 'RepositoryService', 'RequestService', '$q', 'RelationshipService', 'Model'];
 
 	/* @ngInject */
-	function DataStore(ModelService, RepositoryService, RequestService, $q, RelationshipService) {
+	function DataStore(ModelService, RepositoryService, RequestService, $q, RelationshipService, Model) {
 		var self = this;
 
 
@@ -20,10 +20,46 @@
 		self.get = get;
 		self.find = find;
 		self.remove = remove;
+		self.registerScope = registerScope;
 		self.clear = clear;
+		self.clearAll = clearAll;
 
-		//Initialisation
+		//Internal
+		self._decorateFactory = _decorateFactory;
+		self._decorateModel = _decorateModel;
+
+		/*
+		 * Initialisation Relationships
+		 */
 		RelationshipService.registerDataStore(this);
+
+		/*
+		 * Create a listener to trigger a sync if goes online
+		 */
+		RequestService.on('goOnline', function () {
+			RequestService.ready().then(function () {
+				self.syncAll();
+			});
+		});
+
+		/*
+		 * True if currently synchronising via syncAll
+		 */
+		self.$syncInProgress = false;
+
+		/*
+		 * A promise to when the current sync is complete
+		 * If $syncInProgress is true, otherwise just a resolved
+		 * promise
+		 */
+		var $syncPromise = null;
+		self.$syncComplete = $q.when();
+
+		/*
+		 * Decorate Model Factory and models when created
+		 */
+		self._decorateFactory(Model);
+		Model.addDecorator(self._decorateModel);
 
 
 		/////////////////////////////////////////
@@ -50,6 +86,7 @@
 				}
 			});
 			RepositoryService.create(Model);
+
 			return Model;
 		}
 
@@ -63,10 +100,12 @@
 		 *
 		 * @param models
 		 * @param execute
+		 * @param $scope
+		 * 
 		 * @returns {*}
 		 */
-		function save(models, execute) {
-			execute = typeof execute === 'undefined' ? true : execute;
+		function save(models, execute, $scope) {
+			execute = typeof execute === 'undefined' ? false : execute;
 			models = angular.isArray(models) ? models : [models];
 
 			/*
@@ -75,8 +114,9 @@
 			function fx(i) {
 				if (i < models.length) {
 					var model = models[i];
-					return RepositoryService.get(model.className()).save(model).then(function () {
-						if (model.__existsRemotely) {
+					var exists = model.updatedDate && model.updatedDate != null;
+					return RepositoryService.get(model.className()).save(model, $scope).then(function () {
+						if (model.__existsRemotely || exists) {
 							return RequestService.update(model, execute);
 						} else {
 							return RequestService.create(model, execute);
@@ -151,7 +191,7 @@
 				if (updatedAt !== null) {
 					options.updatedAt = updatedAt;
 				}
-				return RequestService.find(Model, options);
+				return RequestService.findChunked(Model, options);
 			}).then(function (data) {
 				//save the data
 				return _saveResponseDataLocally(Model, data, true);
@@ -163,17 +203,45 @@
 		 * SyncAll
 		 *
 		 * Syncs all models
+		 * Sets flags and a promise on the DataStore to indicate in progress
 		 *
 		 * @returns {*}
 		 */
 		function syncAll() {
 			var pArr = [],
 				self = this;
-			angular.forEach(ModelService.getAll(), function (Model) {
-				pArr.push(self.sync(Model));
-			});
-			return $q.all(pArr);
+
+			if (!self.$syncInProgress) {
+				/*
+				 * Setup flags
+				 */
+				self.$syncInProgress = true;
+				$syncPromise = $q.defer();
+				self.$syncComplete = $syncPromise.promise;
+
+				/*
+				 * Build a promise array of all the data model parallel syncs
+				 */
+				angular.forEach(ModelService.getAll(), function (Model) {
+					pArr.push(self.sync(Model));
+				});
+				/*
+				 * Respond when complete
+				 */
+				return $q.all(pArr).then(function () {
+					self.$syncInProgress = false;
+					$syncPromise.resolve();
+					return $q.when();
+				}, function (error) {
+					self.$syncInProgress = false;
+					$syncPromise.reject('SyncAll Error: ' + error);
+					return self.$syncComplete;
+				});
+			} else {
+				return self.$syncComplete;
+			}
 		}
+
 
 		/**
 		 * _saveResponseDataLocally
@@ -237,10 +305,16 @@
 				Model = ModelService.get(Model);
 			}
 
+			if (typeof id === 'undefined') {
+				return $q.when();
+			}
+
 
 			var repo = RepositoryService.get(Model);
 
-			return repo.updatedAt().then(function (date) {
+			return self.$syncComplete.then(function () {
+				return repo.updatedAt()
+			}).then(function (date) {
 				if (date === null || forceRemote) {
 					return _getFromRemote(Model, id, $scope);
 				} else {
@@ -297,7 +371,10 @@
 
 			var repo = RepositoryService.get(Model);
 
-			return repo.updatedAt().then(function (date) {
+			//ensure current sync is complete
+			return self.$syncComplete.then(function () {
+				return repo.updatedAt()
+			}).then(function (date) {
 				if (date === null || forceRemote) {
 					return _findFromRemote(Model, options, $scope);
 				} else {
@@ -310,7 +387,7 @@
 					});
 				}
 			}, function (error) {
-				p.reject(error);
+				return $q.reject(error);
 			});
 		}
 
@@ -332,6 +409,20 @@
 
 
 		/**
+		 * registerScope
+		 *
+		 * Registers a new scope for a model, allowing it get stay bound
+		 * and recieve updates within that scope
+		 *
+		 * @param m1
+		 * @param $scope
+		 */
+		function registerScope(m1, $scope) {
+			RepositoryService.get(m1.className()).registerModel(m1, $scope);
+		}
+
+
+		/**
 		 * _findFromRemote
 		 *
 		 * Finds from the remote and saves into the database
@@ -344,7 +435,7 @@
 		 */
 		function _findFromRemote(Model, options, $scope) {
 			return RequestService.find(Model, options).then(function (data) {
-				return _saveResponseDataLocally(Model, data, false, $scope);
+				return _saveResponseDataLocally(Model, data.data, false, $scope);
 			}).then(function (models) {
 				return $q.when(models && models.length > 0 ? models : []);
 			});
@@ -381,6 +472,83 @@
 				}
 			}
 		}
+
+		/**
+		 * clearAll
+		 *
+		 * Clears all local data, in memory and cached
+		 *
+		 * @returns {*}
+		 */
+		function clearAll() {
+			var p = [];
+
+			angular.forEach(RepositoryService.getAll(), function (repo) {
+				p.push(repo.clear(true));
+			});
+
+			return $q.all(p)
+		}
+
+
+		/**
+		 * _decorateFactory
+		 *
+		 * adds a $get, $sync, $find functions to a model factory
+		 *
+		 * @param Model
+		 * @returns {Model}
+		 * @private
+		 */
+		function _decorateFactory(ModelFactory) {
+			var getArgs = function (that, args) {
+				var a = Array.prototype.slice.call(args);
+				a.unshift(that);
+				return a;
+			};
+
+			/*
+			 * Ideally we'd bind to prototype but this is quicker
+			 */
+			ModelFactory.prototype.$get = function () {
+				return self.get.apply(self, getArgs(this, arguments));
+			};
+			ModelFactory.prototype.$find = function () {
+				return self.find.apply(self, getArgs(this, arguments));
+			};
+			ModelFactory.prototype.$sync = function () {
+				return self.sync.apply(self, getArgs(this, arguments));
+			};
+		}
+
+		/**
+		 * _decorateModel
+		 *
+		 * Decorates a model constructor with $save and $remove
+		 *
+		 * @param ModelConstructor
+		 * @private
+		 */
+		function _decorateModel(ModelConstructor) {
+			var getArgs = function (that, args) {
+				var a = Array.prototype.slice.call(args);
+				a.unshift(that);
+				return a;
+			};
+
+			ModelConstructor.prototype.$save = function () {
+				return self.save.apply(self, getArgs(this, arguments));
+			};
+			ModelConstructor.prototype.$remove = function () {
+				return self.remove.apply(self, getArgs(this, arguments));
+			};
+			ModelConstructor.prototype.$register = function () {
+				return self.registerScope.apply(self, getArgs(this, arguments));
+			};
+		}
+
+
+
 	}
 })
 ();

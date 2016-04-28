@@ -7,7 +7,8 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 
 	var remote, ModelService, $rootScope, TestModel, $q,
 	//m1, m2, m3,
-		Backendless = window.Backendless;
+		Backendless = window.Backendless,
+		originalTimeout;
 
 	/*
 
@@ -57,6 +58,13 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 		$q = _$q_;
 
 		/*
+		 Allow longer timeout
+		 */
+		originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+		jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+
+
+		/*
 		 Setup Schema
 		 */
 		TestModel = ModelService.create('TestModel').schema({
@@ -82,6 +90,7 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 	 *
 	 */
 	afterEach(function () {
+		jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 		ModelService.clear();
 	});
 
@@ -276,7 +285,6 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 		_digest(d, 100);
 
 	});
-
 	it('.find can filter by an array of values', function (done) {
 		var d = {done: false};
 
@@ -296,7 +304,6 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 
 		_digest(d, 100);
 	});
-
 	it('.find can filter by multiple values', function (done) {
 		var d = {done: false};
 
@@ -314,6 +321,41 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			done();
 		});
 
+		_digest(d, 100);
+	});
+	it('.find can use sort', function (done) {
+		var d = {done: false};
+
+		sampleData().then(function () {
+			return remote.find(TestModel, {
+				orderBy: 'city'
+			}).then(function (data) {
+				expect(data.data[0].city).toBe('London');
+				done();
+			});
+		});
+		_digest(d, 100);
+	});
+	it('.find can use pagination', function (done) {
+		var d = {done: false};
+
+		sampleData().then(function () {
+			return remote.find(TestModel, {
+				limit: 2,
+				offset: 1,
+				orderBy: 'city'
+			}).then(function (data) {
+				expect(data.length).toBe(2);
+				expect(data.count).toBe(5);
+				expect(data.offset).toBe(1);
+				expect(data.limit).toBe(2);
+				expect(data.data.length).toBe(2);
+				expect(data.data[0].city).toBe('London');
+				expect(data.data[1].city).toBe('Newcastle');
+
+				done();
+			});
+		});
 		_digest(d, 100);
 	});
 

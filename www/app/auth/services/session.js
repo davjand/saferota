@@ -24,12 +24,6 @@
 		self.clear = clear;
 		self.getReady = getReady;
 
-		//Private, for testing only
-		if (window.inject) {
-			self._handleDescribeUserClass = _handleDescribeUserClass;
-		}
-
-
 		///////////////////////////////
 
 		/*
@@ -53,11 +47,13 @@
 		function start() {
 			self._ready = $q.defer();
 
-			if (_isLoggedIn()) {
-				Backendless.UserService.describeUserClass(
-					new Backendless.Async(
-						_handleDescribeUserClass,
-						_handleError));
+
+			var user = _isLoggedIn();
+
+			if (_isLoggedIn() !== false) {
+				self.user = new User(user);
+				self.isLoggedIn = true;
+				self._ready.resolve();
 			}
 			else {
 				self._ready.resolve();
@@ -66,10 +62,16 @@
 			return self._ready.promise;
 		}
 
+		/**
+		 * clear
+		 *
+		 * Clears the Data
+		 *
+		 */
 		function clear() {
-			this.isLoggedIn = false;
-			this.user = null;
-			this.data = {};
+			self.isLoggedIn = false;
+			self.user = null;
+			self.data = {};
 		}
 
 
@@ -79,22 +81,24 @@
 
 		 */
 
+		/**
+		 * Gets the current user
+		 *
+		 *
+		 * @returns {* | User}
+		 * @private
+		 */
 		function _isLoggedIn() {
 			try {
-				return Backendless.UserService.getCurrentUser() !== null;
+				/*
+				 A bit of a hack to prevent going online syncrhonously every single page load
+				 @TODO will need reviewing
+				 return Backendless.UserService.getCurrentUser();
+				 */
+				return Backendless.LocalCache.get("current-user-id") != false
 			} catch (error) {
 				return false;
 			}
-		}
-
-		function _handleDescribeUserClass(data) {
-			self.user = new User(data);
-			self.isLoggedIn = true;
-			self._ready.resolve();
-		}
-
-		function _handleError(error) {
-			self._ready.resolve(error.message);
 		}
 	}
 

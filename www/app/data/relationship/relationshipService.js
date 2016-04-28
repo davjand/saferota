@@ -5,10 +5,10 @@
 		.module('saferota.data')
 		.service('RelationshipService', RelationshipService);
 
-	RelationshipService.$inject = ['$q'];
+	RelationshipService.$inject = ['$q', 'Model'];
 
 	/* @ngInject */
-	function RelationshipService($q) {
+	function RelationshipService($q, Model) {
 		var self = this;
 
 
@@ -31,6 +31,10 @@
 
 		function initialize() {
 			self.$store = null;
+
+			//setup decorators
+			Model.addDecorator(self.decorate);
+
 		}
 
 		/**
@@ -70,7 +74,7 @@
 				 HasOne / Local
 				 */
 				model[key] = foreignModel.getKey();
-				return self.$store.save(model);
+				return self.$store.save(model, false);
 
 			} else if (r.keyType === model.REL_KEY_TYPES.FOREIGN &&
 				r.type === model.REL_TYPES.HAS_ONE) {
@@ -81,7 +85,7 @@
 				//need to see if existing and remove
 				return self.removeRelated(model, key).then(function () {
 					foreignModel[r.key] = model.getKey();
-					return self.$store.save(foreignModel);
+					return self.$store.save(foreignModel, false);
 				});
 
 			} else if (r.keyType === model.REL_KEY_TYPES.LOCAL &&
@@ -104,12 +108,10 @@
 					if (!angular.isArray(foreignModel)) {
 						foreignModel = [foreignModel]
 					}
-					var pArr = [];
 					angular.forEach(foreignModel, function (fm) {
 						fm[r.key] = model.getKey();
-						pArr.push(self.$store.save(fm));
 					});
-					return $q.all(pArr);
+					return self.$store.save(foreignModel, false);
 				});
 			}
 		}
@@ -134,7 +136,7 @@
 				 HasOne / Local
 				 */
 				model[r.key] = null;
-				return self.$store.save(model);
+				return self.$store.save(model, false);
 
 			} else if (r.keyType === model.REL_KEY_TYPES.FOREIGN &&
 				r.type === model.REL_TYPES.HAS_ONE) {
@@ -146,7 +148,7 @@
 						return $q.when();
 					}
 					foreignModel[r.key] = null;
-					return self.$store.save(foreignModel);
+					return self.$store.save(foreignModel, false);
 				});
 
 
@@ -175,11 +177,10 @@
 					if (!models) {
 						return $q.when();
 					}
-					var pArr = [];
 					angular.forEach(models, function (m) {
-						pArr.push(self.removeRelated(m, r.key));
+						m[r.key] = null;
 					});
-					return $q.all(pArr);
+					return self.$store.save(models);
 				});
 
 			}
@@ -263,22 +264,22 @@
 		 * @param ModelConstructor
 		 */
 		function decorate(ModelConstructor) {
-			var self = this,
-				getArgs = function (that, args) {
+			var getArgs = function (that, args) {
 					var a = Array.prototype.slice.call(args);
 					a.unshift(that);
 					return a;
 				};
 
-			ModelConstructor.prototype.$get = function () {
+			ModelConstructor.prototype.$getRel = function () {
 				return self.getRelated.apply(self, getArgs(this, arguments));
 			};
-			ModelConstructor.prototype.$set = function () {
+			ModelConstructor.prototype.$setRel = function () {
 				return self.setRelated.apply(self, getArgs(this, arguments));
 			};
-			ModelConstructor.prototype.$remove = function () {
+			ModelConstructor.prototype.$removeRel = function () {
 				return self.removeRelated.apply(self, getArgs(this, arguments));
 			};
+
 		}
 
 	}

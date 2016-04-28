@@ -130,6 +130,8 @@
 			var p = $q.defer();
 
 			self.config().then(function (conf) {
+				conf = conf || {};
+
 				//get the key
 				if (typeof value === 'undefined') {
 					p.resolve(conf[key]);
@@ -255,7 +257,6 @@
 		 * $this - to allow filtering of the whole object (ie if just a string)
 		 *
 		 * @param filter
-		 * @param orderBy @TODO Implement Sort
 		 *
 		 * @returns {Promise}
 		 */
