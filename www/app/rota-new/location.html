@@ -1,8 +1,10 @@
-<ion-view class="rota-new"
-		  ng-controller="LocationPickerController as vm">
+<ion-view cache-view="false">
 	<ion-nav-title>Choose Location</ion-nav-title>
 
-	<div id="map" data-tap-disabled="true"></div>
+	<ion-nav-buttons side="secondary">
+		<button class="button" ng-click="vm.save()">Save</button>
+	</ion-nav-buttons>
+
+	<location-picker location="vm.location" style="height: 100%;"></location-picker>
 
 </ion-view>
-

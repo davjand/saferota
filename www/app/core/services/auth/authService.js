@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('saferota.auth')
+		.module('saferota.core')
 		.service('AuthService', AuthService);
 
 	AuthService.$inject = ['Backendless','Session', '$q','$rootScope', 'AUTH_EVENTS'];

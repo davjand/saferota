@@ -22,16 +22,19 @@ module.exports = function (config) {
 			//overrides: []
 		},
 
-		plugins: ['karma-wiredep',
+		plugins: [
+			'karma-wiredep',
 			'karma-jasmine',
 			'karma-chrome-launcher',
 			'karma-phantomjs-launcher',
-			'karma-coverage'],
+			'karma-coverage',
+			'karma-ng-html2js-preprocessor'],
 
 		// list of files / patterns to load in the browser
 		files: [
 			'www/lib/ionic/js/ionic.bundle.js',
 			'www/lib/angular-mocks/angular-mocks.js',
+
 
 			/*'www/lib/ngCordova/dist/ng-cordova.js',
 			 'www/lib/ngCordova/dist/ng-cordova-mocks.js',
@@ -42,10 +45,9 @@ module.exports = function (config) {
 			 'www/lib/moment/min/moment.min.js',
 			 'www/lib/angular-cache/dist/angular-cache.js',*/
 
-
 			'www/app/**/*.module.js',
-
-			'www/app/**/*.js'
+			'www/app/**/*.js',
+			'www/app/**/*.html'
 		],
 
 
@@ -56,7 +58,14 @@ module.exports = function (config) {
 		// preprocess matching files before serving them to the browser
 		// available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: {
-			'www/app/**/!(*spec).js': ['coverage']
+			'www/app/**/!(*spec).js': ['coverage'],
+			'www/app/**/*.html': ['ng-html2js']
+		},
+
+		//Preprocess
+		ngHtml2JsPreprocessor: {
+			// strip this from the file path
+			stripPrefix: 'www/'
 		},
 
 

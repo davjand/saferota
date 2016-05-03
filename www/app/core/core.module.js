@@ -15,6 +15,6 @@
 			'toastr',
 			'angular-ladda',
 			'saferota.data',
-			'saferota.auth'
+			'saferota.backendless'
 		]);
 })();

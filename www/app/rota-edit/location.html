@@ -1,0 +1,13 @@
+<ion-view cache-view="false">
+
+	<ion-nav-title>Edit Location</ion-nav-title>
+
+	<ion-nav-buttons side="secondary">
+		<button class="button" ng-click="vm.save()">Save</button>
+	</ion-nav-buttons>
+
+	<div style="height: 100%" ng-if="vm.location">
+		<location-picker location="vm.location" style="height: 100%;"></location-picker>
+	</div>
+
+</ion-view>

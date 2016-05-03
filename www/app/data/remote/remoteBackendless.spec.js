@@ -5,7 +5,7 @@
  */
 xdescribe('saferota.data RemoteAdapterBackendless', function () {
 
-	var remote, ModelService, $rootScope, TestModel, $q,
+	var remote, ModelService, $rootScope, TestModel, TestPet, $q,
 	//m1, m2, m3,
 		Backendless = window.Backendless,
 		originalTimeout;
@@ -71,6 +71,13 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			name: '',
 			city: ''
 		}).key('objectId');
+
+		TestPet = ModelService.create('TestPet')
+			.schema({
+				name: ''
+			})
+			.key('objectId')
+			.relationship('hasOne', 'owner', 'TestModel');
 
 		/*
 		 Create new remote
@@ -430,6 +437,38 @@ xdescribe('saferota.data RemoteAdapterBackendless', function () {
 			done();
 		});
 		_digest(d, 50);
+	});
+
+	/*
+	 .Preprocess relationships for save
+	 */
+	it('can format relationships correctly for backendless', function () {
+		var m = TestModel.create({id: '2', name: 'james'});
+		var p = TestPet.create({name: 'dog', owner: '2'});
+
+		var data = remote._formatForSave(p);
+
+		expect(data.owner.objectId).toBe('2');
+		expect(data.owner.___class).toBe('TestModel');
+	});
+
+	/*
+	 * .process relationship downloads
+	 */
+	it('Can download relationships to the expected format', function () {
+		var m = TestModel.create({id: '2', name: 'james'});
+		var p = TestPet.create({name: 'dog', owner: '2'});
+
+		var d = remote._processRelationships(TestPet, {
+			id: "888",
+			name: 'Cat',
+			owner: {
+				objectId: '1234'
+			}
+		});
+
+		expect(d.owner).toBe('1234');
+
 	});
 
 

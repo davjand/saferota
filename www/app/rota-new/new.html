@@ -1,93 +1,19 @@
 <ion-view class="rota-new"
-		  ng-controller="NewRotaController as vm">
+		  cache-view="false">
 	<ion-nav-title>Add SafeRota</ion-nav-title>
+
 	<ion-content>
-		<div class="list">
-			<div class="item-divider item">Rota Information</div>
-			<a class="item"
-			   href="#"
-			   ng-click="vm.selectOrganisation()">
-				Organisation
-				<span class="item-note">
-					<span ng-if="vm.organisation.name">
-						{{vm.organisation.name}}
-					</span>
-					<span ng-if="!vm.organisation.name">Please Select</span>
-				</span>
-			</a>
-			<a class="item"
-			   href="#"
-			   ng-click="vm.selectSpeciality()">
-				Speciality
-				<span class="item-note">
-					<span ng-if="vm.speciality.title">
-						{{vm.speciality.title}}
-					</span>
-					<span ng-if="!vm.speciality.title">Please Select</span>
-				</span>
-			</a>
-			<a class="item"
-			   href="#"
-			   ng-click="vm.selectRole()">
-				Role
-				<span class="item-note">
-					<span ng-if="vm.role.title">
-						{{vm.role.title}}
-					</span>
-					<span ng-if="!vm.role.title">Please Select</span>
-				</span>
-			</a>
 
-			<div class="item-divider item">Contract Information</div>
+		<ion-nav-buttons side="primary">
+			<button class="button" ng-click="vm.cancel()">Cancel</button>
+		</ion-nav-buttons>
 
-			<label class="item item-input item-select">
-				<div class="input-label">
-					Banding
-				</div>
-				<select ng-model="vm.data.banding"
-						ng-options="item as item.name for item in vm.BANDING track by item.value"
-						convert-to-number>
-				</select>
-			</label>
+		<rota-edit rota="vm.rota"></rota-edit>
 
-			<label class="item item-input">
-				<div class="input-label">
-					Rota Hours
-				</div>
-				<input type="text"
-					   class="text-right"
-					   ng-model="vm.data.hours"/>
-			</label>
-
-
-			<div class="item-divider item">Rotation Dates</div>
-			<a class="item"
-			   href="#"
-			   ng-click="vm.selectStart()">
-				Start Date
-				<span class="item-note">
-					{{ vm.data.dateStart | date : "dd MMM yy"}}
-				</span>
-			</a>
-			<a class="item"
-			   ng-class="{'item-icon-right': vm.data.dateEnd}"
-			   href="#"
-			   ng-click="vm.selectEnd()">
-				End Date
-				<i class="icon fa fa-times-circle"
-				   ng-show="vm.data.dateEnd"
-				   aria-hidden="true"
-				   ng-click="vm.data.dateEnd = null; $event.stopPropagation();"></i>
-				<span class="item-note">
-					{{(vm.data.dateEnd | date : 'dd MMM yy' ) || 'Indefinite'}}
-				</span>
-
-			</a>
-
-		</div>
 		<div class="padding">
 			<button class="button button-full button-balanced"
-					ng-click="vm.save()">
+					ng-click="vm.save()"
+					ng-disabled="!vm.rota.isValid()">
 				Next - Set Location
 			</button>
 		</div>

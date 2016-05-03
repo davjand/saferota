@@ -5,10 +5,23 @@
 		.module('saferota.data')
 		.service('DataStore', DataStore);
 
-	DataStore.$inject = ['ModelService', 'RepositoryService', 'RequestService', '$q', 'RelationshipService', 'Model'];
+	DataStore.$inject = [
+		'ModelService',
+		'RepositoryService',
+		'RequestService',
+		'$q',
+		'$interval',
+		'RelationshipService',
+		'Model'];
 
 	/* @ngInject */
-	function DataStore(ModelService, RepositoryService, RequestService, $q, RelationshipService, Model) {
+	function DataStore(ModelService,
+					   RepositoryService,
+					   RequestService,
+					   $q,
+					   $interval,
+					   RelationshipService,
+					   Model) {
 		var self = this;
 
 
@@ -60,6 +73,14 @@
 		 */
 		self._decorateFactory(Model);
 		Model.addDecorator(self._decorateModel);
+
+
+		//Start a regular timeout to check the sync queue
+		//@TODO Unit test
+		$interval(function () {
+			RequestService.next(true);
+		}, 5000);
+
 
 
 		/////////////////////////////////////////
@@ -414,11 +435,14 @@
 		 * Registers a new scope for a model, allowing it get stay bound
 		 * and recieve updates within that scope
 		 *
-		 * @param m1
+		 * @param model {Model|Array}
 		 * @param $scope
 		 */
-		function registerScope(m1, $scope) {
-			RepositoryService.get(m1.className()).registerModel(m1, $scope);
+		function registerScope(model, $scope) {
+			model = angular.isArray(model) ? model : [model];
+			angular.forEach(model, function (m) {
+				RepositoryService.get(m.className()).registerModel(m, $scope);
+			});
 		}
 
 
@@ -496,7 +520,7 @@
 		 *
 		 * adds a $get, $sync, $find functions to a model factory
 		 *
-		 * @param Model
+		 * @param ModelFactory
 		 * @returns {Model}
 		 * @private
 		 */

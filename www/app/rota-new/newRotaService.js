@@ -5,10 +5,10 @@
 		.module('saferota.rota-new')
 		.service('NewRotaService', NewRotaService);
 
-	NewRotaService.$inject = ['Rota', 'RotaLocation', '$rootScope'];
+	NewRotaService.$inject = ['Rota', 'RotaLocation', '$rootScope', '$q', 'Session'];
 
 	/* @ngInject */
-	function NewRotaService(Rota, RotaLocation, $rootScope) {
+	function NewRotaService(Rota, RotaLocation, $rootScope, $q, Session) {
 
 		var self = this;
 		var $serviceScope = $rootScope.$new();
@@ -21,6 +21,7 @@
 		self.complete = complete;
 		self.create = create;
 		self.createLocation = createLocation;
+		//self.cancel = cancel;
 
 
 		////////////////////////////////////////////////////////
@@ -40,7 +41,7 @@
 		 * @returns {Rota}
 		 */
 		function create($scope) {
-			self.rota = Rota.create({}, $scope);
+			self.rota = Rota.create({user: Session.user.objectId}, $scope);
 			self.rota.$register($serviceScope);
 			return self.rota;
 		}

@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('saferota.auth')
+		.module('saferota.core')
 		.service('Session', Session);
 
 	Session.$inject = ['User', 'Backendless', '$q'];
@@ -51,7 +51,8 @@
 			var user = _isLoggedIn();
 
 			if (_isLoggedIn() !== false) {
-				self.user = new User(user);
+				var userId = Backendless.LocalCache.get("current-user-id");
+				self.user = new User({objectId: userId});
 				self.isLoggedIn = true;
 				self._ready.resolve();
 			}

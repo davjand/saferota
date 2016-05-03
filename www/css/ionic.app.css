@@ -11939,7 +11939,7 @@ a.button {
 
 
 */
-.rota-new .item .icon {
+.rota-edit .item .icon {
   color: #ccc; }
 
 /*
@@ -11965,6 +11965,12 @@ a.button {
 */
 .scroll {
   height: 100%;
+}
+
+.map-wrapper {
+  height: 100%;
+  padding-top: 43px;
+  padding-bottom: 43px;
 }
 
 #map {

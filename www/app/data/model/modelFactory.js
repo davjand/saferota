@@ -13,7 +13,7 @@
 	 Prevent keys that aren't allowed
 
 	 */
-	var PROHIBITED = ['_config', '_rel', '_schema'];
+	var PROHIBITED = ['_config', '_rel', '_schema', '_validators'];
 	var allowedKey = function (key) {
 		return PROHIBITED.indexOf(key) === -1;
 	};
@@ -59,6 +59,7 @@
 			};
 			this._schema = {};
 			this._rel = {};
+			this._validators = {};
 			this._instance = null;
 			this._methods = {};
 
@@ -71,11 +72,13 @@
 		/*
 		 Prototype
 		 */
+		CreateModel.prototype.REL_KEY_TYPES = REL_KEY_TYPES;
 		CreateModel.prototype.config = config;
 		CreateModel.prototype.schema = schema;
 		CreateModel.prototype.key = key;
 		CreateModel.prototype.methods = methods;
 		CreateModel.prototype.relationship = relationship;
+		CreateModel.prototype.validators = validators;
 		CreateModel.prototype.create = create;
 		CreateModel.prototype.className = function () {
 			return this._config.name;
@@ -228,6 +231,25 @@
 		}
 
 		/**
+		 * validators
+		 *
+		 *
+		 * @parma object
+		 *
+		 * Accepted formats
+		 * Key: Value {Boolean, function}
+		 *
+		 * If boolean then means required
+		 * Otherwise a function that validates the object
+		 *
+		 * @returns this
+		 */
+		function validators(object) {
+			this.config(object, '_validators');
+			return this;
+		}
+
+		/**
 		 *
 		 * Creates an instance of the model
 		 *
@@ -245,29 +267,42 @@
 
 			var factory = this;
 
+
 			/*
-
-			 If the object has already been created then return a new
-			 instance of the created object
-
+			 *
+			 * If the object has already been created then return a new
+			 * instance of the created object
+			 *
 			 */
 			if (factory._instance !== null) {
 				return new factory._instance(createData, $scope, stopCallback);
 			}
 
 			/*
-
-			 Otherwise we construct a new object from the schema
-
+			 *
+			 * Otherwise we construct a new object from the schema
+			 *
 			 */
 
 			/*
-
-			 Integrity check:
-			 1) check that the primary key isn't set in the schema
-
+			 *
+			 * Integrity check:
+			 * 1) If no schema then throw an error
+			 *
 			 */
-			if (typeof this._schema[this._config.key] !== 'undefined') {
+			if (Object.keys(factory._schema).length < 1) {
+				throw('Error: ModelFactory.create - No Schema Defined');
+			}
+
+			/*
+			 *
+			 *
+			 * Integrity check:
+			 * 2) Check that the primary key isn't set in the schema
+			 *
+			 *
+			 */
+			if (typeof factory._schema[factory._config.key] !== 'undefined') {
 				throw('Error: ModelFactory.create - primary key must not be set in model schema');
 			}
 
@@ -312,6 +347,7 @@
 			Model.prototype._config = factory._config;
 			Model.prototype._rel = factory._rel;
 			Model.prototype._schema = factory._schema;
+			Model.prototype._validators = factory._validators;
 
 			//set the custom methods
 			angular.forEach(factory._methods, function (fx, key) {
@@ -352,6 +388,7 @@
 			Model.prototype.guid = guid;
 			Model.prototype.resolveWithRemote = resolveWithRemote;
 			Model.prototype.isEqual = isEqual;
+			Model.prototype.isValid = isValid;
 			Model.prototype.config = function () {
 				return this._config;
 			};
@@ -624,6 +661,50 @@
 			});
 
 			return schemaMatch && relMatch;
+		}
+
+		/**
+		 * isValid
+		 *
+		 * Validates the model data against the validators
+		 *
+		 * @returns {Boolean}
+		 *
+		 */
+		function isValid() {
+			var self = this;
+
+			//If no validators return true
+			if (Object.keys(self._validators).length < 1) {
+				return true;
+			}
+
+			//Loop through the validators
+			var valid = true;
+			angular.forEach(self._validators, function (item, key) {
+				/*
+				 * If Boolean, treat as a required flag
+				 */
+				if (item === true) {
+					var v = self[key];
+					if (typeof v === 'string' && v.length < 1) {
+						valid = false;
+					} else if (v === null) {
+						valid = false;
+					} else if (typeof v === 'undefined') {
+						valid = false;
+					}
+				}
+				/*
+				 * If function, treat as definitive is valid or not
+				 */
+				if (angular.isFunction(item)) {
+					valid = valid && item(self[key])
+				}
+
+			});
+			return valid;
+
 		}
 
 	}

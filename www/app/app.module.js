@@ -6,6 +6,7 @@
 			'saferota.core',
 			'saferota.auth',
 			'saferota.rota',
-			'saferota.rota-new'
+			'saferota.rota-new',
+			'saferota.rota-edit'
 		]);
 })();

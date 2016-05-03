@@ -39,11 +39,11 @@
 					}
 				},
 				/* @ngInject */
-				onEnter: function (userRotas, $state) {
-					if (userRotas.length < 1) {
-						$state.go('app.new');
-					}
-				}
+				// onEnter: function (userRotas, $state) {
+				// 	if (userRotas.length < 1) {
+				// 		$state.go('app.new');
+				// 	}
+				// }
 			});
 
 		//by default go here

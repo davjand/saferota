@@ -59,6 +59,8 @@
 			self._getClass = _getClass;
 			self._persistance = _persistance;
 			self._xhr = _xhr;
+			self._formatForSave = _formatForSave;
+			self._processRelationships = _processRelationships;
 
 			//only for testing expose this
 			if (window.module) {
@@ -85,7 +87,9 @@
 				self._persistance(Model),
 				'findById',
 				id
-			);
+			).then(function (data) {
+				return $q.when(self._processRelationships(Model, data));
+			});
 		}
 
 		/**
@@ -181,10 +185,13 @@
 				var data = [];
 				angular.forEach(response.data, function (val) {
 					var obj = angular.merge({}, val);
-					obj.updatedDate = obj.updated;
+					obj.updatedDate = new Date(obj.updated);
 					delete obj.updated;
-					obj.createdDate = obj.created;
+					obj.createdDate = new Date(obj.created);
 					delete obj.created;
+
+					//process relationships
+					obj = self._processRelationships(Model, obj);
 
 					data.push(obj);
 				});
@@ -212,8 +219,10 @@
 			return self._wrapPromise(
 				self._persistance(model),
 				'save',
-				model.toObject(false, false)
-			);
+				_formatForSave(model)
+			).then(function (data) {
+				return $q.when(self._processRelationships(model.factory, data));
+			});
 		}
 
 		/**
@@ -228,8 +237,10 @@
 			return self._wrapPromise(
 				self._persistance(model),
 				'save',
-				model.toObject(false, false)
-			);
+				_formatForSave(model)
+			).then(function (data) {
+				return $q.when(self._processRelationships(model.factory, data));
+			});
 		}
 
 		/**
@@ -404,6 +415,56 @@
 			return p.promise;
 		}
 
+		/**
+		 * _formatForSave
+		 *
+		 * Converts a model into a data object
+		 * Processes each relationship into the following format
+		 *
+		 * rel: {
+		 * 	___class: 'className',
+		 * 	objectId: 'xxx'
+		 * 
+		 * }
+		 *
+		 * @param model
+		 * @private
+		 */
+		function _formatForSave(model) {
+			var data = model.toObject(false, false);
+
+			angular.forEach(model._rel, function (r) {
+				var d = data[r.key];
+
+				if (d && r.keyType === model.REL_KEY_TYPES.LOCAL) {
+					data[r.key] = {
+						___class: r.model,
+						objectId: d
+					}
+				}
+			});
+			return data;
+		}
+
+		/**
+		 * _processRelationships
+		 *
+		 * @param Model
+		 * @param data
+		 * @private
+		 */
+		function _processRelationships(Model, data) {
+			angular.forEach(Model._rel, function (rel) {
+				if (rel.keyType === Model.REL_KEY_TYPES.LOCAL) {
+					var k = rel.key;
+					if (data[k]) {
+						data[k] = data[k].objectId;
+					}
+				}
+			});
+			return data;
+
+		}
 
 	}
 

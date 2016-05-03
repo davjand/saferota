@@ -99,8 +99,31 @@ describe('saferota.data Model', function () {
 	});
 
 	/*
+	 .validators
+	 */
+	it('.validators sets the validators object for a model', function () {
+		var m = new Model('test').schema({name: ''});
+		m.validators({
+			name: true
+		});
+
+		expect(m._validators.name).toBe(true);
+	});
+
+
+	/*
 	 .create
 	 */
+	it('.create throws an error if no schema defined', function () {
+		var Test = new Model('test');
+		var error = false;
+		try {
+			var t = Test.create();
+		} catch (err) {
+			error = true;
+		}
+		expect(error).toBe(true);
+	});
 	it('Can create a new model instance from the config', function () {
 		var Test = new Model('test');
 		Test.schema({
@@ -357,6 +380,54 @@ describe('saferota.data Model', function () {
 		expect(d.category).toBe(10);
 	});
 
+
+	it('.isValid returns true if no validators', function () {
+		var Test = new Model('test').schema({name: 'test'});
+
+		var t = Test.create();
+
+		expect(t.isValid()).toBe(true);
+
+	});
+	it('.isValid validates required parameters', function () {
+		var Test =
+			new Model('test')
+				.schema({name: '', city: '', country: ''})
+				.validators({name: true, city: false});
+
+		var t = Test.create();
+
+		expect(t.isValid()).toBe(false);
+
+		t.name = 'James';
+		expect(t.isValid()).toBe(true);
+
+		t.name = null;
+		expect(t.isValid()).toBe(false);
+
+
+		t.name = 'David';
+		t.city = null;
+		expect(t.isValid()).toBe(true);
+	});
+	it('.isValid can validate via a function callback', function () {
+		var Test =
+			new Model('test')
+				.schema({name: ''})
+				.validators({
+					name: function (value) {
+						return value === 'john';
+					}
+				});
+
+		var t = Test.create({name: 'james'});
+
+		expect(t.isValid()).toBe(false);
+
+		t.name = 'john';
+		expect(t.isValid()).toBe(true);
+	});
+
 	/*
 	 .resolveRemote - sets a local object with the data from the server
 	 */
@@ -384,7 +455,7 @@ describe('saferota.data Model', function () {
 				calls++;
 			};
 
-		var Test = new Model('test', fx);
+		var Test = new Model('test', fx).schema({name: 'test'});
 
 
 		Test.create({});

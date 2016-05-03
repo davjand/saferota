@@ -1,6 +1,6 @@
-xdescribe('SafeRota Auth: User Object', function () {
+xdescribe('SafeRota Core: User Object', function () {
 
-	beforeEach(module('saferota.auth'));
+	beforeEach(module('saferota.core'));
 
 	it('Can set the user defaults', inject(function (User) {
 		var user = new User();

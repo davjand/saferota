@@ -7,7 +7,8 @@
 			'ui.router',
 			'jcs-autoValidate',
 			'angular-ladda',
-			'saferota.backendless'
+			'saferota.backendless',
+			'saferota.core'
 		]);
 
 

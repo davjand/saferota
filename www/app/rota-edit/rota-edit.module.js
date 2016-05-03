@@ -1,7 +1,6 @@
 angular
-	.module('saferota.rota-new', [
+	.module('saferota.rota-edit', [
 		'saferota.core',
-		'saferota.auth',
 		'saferota.rota',
 		'ionic-datepicker',
 		'ngCordova'

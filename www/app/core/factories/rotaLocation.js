@@ -22,9 +22,13 @@
 	/* @ngInject */
 	function run(DataStore) {
 		RotaLocation = DataStore.create('RotaLocations')
+			.key('objectId')
 			.schema({
 				location: {},
-				radius: ''
+				lat: null,
+				long: null,
+				ownerId: '',
+				radius: 400
 			})
 			.relationship('hasOne', 'rota', 'Rotas');
 	}

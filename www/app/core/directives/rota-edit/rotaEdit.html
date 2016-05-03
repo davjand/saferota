@@ -1,0 +1,92 @@
+<div class="list rota-edit">
+
+	<label class="item item-input">
+		<div class="input-label">
+			Rota Name
+		</div>
+		<input type="text"
+			   class="text-right"
+			   ng-model="vm.rota.label"
+			   autofocus/>
+	</label>
+
+	<a class="item"
+	   href="#"
+	   ng-click="vm.selectOrganisation()">
+		Organisation
+				<span class="item-note">
+					<span ng-if="vm.organisation.name">
+						{{vm.organisation.name}}
+					</span>
+					<span ng-if="!vm.organisation.name">Please Select</span>
+				</span>
+	</a>
+	<a class="item"
+	   href="#"
+	   ng-click="vm.selectSpeciality()">
+		Speciality
+				<span class="item-note">
+					<span ng-if="vm.speciality.title">
+						{{vm.speciality.title}}
+					</span>
+					<span ng-if="!vm.speciality.title">Please Select</span>
+				</span>
+	</a>
+	<a class="item"
+	   href="#"
+	   ng-click="vm.selectRole()">
+		Role
+				<span class="item-note">
+					<span ng-if="vm.role.title">
+						{{vm.role.title}}
+					</span>
+					<span ng-if="!vm.role.title">Please Select</span>
+				</span>
+	</a>
+
+	<div class="item-divider item">Banding &amp; Dates</div>
+
+	<label class="item item-input item-select">
+		<div class="input-label">
+			Banding
+		</div>
+		<select ng-model="vm.rota.banding"
+				ng-options="item.value as item.name for item in vm.BANDING"
+				convert-to-number>
+		</select>
+	</label>
+
+	<label class="item item-input">
+		<div class="input-label">
+			Rota Hours
+		</div>
+		<input type="text"
+			   class="text-right"
+			   ng-model="vm.rota.hours"/>
+	</label>
+
+
+	<a class="item"
+	   href="#"
+	   ng-click="vm.selectStart()">
+		Start Date
+				<span class="item-note">
+					{{ vm.rota.dateStart | date : "dd MMM yy"}}
+				</span>
+	</a>
+	<a class="item"
+	   ng-class="{'item-icon-right': vm.rota.dateEnd}"
+	   href="#"
+	   ng-click="vm.selectEnd()">
+		End Date
+		<i class="icon fa fa-times-circle"
+		   ng-show="vm.rota.dateEnd"
+		   aria-hidden="true"
+		   ng-click="vm.rota.dateEnd = null; $event.stopPropagation();"></i>
+				<span class="item-note">
+					{{(vm.rota.dateEnd | date : 'dd MMM yy' ) || 'Indefinite'}}
+				</span>
+
+	</a>
+
+</div>

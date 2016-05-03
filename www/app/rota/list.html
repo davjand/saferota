@@ -1,5 +1,6 @@
 <ion-view class=""
->
+		  hide-back-button="true"
+		  cache-view="false">
 
 	<ion-nav-title>My SafeRotas</ion-nav-title>
 
@@ -18,12 +19,19 @@
 	</ion-nav-buttons>
 
 	<ion-content>
-		<ul class="list">
-			<li class="item"
-				ng-repeat="rota in vm.rotas">
-				Rota {{$index + 1}}
-			</li>
-		</ul>
+		<ion-list>
+			<ion-item ng-repeat="rota in vm.rotas"
+					  class="item-icon-left">
 
+				<i class="icon ion-ios-navigate-outline"></i>
+
+				<h2>{{rota.label || "Rota " + ($index + 1)}}</h2>
+				<p>Monitoring Paused</p>
+				<ion-option-button class="button-positive"
+								   ng-click="vm.edit(rota)">
+					Edit
+				</ion-option-button>
+			</ion-item>
+		</ion-list>
 	</ion-content>
 </ion-view>

@@ -1,6 +1,6 @@
-xdescribe('saferota.auth Session', function () {
+xdescribe('saferota.core Session', function () {
 
-	beforeEach(module('saferota.auth'));
+	beforeEach(module('saferota.core'));
 	beforeEach(inject(function ($q, Backendless,Session) {
 
 		spyOn(Backendless.UserService, 'describeUserClass').and.callFake(function(){

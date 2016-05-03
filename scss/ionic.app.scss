@@ -40,7 +40,7 @@ $errorBg: #FFDFDF;
 
 //Modules
 @import "www/app/auth/style";
-@import "www/app/rota-new/style";
+@import "www/app/core/style";
 
 /*
 
@@ -73,6 +73,11 @@ $errorBg: #FFDFDF;
 	height: 100%;
 }
 
+.map-wrapper {
+	height: 100%;
+	padding-top: 43px;
+	padding-bottom: 43px;
+}
 #map {
 	width: 100%;
 	height: 100%;

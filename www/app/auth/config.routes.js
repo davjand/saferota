@@ -4,7 +4,6 @@
 	angular
 		.module('saferota.auth')
 		.config(configRoutes);
-	//.run(configRouteAccess);
 
 	/* @ngInject */
 	function configRoutes($stateProvider) {
@@ -34,7 +33,7 @@
 			})
 			.state('auth.signup', {
 				url: '/signup',
-				templateUrl: 'app/auth/signup.html',
+				templateUrl: 'app/auth/signup.html'
 			})
 			.state('auth.resetPassword', {
 				url: '/reset-password/:email',

@@ -38,13 +38,20 @@
 				hours: 40,
 				dateStart: new Date(),
 				dateEnd: null,
-				banding: 0
+				banding: 0,
+				ownerId: ''
 			})
 			.relationship('hasOne', 'organisation', 'RotaOrganisations')
 			.relationship('hasOne', 'speciality', 'RotaSpecialities')
 			.relationship('hasOne', 'role', 'RotaRoles')
 			.relationship('hasMany', 'locations', 'RotaLocations.rota')
 			.relationship('hasOne', 'user', 'Users')
+			.validators({
+				label: true,
+				organisation: true,
+				speciality: true,
+				role: true
+			})
 			.config({
 				sync: function () {
 					return {

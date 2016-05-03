@@ -458,7 +458,7 @@ describe('saferota.data Repository', function () {
 		_d();
 	});
 	it('.remove can bypass local storage if model is offline disabled', function () {
-		var NoSyncModel = ModelService.create('noSync').config({offline: false});
+		var NoSyncModel = ModelService.create('noSync').config({offline: false}).schema({name: 'test'});
 		var noSyncRepo = RepositoryService.create(NoSyncModel);
 		var m = NoSyncModel.create();
 

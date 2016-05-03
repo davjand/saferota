@@ -1,0 +1,13 @@
+<ion-view cache-view="false">
+	<ion-nav-title>Edit SafeRota</ion-nav-title>
+	<ion-nav-buttons side="secondary">
+		<button class="button"
+				ng-click="vm.save()"
+				ng-disabled="!vm.rota.isValid()">Next
+		</button>
+	</ion-nav-buttons>
+
+	<ion-content>
+		<rota-edit rota="vm.rota"></rota-edit>
+	</ion-content>
+</ion-view>
