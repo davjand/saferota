@@ -5,10 +5,10 @@
 		.module('saferota.core')
 		.service('AuthService', AuthService);
 
-	AuthService.$inject = ['Backendless','Session', '$q','$rootScope', 'AUTH_EVENTS'];
+	AuthService.$inject = ['Backendless', 'Session', '$q', '$rootScope', 'AUTH_EVENTS', 'DataStore'];
 
 	/* @ngInject */
-	function AuthService(Backendless, Session, $q, $rootScope, AUTH_EVENTS) {
+	function AuthService(Backendless, Session, $q, $rootScope, AUTH_EVENTS, DataStore) {
 		var self = this;
 
 		//Public
@@ -64,8 +64,11 @@
 
 			Backendless.UserService.login( email, password, true,
 				new Backendless.Async( function(user){
-					p.resolve(user);
-					$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+
+					Session.start(user.objectId).then(function () {
+						p.resolve(user);
+						$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+					});
 				}, function(error){
 					p.reject(error.message);
 				}) );
@@ -92,7 +95,7 @@
 
 			Backendless.UserService.register( user,
 				new Backendless.Async( function(){
-					Session.start().then(function(){
+					Session.start(user.objectId).then(function () {
 						self.login(email,password).then(function(){
 							p.resolve();
 							$rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
@@ -140,7 +143,9 @@
 			Backendless.UserService.logout( new Backendless.Async( function(){
 				Session.clear();
 				$rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
-				p.resolve();
+				DataStore.clearAll().then(function () {
+					p.resolve();
+				});
 			}, function(error){
 				p.reject(error.message);
 			}) );

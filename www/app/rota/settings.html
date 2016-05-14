@@ -1,0 +1,39 @@
+<ion-view hide-back-button="true">
+	<ion-nav-title>Settings</ion-nav-title>
+	<ion-nav-buttons side="primary">
+		<button class="button" ui-sref="app.list" nav-direction="swap">
+			Close
+		</button>
+	</ion-nav-buttons>
+	<ion-content>
+		<!-- Rota Settings -->
+		<div class="card">
+			<div class="item item-divider">
+				Sync Settings
+			</div>
+			<div class="item">
+				<a class="button button-stable button-outline button-block"
+				   ng-click="vm.sync()">
+					Sync Now
+				</a>
+			</div>
+		</div>
+
+		<!-- Account Settings -->
+		<div class="card">
+			<div class="item item-divider">
+				Your Account
+			</div>
+			<div class="item text-wrap">
+				<p>Email: {{vm.user.email}} </p>
+			</div>
+			<div class="item">
+				<a class="button button-stable button-outline">Edit Password</a>
+				<a class="button button-stable button-outline pull-right"
+				   ng-click="vm.logout()">Logout</a>
+			</div>
+		</div>
+
+
+	</ion-content>
+</ion-view>

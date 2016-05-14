@@ -16,7 +16,7 @@
 	 */
 
 
-	var Rota, User;
+	var Rota;
 
 	run.$inject = ['Session', 'DataStore'];
 
@@ -55,17 +55,12 @@
 			.config({
 				sync: function () {
 					return {
-						user: Session.user.objectId || null
+						user: Session.userId || null
 					}
 				}
 			});
 
 		Rota.BANDING_OPTIONS = BANDING_OPTIONS;
-
-		//we won't actually use this, it's just for the relationship mapping
-		User = DataStore.create('Users')
-			.schema({email: '', firstName: '', lastName: ''})
-			.config({sync: false});
 	}
 
 

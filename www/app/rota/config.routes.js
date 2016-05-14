@@ -34,17 +34,27 @@
 				resolve: {
 					/* @ngInject */
 					userRotas: function (Rota) {
-						//Redirect to new if no rotas selected
 						return Rota.$find();
+					},
+					/* @ngInject */
+					activeRotas: function (RotaGeoFenceService) {
+						return RotaGeoFenceService.getActiveRotaIds()
 					}
-				},
+				}
 				/* @ngInject */
 				// onEnter: function (userRotas, $state) {
 				// 	if (userRotas.length < 1) {
 				// 		$state.go('app.new');
 				// 	}
 				// }
+			})
+			.state('app.settings', {
+				url: '/settings',
+				templateUrl: 'app/rota/settings.html',
+				controller: 'SettingsController',
+				controllerAs: 'vm'
 			});
+
 
 		//by default go here
 		$urlRouterProvider.otherwise('/app/list');

@@ -25,6 +25,10 @@
 
 		var self = this;
 
+		var _interceptors = {
+			error: []
+		};
+
 
 		//Online / Offline Functions
 		self.pingOnline = pingOnline;
@@ -44,6 +48,8 @@
 		self.get = get;
 
 		self.next = next;
+		self.interceptor = interceptor;
+		self.startBackgroundQueueProcessing = startBackgroundQueueProcessing;
 
 		self.ready = function () {
 			return self.$ready.promise ? self.$ready.promise : self.$ready;
@@ -61,6 +67,7 @@
 
 		self._handleResponse = _handleResponse;
 		self._handleError = _handleError;
+		self._processInterceptors = _processInterceptors;
 
 		//Initialize
 		initialize();
@@ -129,6 +136,12 @@
 			 */
 			self.$onlinePromise = null;
 
+			/*
+			 * Disable background queue processing, useful
+			 * for testing
+			 */
+			self.$disableBackgroundQueueProcessing = false;
+
 			//a little bit of logic to allow promise chaining
 			self.on('queueStart', function () {
 				self.$ready = $q.defer();
@@ -144,6 +157,8 @@
 					self.$ready.resolve();
 				}
 			});
+
+			startBackgroundQueueProcessing();
 		}
 
 
@@ -176,11 +191,14 @@
 					self.emit('goOnline');
 				}
 				p.resolve(true);
-			}, function () {
+			}, function (error) {
 				if (self.$isOnline) {
 					self.$isOnline = false;
 					self.emit('goOffline');
 				}
+
+				self._processInterceptors(error);
+
 				rejectPromise ? p.reject() : p.resolve(false);
 			});
 			return p.promise;
@@ -246,7 +264,7 @@
 					self.$scheduledRetry = false;
 					self.$retryPromise = null;
 					self.$retryCount = 0;
-					
+
 					execute ?
 						self.$onlinePromise.resolve(self.next()) :
 						self.$onlinePromise.resolve();
@@ -541,6 +559,47 @@
 		}
 
 		/**
+		 * startBackgroundQueueProcessing
+		 *
+		 * starts a timeout cycle every 5 seconds that will process the
+		 * transaction queue. Respects online/offline
+		 *
+		 */
+		function startBackgroundQueueProcessing() {
+			var PROCESS_EVERY = 5 * 1000; //five seconds
+
+			$timeout(function () {
+				if (!self.$disableBackgroundQueueProcessing) {
+					self.goOnline(true).then(function () {
+						self.next(true).then(function () {
+							self.startBackgroundQueueProcessing();
+						}, function () {
+							self.startBackgroundQueueProcessing();
+						})
+					}, function () {
+						self.startBackgroundQueueProcessing();
+					});
+				}
+			}, PROCESS_EVERY);
+		}
+
+
+		/**
+		 * interceptor
+		 *
+		 * Registers an interceptor for requests.
+		 * Only supported type at the moment is error
+		 *
+		 * @param interceptorFunction {Function}
+		 * @param type {String} Defaults to 'error'
+		 */
+		function interceptor(interceptorFunction, type) {
+			type = type || 'error';
+			_interceptors[type].push(interceptorFunction);
+		}
+
+
+		/**
 		 * _handleResponse
 		 *
 		 * @param data
@@ -572,9 +631,29 @@
 			self.$inProgress = false;
 			self.$processing = false;
 
+			self._processInterceptors();
+
 			var p = $q.defer();
 			p.reject(error);
 			return p.promise;
+		}
+
+		/**
+		 * _processInterceptors
+		 *
+		 * Calls the interceptors for the type with the given data
+		 *
+		 * @param type
+		 * @param data
+		 * @private
+		 */
+		function _processInterceptors(type, data) {
+			/*
+			 * Call any error interceptors that are relevent
+			 */
+			angular.forEach(_interceptors[type || 'error'], function (interceptor) {
+				interceptor(data);
+			});
 		}
 
 	}

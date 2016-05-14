@@ -257,6 +257,7 @@
 		 * $this - to allow filtering of the whole object (ie if just a string)
 		 *
 		 * @param filter
+		 * @param orderBy
 		 *
 		 * @returns {Promise}
 		 */

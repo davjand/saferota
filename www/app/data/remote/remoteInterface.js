@@ -89,6 +89,7 @@
 	 * @returns {$q.deferred}
 	 */
 	function find(Model, options) {
+		options = options || {};
 
 		//create a copy, can cause an issue with testing if not
 		var filterOptions = angular.merge({}, options);

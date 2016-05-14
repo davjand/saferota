@@ -1,11 +1,17 @@
 describe('saferota.data DataStore', function () {
 	beforeEach(module('saferota.data'));
 
-	var DataStore, RepositoryService, ModelService, RequestService, $rootScope,
+	var DataStore, RepositoryService, ModelService, RequestService, $rootScope, $timeout, $q,
 		TestModel1, TestModel2, TestModelPet,
 		repo1;
 
-	beforeEach(inject(function (_DataStore_, _RepositoryService_, _ModelService_, _RequestService_, _$rootScope_) {
+	beforeEach(inject(function (_DataStore_,
+								_RepositoryService_,
+								_ModelService_,
+								_RequestService_,
+								_$rootScope_,
+								_$timeout_,
+								_$q_) {
 
 
 		DataStore = _DataStore_;
@@ -13,6 +19,8 @@ describe('saferota.data DataStore', function () {
 		ModelService = _ModelService_;
 		RequestService = _RequestService_;
 		$rootScope = _$rootScope_;
+		$timeout = _$timeout_;
+		$q = _$q_;
 
 		TestModel1 = DataStore.create('test1').schema({
 			name: '',
@@ -254,6 +262,24 @@ describe('saferota.data DataStore', function () {
 	});
 
 
+	it('.get will always only look locally if $alwasySearchLocal is true', function (done) {
+		DataStore.$alwaysSearchLocal = true;
+
+		spyOn(repo1, 'get').and.callThrough();
+		spyOn(RequestService, 'get').and.returnValue($q.when(null));
+
+
+		DataStore.get(TestModel1, 1).then(function (data) {
+			expect(repo1.get).toHaveBeenCalled();
+			expect(RequestService.get).not.toHaveBeenCalled();
+			expect(data).toBeNull();
+			done();
+		});
+
+		_d();
+	});
+
+
 	/*
 	 .find
 	 */
@@ -312,6 +338,22 @@ describe('saferota.data DataStore', function () {
 			expect(true).toBe(true);
 			done();
 		});
+		_d();
+	});
+	it('.find will always only look locally if $alwasySearchLocal is true', function (done) {
+		DataStore.$alwaysSearchLocal = true;
+
+		spyOn(repo1, 'find').and.callThrough();
+		spyOn(RequestService, 'find').and.returnValue($q.when({data: []}));
+
+
+		DataStore.find(TestModel1).then(function (data) {
+			expect(repo1.find).toHaveBeenCalled();
+			expect(RequestService.find).not.toHaveBeenCalled();
+			expect(data).toEqual([]);
+			done();
+		});
+
 		_d();
 	});
 
@@ -407,7 +449,7 @@ describe('saferota.data DataStore', function () {
 			return DataStore.sync(TestModel1);
 		}).then(function () {
 			//should have made the correct call to request service
-			expect(RequestService.findChunked).toHaveBeenCalledWith(TestModel1, {updatedAt: date, offset: 0});
+			expect(RequestService.findChunked).toHaveBeenCalledWith(TestModel1, {updatedDate: date, offset: 0});
 			return repo.find();
 		}).then(function (models) {
 			//data should have been updated
@@ -496,8 +538,13 @@ describe('saferota.data DataStore', function () {
 		spyOn(DataStore, 'syncAll').and.callThrough();
 
 		RequestService.goOnline().then(function () {
-			expect(DataStore.syncAll.calls.count()).toBe(1);
-			done();
+			//a little nbit of digest hacking to get it to work in a testing situation
+			setTimeout(function () {
+				$timeout.flush();
+				expect(DataStore.syncAll.calls.count()).toBe(1);
+				done();
+			});
+
 		});
 
 		_d();
@@ -551,10 +598,11 @@ describe('saferota.data DataStore', function () {
 	});
 
 
-	it('.decorateModel adds $save, $register and $remove functions to a model', function () {
+	it('.decorateModel adds $save, $register, $deregister and $remove functions to a model', function () {
 		spyOn(DataStore, 'save');
 		spyOn(DataStore, 'remove');
 		spyOn(DataStore, 'registerScope');
+		spyOn(DataStore, 'deregisterScope');
 
 		var m = TestModel1.create({name: 'James'});
 
@@ -579,6 +627,13 @@ describe('saferota.data DataStore', function () {
 			true
 		);
 
+		m.$deregister(true);
+
+		expect(DataStore.deregisterScope).toHaveBeenCalledWith(
+			m,
+			true
+		);
+
 	});
 
 	//RegisterScope
@@ -594,7 +649,18 @@ describe('saferota.data DataStore', function () {
 
 	});
 
+	//deregisterScope
+	it('.deregisterScope can register scope for a model', function () {
+		spyOn(RepositoryService.get('test1'), 'deregisterModel');
 
+		var $s = $rootScope.$new();
+		var m1 = TestModel1.create({name: 'james'});
+
+		DataStore.deregisterScope(m1, $s);
+
+		expect(RepositoryService.get('test1').deregisterModel).toHaveBeenCalled();
+
+	});
 
 
 	/*

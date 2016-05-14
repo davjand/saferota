@@ -13,10 +13,10 @@
 	 * A remote adapter for the Backendless Backend
 	 *
 	 */
-	RemoteAdapterBackendless.$inject = ['RemoteAdapterInterface', '$q', '$http'];
+	RemoteAdapterBackendless.$inject = ['RemoteAdapterInterface', '$q', 'BACKENDLESS_API'];
 
 	/* @ngInject */
-	function RemoteAdapterBackendless(RemoteAdapterInterface, $q, $http) {
+	function RemoteAdapterBackendless(RemoteAdapterInterface, $q, BACKENDLESS_API) {
 
 		return RemoteAdapterInterface({
 			initialize: initialize,
@@ -47,11 +47,13 @@
 
 			//init Backendless
 			if (!Backendless.UserService) {
+				Backendless.serverURL = BACKENDLESS_API;
 				Backendless.initApp(
 					config.application,
 					config.secret,
 					config.version
 				);
+
 			}
 
 			//extra functions
@@ -167,7 +169,7 @@
 			if (options.updatedDate) {
 				var cond = 'updated > ' + options.updatedDate.getTime();
 				if (query.condition) {
-					query.condition = " and " + cond;
+					query.condition = query.condition + " and " + cond;
 				} else {
 					query.condition = cond;
 				}
@@ -268,7 +270,22 @@
 		 * @returns {*|Promise}
 		 */
 		function online() {
-			return this._xhr('GET', 'users/userclassprops');
+			var token = Backendless.LocalCache.get("user-token");
+
+			if (!token) {
+				return $q.reject({code: 3064});
+			}
+
+			return this._xhr('GET', 'users/isvalidusertoken/' + token).then(function () {
+				return $q.when();
+			}, function (error) {
+				error = error || {};
+				//if expired
+				if (error.code === 3064) {
+					Backendless.LocalCache.clear();
+				}
+				return $q.reject(error);
+			});
 		}
 
 
@@ -391,7 +408,7 @@
 		 */
 		function _xhr(method, url) {
 
-			url = "https://api.backendless.com/" + this._config.version + "/" + url;
+			url = BACKENDLESS_API + "/" + this._config.version + "/" + url;
 
 			var p = $q.defer();
 			var xhr = new XMLHttpRequest();

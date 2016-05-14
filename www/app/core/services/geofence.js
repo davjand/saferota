@@ -34,13 +34,14 @@
 			if (angular.isObject($window.geofence)) {
 				$log.log("Geofence plugin found");
 
-				geoFence.api = $window.geoFence;
+				geoFence.api = $window.geofence;
 
 				/*
 				 * Trigger events to $rootScope
 				 */
 				$window.geofence.onTransitionReceived = function (geofences) {
-					$rootScope.emit('GEO_EVENT', geofences)
+					$log.log(geofences);
+					$rootScope.$emit('GEO_EVENT', geofences)
 				};
 
 				$window.geofence.initialize().then(function () {
@@ -68,7 +69,7 @@
 						return $q.when();
 					},
 					getWatched: function () {
-						return $q.when([]);
+						return $q.when('[]');
 					},
 					_triggerEvent: function (id, event) {
 						$rootScope.$emit('GEO_EVENT', {

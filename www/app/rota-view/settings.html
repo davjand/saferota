@@ -1,0 +1,37 @@
+<ion-view>
+	<ion-nav-title>{{vm.rota.label || 'View Rota'}}</ion-nav-title>
+	<ion-nav-buttons side="primary">
+		<button class="button" ng-click="vm.change()">Switch</button>
+	</ion-nav-buttons>
+	<ion-content>
+		<!-- Rota Settings -->
+		<div class="card">
+			<div class="item item-divider">
+				{{vm.rota.label}} Rota Settings
+			</div>
+			<div class="item">
+				<a class="button button-stable button-outline button-block"
+				   ng-click="vm.edit()">
+					Edit Settings
+				</a>
+			</div>
+		</div>
+
+		<!-- Account Settings -->
+		<div class="card">
+			<div class="item item-divider">
+				Your Account
+			</div>
+			<div class="item text-wrap">
+				<p>Email: {{vm.user.email}} </p>
+			</div>
+			<div class="item">
+				<a class="button button-stable button-outline">Edit Password</a>
+				<a class="button button-stable button-outline pull-right"
+				   ng-click="vm.logout()">Logout</a>
+			</div>
+		</div>
+
+
+	</ion-content>
+</ion-view>

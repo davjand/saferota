@@ -17,6 +17,8 @@ describe('saferota.data RequestService', function () {
 		m1 = TestModel.create({name: 'james'});
 		m2 = TestModel.create({name: 'john'});
 
+		RequestService.$disableBackgroundQueueProcessing = true;
+
 	}));
 
 	afterEach(function () {
@@ -515,4 +517,22 @@ describe('saferota.data RequestService', function () {
 		});
 		$rootScope.$digest();
 	});
+
+
+	/*
+	 *
+	 * Error Intercepting
+	 *
+	 */
+	it('.interceptor registers an error interceptor that is called by _handleError', function () {
+		var flag = false;
+		RequestService.interceptor(function () {
+			flag = true;
+		});
+
+		RequestService._handleError();
+
+		expect(flag).toBe(true);
+	});
+
 });

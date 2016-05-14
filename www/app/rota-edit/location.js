@@ -59,12 +59,13 @@
 		 * Save
 		 */
 		function save() {
+			var id = EditRotaService.rota.getKey();
 
 			EditRotaService.completeEdit().then(function () {
 				$ionicHistory.nextViewOptions({
 					historyRoot: true
 				});
-				$state.go('app.list');
+				$state.go('app.view.settings', {rotaId: id});
 			});
 		}
 

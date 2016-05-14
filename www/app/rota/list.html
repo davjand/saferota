@@ -5,14 +5,14 @@
 	<ion-nav-title>My SafeRotas</ion-nav-title>
 
 	<ion-nav-buttons side="primary">
-		<button class="button" ng-click="vm.sync()">
-			Sync
+		<button class="button" ui-sref="app.settings" nav-direction="swap">
+			Settings
 		</button>
 	</ion-nav-buttons>
 
 	<ion-nav-buttons side="secondary">
 		<button class="button"
-				ng-click="vm.add()"
+				ui-sref="app.new"
 				nav-direction="enter">
 			Add
 		</button>
@@ -21,16 +21,37 @@
 	<ion-content>
 		<ion-list>
 			<ion-item ng-repeat="rota in vm.rotas"
+					  ng-click="vm.selectRota(rota)"
 					  class="item-icon-left">
 
-				<i class="icon ion-ios-navigate-outline"></i>
+				<i ng-if="vm.isActive(rota)"
+				   class="icon ion-ios-navigate"></i>
+				<i ng-if="!vm.isActive(rota)"
+				   class="icon ion-ios-navigate-outline"></i>
 
 				<h2>{{rota.label || "Rota " + ($index + 1)}}</h2>
-				<p>Monitoring Paused</p>
+
+				<p>
+					<span ng-if="vm.isActive(rota)"> Active</span>
+					<span ng-if="!vm.isActive(rota)"> Inactive</span>
+				</p>
+
 				<ion-option-button class="button-positive"
 								   ng-click="vm.edit(rota)">
-					Edit
+					Edit Details
 				</ion-option-button>
+
+				<ion-option-button class="button-assertive"
+								   ng-if="!vm.isActive(rota)"
+								   ng-click="vm.activate(rota,$event)">
+					Activate
+				</ion-option-button>
+				<ion-option-button class="button-assertive"
+								   ng-if="vm.isActive(rota)"
+								   ng-click="vm.deactivate(rota,$event)">
+					Deactivate
+				</ion-option-button>
+
 			</ion-item>
 		</ion-list>
 	</ion-content>

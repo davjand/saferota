@@ -1312,16 +1312,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		/***/ }
 		/******/ ])
 		});
-		;
-	
-	/***/ }
+			/***/
+		}
 	/******/ ])
 	});
-	;
-	//# sourceMappingURL=cachefactory.js.map
-
-/***/ }
+		/***/
+	}
 /******/ ])
 });
-;
 //# sourceMappingURL=angular-cache.js.map

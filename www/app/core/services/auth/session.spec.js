@@ -1,20 +1,21 @@
-xdescribe('saferota.core Session', function () {
+describe('saferota.core Session', function () {
+
+	var $q, Backendless, Session, $rootScope;
 
 	beforeEach(module('saferota.core'));
-	beforeEach(inject(function ($q, Backendless,Session) {
-
-		spyOn(Backendless.UserService, 'describeUserClass').and.callFake(function(){
-			Session._handleDescribeUserClass({
-				firstName: 'John',
-				lastName: 'Doe',
-				username: 'john@doe.com'
-			});
-		});
-		spyOn(Backendless.UserService, 'getCurrentUser').and.returnValue("John");
+	beforeEach(inject(function (_$q_, _Backendless_, _Session_, _$rootScope_) {
+		$q = _$q_;
+		Backendless = _Backendless_;
+		Session = _Session_;
+		$rootScope = _$rootScope_;
 	}));
-	
 
-	it('Can clear a session', inject(function (Session) {
+	function _d() {
+		$rootScope.$digest();
+	}
+
+
+	xit('Can clear a session', inject(function (Session) {
 		Session.user = {'firstName': 'David'};
 		Session.isLoggedIn = true;
 

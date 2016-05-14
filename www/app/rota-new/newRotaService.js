@@ -5,10 +5,10 @@
 		.module('saferota.rota-new')
 		.service('NewRotaService', NewRotaService);
 
-	NewRotaService.$inject = ['Rota', 'RotaLocation', '$rootScope', '$q', 'Session'];
+	NewRotaService.$inject = ['Rota', 'RotaLocation', '$rootScope', '$q', 'Session', 'RotaGeoFenceService'];
 
 	/* @ngInject */
-	function NewRotaService(Rota, RotaLocation, $rootScope, $q, Session) {
+	function NewRotaService(Rota, RotaLocation, $rootScope, $q, Session, RotaGeoFenceService) {
 
 		var self = this;
 		var $serviceScope = $rootScope.$new();
@@ -74,17 +74,19 @@
 		function complete() {
 			return self.rota.$save().then(function () {
 				return self.rota.$setRel('locations', self.locations);
-			}).then(function () {
+			})
+				.then(RotaGeoFenceService.activate(self.rota))
+				.then(function () {
 
-				var id = self.rota.id;
-				self.rota = null;
-				self.locations = [];
+					var id = self.rota.id;
+					self.rota = null;
+					self.locations = [];
 
-				$serviceScope.$destroy();
-				$serviceScope = $rootScope.$new(true);
+					$serviceScope.$destroy();
+					$serviceScope = $rootScope.$new(true);
 
-				return $q.when(id);
-			});
+					return $q.when(id);
+				});
 		}
 
 

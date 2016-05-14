@@ -40,6 +40,7 @@
 				vm.password
 			).then(function () {
 				vm.loading = false;
+				$state.go('app.list');
 			}, function (error) {
 				vm.error = error;
 				vm.password = '';

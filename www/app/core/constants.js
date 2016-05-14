@@ -7,7 +7,8 @@
 		.constant('moment', moment)
 		.constant('google', window.google || {})
 		.constant('DATA_EVENTS', {
-			REFRESH_DATA: 'REFRESH_DATA'
+			REFRESH_DATA: 'REFRESH_DATA',
+			SYNC_COMPLETE: 'SYNC_COMPLETE'
 		}).constant('AUTH_EVENTS', {
 			loginSuccess: 'auth-login-success',
 			loginFailed: 'auth-login-failed',

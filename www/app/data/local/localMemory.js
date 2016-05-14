@@ -138,7 +138,7 @@
 		 * @returns {*}
 		 */
 		function clear() {
-			this.$cache = [];
+			this.$cache = {};
 			this.$config = {};
 			return _wrapInPromise();
 		}

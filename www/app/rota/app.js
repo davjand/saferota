@@ -37,7 +37,7 @@
 		var vm = this;
 
 		var syncPromise = null,
-			SYNC_EVERY = 1000 * 60; //60 seconds
+			SYNC_EVERY = 1000 * 60 * 4; //4 minutes
 
 		activate();
 
@@ -66,6 +66,15 @@
 			 */
 			$rootScope.$on(AUTH_EVENTS.logoutSuccess, logout);
 
+			/*
+			 * Handle DataStore Errors
+			 */
+			DataStore.interceptor(function (error) {
+				if (error.code === 3064) {
+					console.log('logout');
+				}
+			}, 'error');
+
 		}
 
 		/**
@@ -89,6 +98,7 @@
 				return DataStore.syncAll()
 			}).then(function () {
 				$ionicLoading.hide();
+				$rootScope.$emit(DATA_EVENTS.SYNC_COMPLETE);
 				scheduleSync();
 			}, function (error) {
 				//@TODO Error handling

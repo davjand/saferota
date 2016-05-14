@@ -5,7 +5,7 @@
 		.module('saferota.core')
 		.service('RotaGeoFenceService', rotaGeoFenceService);
 
-	rotaGeoFenceService.$inject = ['geofence', 'RotaLocation', 'Rota', '$q'];
+	rotaGeoFenceService.$inject = ['geofence', 'RotaLocation', '$q'];
 
 	/*
 	 * Spec
@@ -20,13 +20,12 @@
 	 * [X] activate(Rota) - activates all locations in a rota
 	 * [X] deactivate(Rota) - deactivates all locations in a rota
 	 *
-	 * [ ] Emits an event when the geofence transitionTo callback is called.
+	 * [X] Emits an event when the geofence transitionTo callback is called.
 	 */
 
 	/* @ngInject */
 	function rotaGeoFenceService(geofence,
 								 RotaLocation,
-								 Rota,
 								 $q) {
 
 		var self = this;
@@ -68,15 +67,18 @@
 		 */
 		function getActiveRotaIds() {
 			return geofence.ready()
-				.then(self.getActiveLocations())
+				.then(self.getActiveLocations)
 				.then(function (locations) {
 					var filter = {
 						objectId: []
 					};
+					if (locations === null || locations.length < 1) {
+						return $q.when([]);
+					}
 					angular.forEach(locations, function (item) {
-						objectId.push(item.id)
+						filter.objectId.push(item.id)
 					});
-					return RotaLocation.$find(filter);
+					return RotaLocation.$find({filter: filter});
 				}).then(function (locationObjects) {
 					var result = [];
 					angular.forEach(locationObjects, function (item) {
@@ -131,10 +133,20 @@
 				})
 		}
 
-		function deactivateLocation(location) {
+		/**
+		 * deactivateLocation
+		 *
+		 * @param location
+		 * @param bypassError
+		 * @returns {*}
+		 */
+		function deactivateLocation(location, bypassError) {
 			return self.locationIsActive(location)
 				.then(function (result) {
 					if (!result) {
+						if (bypassError) {
+							return $q.when();
+						}
 						return $q.reject('RotaGeoFenceService: Cannot Deactivate Location ' + location.getKey() + ", is not active");
 					}
 					return geofence.api.remove(location.getKey())
@@ -142,6 +154,13 @@
 		}
 
 
+		/**
+		 * activate
+		 *
+		 *
+		 * @param rota
+		 * @returns {*}
+		 */
 		function activate(rota) {
 			return rota.$getRel('locations').then(function (locations) {
 				var p = [];
@@ -152,11 +171,18 @@
 			});
 		}
 
-		function deactivate(rota) {
+		/**
+		 * deactivate
+		 *
+		 *
+		 * @param rota
+		 * @returns {*}
+		 */
+		function deactivate(rota, bypassError) {
 			return rota.$getRel('locations').then(function (locations) {
 				var p = [];
 				angular.forEach(locations, function (item) {
-					p.push(self.deactivateLocation(item));
+					p.push(self.deactivateLocation(item, bypassError));
 				});
 				return $q.all(p);
 			});

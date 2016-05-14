@@ -11,13 +11,8 @@
 	/* @ngInject */
 	function configureLocalForage($localForageProvider) {
 		$localForageProvider.config({
-			name        : 'saferota'
+			name: 'saferota'
 		});
-	}
-	
-	/* @ngInject */
-	function configureData(DataConfigProvider){
-		//DataConfigProvider.setLocal('LocalAdapterLocalForage');
 	}
 
 })();

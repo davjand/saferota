@@ -232,6 +232,7 @@ describe('saferota.data RelationshipService', function () {
 			return RequestService.next(true);
 		});
 		_d();
+		_d();
 		expect(p1.house).toBe(null);
 
 		_down(done);

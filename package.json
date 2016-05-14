@@ -33,10 +33,7 @@
     "cordova-plugin-splashscreen",
     "cordova-plugin-statusbar",
     "ionic-plugin-keyboard",
-    {
-      "locator": "https://github.com/cowbell/cordova-plugin-geofence",
-      "id": "cordova-plugin-geofence"
-    }
+    "cordova-plugin-geofence"
   ],
   "cordovaPlatforms": [
     "android",

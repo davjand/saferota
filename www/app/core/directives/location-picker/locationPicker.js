@@ -44,34 +44,35 @@
 				 */
 				function activate() {
 
+					var lat, lng;
+
 					$scope.location = $scope.location || {};
 
 					$scope.map = null;
 					$scope.marker = null;
 					$scope.circle = null;
 
-					/*
-					 * Center the map using geolocation
-					 */
-					$cordovaGeolocation.getCurrentPosition({
-						timeout: 6000,
-						enableHighAccuracy: true
-					}).then(function (position) {
-						var lat, lng;
+					if ($scope.location.lat) {
+						$scope.initMap($scope.location.lat, $scope.location.long);
+					} else {
 						/*
-						 * If location already created, center there
+						 * Center the map using geolocation
 						 */
-						if ($scope.location.lat) {
-							lat = $scope.location.lat;
-							lng = $scope.location.long;
-						} else {
-							lat = position.coords.latitude;
-							lng = position.coords.longitude;
-						}
-						$scope.initMap(lat, lng);
-					}, function (error) {
-						$scope.initMap(51.528969, -0.165011);
-					});
+						$cordovaGeolocation.getCurrentPosition({
+							timeout: 6000,
+							enableHighAccuracy: true
+						}).then(function (position) {
+
+							/*
+							 * If location already created, center there
+							 */
+							$scope.initMap(position.coords.latitude, position.coords.longitude);
+						}, function (error) {
+							$scope.initMap(51.528969, -0.165011);
+
+						});
+					}
+
 				}
 
 				/**
@@ -116,7 +117,7 @@
 					/*
 					 * Watch the location change and redraw
 					 */
-					$scope.$watch('location', function () {
+					$scope.$watch('location.radius', function () {
 						$scope.drawLocation();
 					});
 				}
@@ -142,7 +143,7 @@
 						$scope.marker = new google.maps.Marker({
 							position: latLng,
 							map: $scope.map,
-							icon: '/img/location/pin.png',
+							icon: 'img/location/pin.png',
 							draggable: true
 						});
 

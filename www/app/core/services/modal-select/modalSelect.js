@@ -80,7 +80,7 @@
 			/*
 			 * Create the modal
 			 */
-			$ionicModal.fromTemplateUrl('app/core/modal-select/modalSelect.html', {
+			$ionicModal.fromTemplateUrl('app/core/services/modal-select/modalSelect.html', {
 				scope: $scope,
 				animation: 'slide-in-up'
 			}).then(function (createdModal) {

@@ -10,7 +10,7 @@
 		'RepositoryService',
 		'RequestService',
 		'$q',
-		'$interval',
+		'$timeout',
 		'RelationshipService',
 		'Model'];
 
@@ -19,7 +19,7 @@
 					   RepositoryService,
 					   RequestService,
 					   $q,
-					   $interval,
+					   $timeout,
 					   RelationshipService,
 					   Model) {
 		var self = this;
@@ -34,12 +34,28 @@
 		self.find = find;
 		self.remove = remove;
 		self.registerScope = registerScope;
+		self.deregisterScope = deregisterScope;
 		self.clear = clear;
 		self.clearAll = clearAll;
+
+		self.interceptor = interceptor;
 
 		//Internal
 		self._decorateFactory = _decorateFactory;
 		self._decorateModel = _decorateModel;
+
+
+		//Settings
+
+
+		/*
+		 * Always look in the local data stores for objects
+		 * If Set to true, we will not going looking remotely for any data
+		 * 
+		 * useful for testing purposes as don't need to do a sync
+		 */
+		self.$alwaysSearchLocal = false;
+
 
 		/*
 		 * Initialisation Relationships
@@ -48,11 +64,16 @@
 
 		/*
 		 * Create a listener to trigger a sync if goes online
+		 *
+		 * Delay the sync so that it doesn't interfere
+		 *
 		 */
 		RequestService.on('goOnline', function () {
-			RequestService.ready().then(function () {
-				self.syncAll();
-			});
+			$timeout(function () {
+				RequestService.ready().then(function () {
+					self.syncAll();
+				});
+			}, 1000)
 		});
 
 		/*
@@ -73,15 +94,6 @@
 		 */
 		self._decorateFactory(Model);
 		Model.addDecorator(self._decorateModel);
-
-
-		//Start a regular timeout to check the sync queue
-		//@TODO Unit test
-		$interval(function () {
-			RequestService.next(true);
-		}, 5000);
-
-
 
 		/////////////////////////////////////////
 
@@ -122,7 +134,7 @@
 		 * @param models
 		 * @param execute
 		 * @param $scope
-		 * 
+		 *
 		 * @returns {*}
 		 */
 		function save(models, execute, $scope) {
@@ -203,14 +215,14 @@
 			}
 
 			//ensure online
-			return RequestService.goOnline().then(function () {
+			return RequestService.goOnline(true).then(function () {
 				/*
 				 Get the updated Date
 				 */
 				return repo.updatedAt();
 			}).then(function (updatedAt) {
 				if (updatedAt !== null) {
-					options.updatedAt = updatedAt;
+					options.updatedDate = updatedAt;
 				}
 				return RequestService.findChunked(Model, options);
 			}).then(function (data) {
@@ -336,12 +348,12 @@
 			return self.$syncComplete.then(function () {
 				return repo.updatedAt()
 			}).then(function (date) {
-				if (date === null || forceRemote) {
+				if ((date === null || forceRemote) && !self.$alwaysSearchLocal) {
 					return _getFromRemote(Model, id, $scope);
 				} else {
 					//get locally
 					return RepositoryService.get(Model).get(id, false, $scope).then(function (model) {
-						if (model !== null) {
+						if (model !== null || self.$alwaysSearchLocal) {
 							return $q.when(model);
 						}
 						return _getFromRemote(Model, id, $scope);
@@ -396,12 +408,12 @@
 			return self.$syncComplete.then(function () {
 				return repo.updatedAt()
 			}).then(function (date) {
-				if (date === null || forceRemote) {
+				if ((date === null || forceRemote ) && !self.$alwaysSearchLocal) {
 					return _findFromRemote(Model, options, $scope);
 				} else {
 					//get locally
 					return repo.find(options, $scope).then(function (models) {
-						if (models !== null) {
+						if (models !== null || self.$alwaysSearchLocal) {
 							return $q.when(models);
 						}
 						return _getFromRemote(Model, options, $scope);
@@ -442,6 +454,21 @@
 			model = angular.isArray(model) ? model : [model];
 			angular.forEach(model, function (m) {
 				RepositoryService.get(m.className()).registerModel(m, $scope);
+			});
+		}
+
+		/**
+		 * deregisterScope
+		 *
+		 * Opposite of registerScope, using repo.deregisterModel funciton
+		 *
+		 * @param model
+		 * @param $scope
+		 */
+		function deregisterScope(model, $scope) {
+			model = angular.isArray(model) ? model : [model];
+			angular.forEach(model, function (m) {
+				RepositoryService.get(m.className()).deregisterModel(m, $scope);
 			});
 		}
 
@@ -514,6 +541,18 @@
 			return $q.all(p)
 		}
 
+		/**
+		 * interceptor
+		 *
+		 * facade for RequestService.interceptor
+		 *
+		 * @param interceptor {Function}
+		 * @param type {String} Optional
+		 */
+		function interceptor(interceptor, type) {
+			RequestService.interceptor(interceptor, type);
+		}
+
 
 		/**
 		 * _decorateFactory
@@ -569,8 +608,10 @@
 			ModelConstructor.prototype.$register = function () {
 				return self.registerScope.apply(self, getArgs(this, arguments));
 			};
+			ModelConstructor.prototype.$deregister = function () {
+				return self.deregisterScope.apply(self, getArgs(this, arguments));
+			};
 		}
-
 
 
 	}

@@ -242,8 +242,8 @@ describe('saferota.core rotaGeoFenceService', function () {
 			spyOn(RotaGeoFenceService, 'deactivateLocation').and.returnValue($q.when());
 			return RotaGeoFenceService.deactivate(r1);
 		}).then(function () {
-			expect(RotaGeoFenceService.deactivateLocation).toHaveBeenCalledWith(l1);
-			expect(RotaGeoFenceService.deactivateLocation).toHaveBeenCalledWith(l2);
+			expect(RotaGeoFenceService.deactivateLocation).toHaveBeenCalledWith(l1, undefined);
+			expect(RotaGeoFenceService.deactivateLocation).toHaveBeenCalledWith(l2, undefined);
 
 			done();
 		});

@@ -160,6 +160,23 @@ describe('saferota.data Repository', function () {
 		expect(flag).toBe(true);
 	});
 
+	/*
+	 * .deregisterModel
+	 */
+	it('.deregisterModel can remove a model from the internal memory', function () {
+		var $s = $rootScope.$new();
+
+		repo.registerModel(m1, $s);
+
+		var c = repo.$mem[m1.id];
+		expect(c.c).toBe(1);
+
+		repo.deregisterModel(m1, $s);
+		expect(repo.$mem[m1.id]).not.toBeDefined();
+
+	});
+
+
 	/* Offline Enabled */
 	it('.offlineEnabled returns the offline setting from the model', function () {
 		var NoSyncModel = ModelService.create('noSync').config({offline: false});

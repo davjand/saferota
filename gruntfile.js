@@ -7,12 +7,15 @@ module.exports = function (grunt) {
 	//noinspection JSUnresolvedFunction
 	grunt.initConfig({
 		injector: {
+
 			options: {
-				ignorePath: 'www'
+				ignorePath: 'www/',
+				addRootSlash: false
 			},
 			local: {
+
 				files: {
-					'www/index.html': ['www/app/**/*module.js','www/app/**/*.js', '!www/app/**/*.spec.js']
+					'www/index.html': ['www/app/**/*module.js', 'www/app/**/*.js', '!www/app/**/*.spec.js']
 				}
 			}
 		},

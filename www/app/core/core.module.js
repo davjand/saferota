@@ -14,7 +14,8 @@
 			'ionic',
 			'toastr',
 			'angular-ladda',
+			'angular-cache',
 			'saferota.data',
-			'saferota.backendless'
+			'saferota.backendless',
 		]);
 })();

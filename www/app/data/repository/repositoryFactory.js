@@ -58,6 +58,7 @@
 
 		 */
 		Repository.prototype.registerModel = registerModel;
+		Repository.prototype.deregisterModel = deregisterModel;
 		Repository.prototype.save = save;
 		Repository.prototype.sync = sync;
 		Repository.prototype.remove = remove;
@@ -115,6 +116,18 @@
 			if ($scope) {
 				this._putMem(model, $scope);
 			}
+		}
+
+		/**
+		 * deregisterModel
+		 *
+		 * Removes a $scope from the internal reference tracking
+		 *
+		 * @param model
+		 * @param $scope
+		 */
+		function deregisterModel(model, $scope) {
+			return this._deregScope(model, $scope);
 		}
 
 
@@ -256,6 +269,16 @@
 						else {
 							var localModel = self._Model.create(data[modelKey], false, true);
 							if (!localModel.isEqual(modelVal)) {
+
+								//ensure in correct format
+								if (typeof modelVal.updatedDate === 'string') {
+									modelVal.updatedDate = new Date(modelVal.updatedDate);
+								}
+								if (typeof localModel.updatedDate === 'string') {
+									localModel.updatedDate = new Date(localModel.updatedDate);
+								}
+
+								//Compare
 								if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
 									localModel.setData(modelVal.toObject());
 								}

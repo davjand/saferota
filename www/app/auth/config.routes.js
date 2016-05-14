@@ -23,7 +23,7 @@
 				/* @ngInject */
 				onEnter: function (AuthService, $state) {
 					if (AuthService.getSession().isLoggedIn) {
-						$state.go('app.main');
+						$state.go('app.list');
 					}
 				}
 			})
