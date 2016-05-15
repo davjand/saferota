@@ -17,11 +17,18 @@
 
 	var RotaEvent;
 
+	run.$inject = ['RotaEvent'];
+
+	/* @ngInject */
+	function run(RotaEvent) {
+		//ensure initialized
+	}
+
 	run.$inject = ['DataStore'];
 
 	/* @ngInject */
-	function run(DataStore) {
-		RotaEvent = DataStore.create('RotaEvents')
+	function factory(DataStore) {
+		return DataStore.create('RotaEvents')
 			.key('objectId')
 			.schema({
 				location: null,
@@ -32,11 +39,6 @@
 				ownerId: ''
 			})
 			.relationship('hasOne', 'rota', 'Rotas');
-	}
-
-	/* @ngInject */
-	function factory() {
-		return RotaEvent
 	}
 })();
 

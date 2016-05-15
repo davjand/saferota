@@ -15,34 +15,32 @@
 	 *
 	 */
 
-	var RotaOrganisation;
 
-	run.$inject = ['DataStore'];
+	run.$inject = ['RotaOrganisation'];
 
 	/* @ngInject */
-	function run(DataStore) {
-		RotaOrganisation =
-			DataStore.create('RotaOrganisations')
-				.key('objectId')
-				.schema({
-					postcode: '',
-					nationalGrouping: '',
-					name: '',
-					highLevelHealthGeography: '',
-					code: '',
-					address1: '',
-					address2: '',
-					address3: '',
-					address4: '',
-					address5: ''
-				});
+	function run(RotaOrganisation) {
+		//ensure initialized
 	}
 
-	factory.$inject = [];
+	factory.$inject = ['DataStore'];
 
 	/* @ngInject */
-	function factory() {
-		return RotaOrganisation
+	function factory(DataStore) {
+		return DataStore.create('RotaOrganisations')
+			.key('objectId')
+			.schema({
+				postcode: '',
+				nationalGrouping: '',
+				name: '',
+				highLevelHealthGeography: '',
+				code: '',
+				address1: '',
+				address2: '',
+				address3: '',
+				address4: '',
+				address5: ''
+			});
 	}
 
 })();

@@ -5,6 +5,7 @@
 		.module('saferota.rota', [
 			'saferota.core',
 			'saferota.auth',
+			'saferota.rota-log',
 			'ui.router'
 		]);
 })();

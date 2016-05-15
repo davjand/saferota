@@ -15,13 +15,18 @@
 	 *
 	 */
 
-	var RotaTimespan;
-
-	run.$inject = ['DataStore'];
+	run.$inject = ['RotaTimespan'];
 
 	/* @ngInject */
-	function run(DataStore) {
-		RotaTimespan = DataStore.create('RotaTimeSpans')
+	function run(RotaTimespan) {
+		//ensure run
+	}
+
+	factory.$inject = ['DataStore'];
+
+	/* @ngInject */
+	function factory(DataStore) {
+		return DataStore.create('RotaTimespans')
 			.key('objectId')
 			.schema({
 				location: null,
@@ -31,11 +36,6 @@
 				ownerId: ''
 			})
 			.relationship('hasOne', 'rota', 'Rotas');
-	}
-
-	/* @ngInject */
-	function factory() {
-		return RotaTimespan
 	}
 })();
 

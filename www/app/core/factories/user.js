@@ -14,14 +14,19 @@
 	 *
 	 *
 	 */
-
-	var User;
-
-	run.$inject = ['DataStore'];
+	
+	run.$inject = ['User'];
 
 	/* @ngInject */
-	function run(DataStore) {
-		User = DataStore.create('Users')
+	function run(User) {
+		//ensure initialized
+	}
+
+	factory.$inject = ['DataStore'];
+
+	/* @ngInject */
+	function factory(DataStore) {
+		return DataStore.create('Users')
 			.key('objectId')
 			.schema({
 				firstName: '',
@@ -31,11 +36,6 @@
 			.config({
 				sync: false
 			});
-	}
-
-	/* @ngInject */
-	function factory() {
-		return User;
 	}
 })();
 

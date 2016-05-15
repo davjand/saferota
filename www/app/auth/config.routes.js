@@ -15,20 +15,19 @@
 				templateUrl: 'app/auth/auth.html',
 				/* @ngInject */
 				resolve: {
-					auth: function (AuthService) {
-						return AuthService.isReady()
+					app: function (Session) {
+						return Session.ready()
 					}
-
 				},
 				/* @ngInject */
-				onEnter: function (AuthService, $state) {
-					if (AuthService.getSession().isLoggedIn) {
+				onEnter: function (App, $state) {
+					if (App.session.isLoggedIn) {
 						$state.go('app.list');
 					}
 				}
 			})
 			.state('auth.login', {
-				url: '',
+				url: '/login',
 				templateUrl: 'app/auth/login.html'
 			})
 			.state('auth.signup', {

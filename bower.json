@@ -33,6 +33,9 @@
         "dist/ladda.min.js",
         "dist/ladda-themeless.min.css"
       ]
+    },
+    "angular-ui-router": {
+      "main": []
     }
   }
 }

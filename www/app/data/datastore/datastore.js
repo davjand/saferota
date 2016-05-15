@@ -10,8 +10,11 @@
 		'RepositoryService',
 		'RequestService',
 		'$q',
+		'$log',
+		'$rootScope',
 		'$timeout',
 		'RelationshipService',
+		'DATA_EVENTS',
 		'Model'];
 
 	/* @ngInject */
@@ -19,8 +22,11 @@
 					   RepositoryService,
 					   RequestService,
 					   $q,
+					   $log,
+					   $rootScope,
 					   $timeout,
 					   RelationshipService,
+					   DATA_EVENTS,
 					   Model) {
 		var self = this;
 
@@ -30,6 +36,9 @@
 		self.save = save;
 		self.sync = sync;
 		self.syncAll = syncAll;
+		self.startSync = startSync;
+		self.stopSync = stopSync;
+
 		self.get = get;
 		self.find = find;
 		self.remove = remove;
@@ -80,6 +89,7 @@
 		 * True if currently synchronising via syncAll
 		 */
 		self.$syncInProgress = false;
+		self.$syncScheduled = null;
 
 		/*
 		 * A promise to when the current sync is complete
@@ -248,6 +258,7 @@
 				/*
 				 * Setup flags
 				 */
+				$rootScope.$emit(DATA_EVENTS.SYNC_START);
 				self.$syncInProgress = true;
 				$syncPromise = $q.defer();
 				self.$syncComplete = $syncPromise.promise;
@@ -264,14 +275,67 @@
 				return $q.all(pArr).then(function () {
 					self.$syncInProgress = false;
 					$syncPromise.resolve();
+					$rootScope.$emit(DATA_EVENTS.SYNC_FINISH);
 					return $q.when();
 				}, function (error) {
 					self.$syncInProgress = false;
+					$rootScope.$emit(DATA_EVENTS.SYNC_ERROR);
+					$log.log(error);
 					$syncPromise.reject('SyncAll Error: ' + error);
 					return self.$syncComplete;
 				});
 			} else {
 				return self.$syncComplete;
+			}
+		}
+
+
+		/**
+		 * startSync
+		 * 
+		 * Starts a regular synchronisation to the server
+		 * Every 3 minutes by default
+		 * 
+		 * @param immediate
+		 * @param interval
+		 */
+		function startSync(immediate, interval){
+			interval = interval || 1000 * 60 * 3; //every 3 minutes
+			immediate = typeof immediate !== 'undefined' ? immediate : false;
+
+			var _scheduleSync = function(){
+				return $timeout(function(){
+					self.syncAll().then(function(){
+						self.$syncScheduled = _scheduleSync();
+					},function(error){
+						$log.log(error);
+						self.$syncScheduled = _scheduleSync();
+					});
+				},interval);
+			};
+
+			if(self.$syncScheduled === null){
+				RequestService.$disableBackgroundQueueProcessing = false;
+				self.$syncScheduled = _scheduleSync();
+			}
+
+			if(immediate){
+				self.syncAll();
+			}
+
+		}
+
+		/**
+		 * stopSync
+		 * 
+		 * Stops the regular synchronisation to the server
+		 * 
+		 */
+		function stopSync(){
+			if(self.$syncScheduled !== null){
+				RequestService.$disableBackgroundQueueProcessing = true;
+				$timeout.cancel(self.$syncScheduled);
+				self.$syncScheduled = false;
 			}
 		}
 
@@ -389,7 +453,6 @@
 		 * Simple find function to filter from the local datastore
 		 *
 		 * @TODO Implement direct remote fetching and synching
-		 * @TODO Implement sorting
 		 *
 		 * @param Model
 		 * @param options {Object} Expected keys .filter

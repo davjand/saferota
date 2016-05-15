@@ -15,13 +15,18 @@
 	 *
 	 */
 
-	var RotaLocation;
-
-	run.$inject = ['DataStore'];
+	run.$inject = ['RotaLocation'];
 
 	/* @ngInject */
-	function run(DataStore) {
-		RotaLocation = DataStore.create('RotaLocations')
+	function run(RotaLocation) {
+		//ensure initialized
+	}
+
+	factory.$inject = ['DataStore'];
+
+	/* @ngInject */
+	function factory(DataStore) {
+		return DataStore.create('RotaLocations')
 			.key('objectId')
 			.schema({
 				location: {},
@@ -31,11 +36,6 @@
 				radius: 400
 			})
 			.relationship('hasOne', 'rota', 'Rotas');
-	}
-
-	/* @ngInject */
-	function factory() {
-		return RotaLocation
 	}
 })();
 

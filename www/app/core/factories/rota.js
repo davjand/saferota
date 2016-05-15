@@ -15,14 +15,18 @@
 	 *
 	 */
 
-
-	var Rota;
-
-	run.$inject = ['Session', 'DataStore'];
+	run.$inject = ['Rota'];
 
 	/* @ngInject */
-	function run(Session, DataStore) {
+	function run(Rota) {
+		//ensure run
+	}
 
+
+	factory.$inject = ['Session', 'DataStore'];
+
+	/* @ngInject */
+	function factory(Session,DataStore) {
 		var BANDING_OPTIONS = [
 			{name: 'None', value: 0},
 			{name: '1c', value: 30},
@@ -31,7 +35,7 @@
 		];
 
 
-		Rota = DataStore.create('Rotas')
+		var Rota = DataStore.create('Rotas')
 			.key('objectId')
 			.schema({
 				label: '',
@@ -61,13 +65,7 @@
 			});
 
 		Rota.BANDING_OPTIONS = BANDING_OPTIONS;
-	}
 
-
-	factory.$inject = ['DataStore', 'Session', '$rootScope'];
-
-	/* @ngInject */
-	function factory() {
 		return Rota;
 	}
 

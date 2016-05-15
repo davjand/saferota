@@ -661,6 +661,29 @@ describe('saferota.data DataStore', function () {
 		expect(RepositoryService.get('test1').deregisterModel).toHaveBeenCalled();
 
 	});
+	
+	//startSync
+	it('.startSync starts a regular syncchronisation', function () {
+		spyOn(DataStore,'syncAll').and.returnValue($q.when());
+
+		DataStore.startSync();
+		$timeout.flush();
+
+		expect(RequestService.$disableBackgroundQueueProcessing).toBe(false);
+
+		expect(DataStore.syncAll).toHaveBeenCalled();
+
+	});
+	it('.stopSync stops synchronisation', function () {
+		spyOn(DataStore,'syncAll').and.returnValue($q.when());
+		DataStore.startSync();
+		DataStore.stopSync();
+
+		$timeout.flush();
+
+		expect(RequestService.$disableBackgroundQueueProcessing).toBe(true);
+		expect(DataStore.syncAll).not.toHaveBeenCalled();
+	});
 
 
 	/*

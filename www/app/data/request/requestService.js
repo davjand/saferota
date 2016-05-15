@@ -28,6 +28,12 @@
 		var _interceptors = {
 			error: []
 		};
+		
+		var ERRORS = {
+			RETRY_SCHEDULED: 100,
+			OFFLINE: 101,
+			ONLINE_ATTEMPT_FAIL: 102
+		};
 
 
 		//Online / Offline Functions
@@ -238,11 +244,24 @@
 			}
 
 			/*
+			 * if Scheduled offline
+			 */
+			if(self.$retryScheduled){
+				return rejectPromise ?
+					$q.reject({
+						code: ERRORS.RETRY_SCHEDULED
+					}) :
+					$q.when(false);
+			}
+
+			/*
 			 * If stayOffline then cancel
 			 */
 			if (self.$stayOffline) {
 				return rejectPromise ?
-					$q.reject() :
+					$q.reject({
+						code: ERRORS.OFFLINE
+					}) :
 					$q.when(false);
 			}
 
@@ -271,7 +290,9 @@
 
 				} else {
 					rejectPromise ?
-						self.$onlinePromise.reject() :
+						self.$onlinePromise.reject({
+							code: ERRORS.ONLINE_ATTEMPT_FAIL
+						}) :
 						self.$onlinePromise.resolve(false);
 				}
 			});
@@ -570,7 +591,13 @@
 
 			$timeout(function () {
 				if (!self.$disableBackgroundQueueProcessing) {
-					self.goOnline(true).then(function () {
+					self.$queue.length().then(function(length){
+						if(length > 0) {
+							return self.goOnline(true);
+						}else{
+							return $q.reject(); //cancel subsequent chain
+						}
+					}).then(function () {
 						self.next(true).then(function () {
 							self.startBackgroundQueueProcessing();
 						}, function () {

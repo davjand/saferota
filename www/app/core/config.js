@@ -4,7 +4,8 @@
 	angular
 		.module('saferota.core')
 		.config(laddaConfig)
-		.run(ionicRun);
+		.run(ionicRun)
+	.run(appRun);
 
 
 	/*
@@ -40,6 +41,14 @@
 			spinnerSize: 35,
 			spinnerColor: '#ffffff'
 		});
+	}
+
+	/*
+	 * App Run
+	 */
+	/* @ngInject */
+	function appRun(App){
+		App.start();
 	}
 
 

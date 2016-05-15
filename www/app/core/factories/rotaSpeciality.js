@@ -20,23 +20,22 @@
 	run.$inject = ['DataStore'];
 
 	/* @ngInject */
-	function run(DataStore) {
-		RotaSpeciality =
-			DataStore.create('RotaSpecialities')
-				.key('objectId')
-				.schema({
-					title: '',
-					code: '',
-					category: ''
-				});
+	function run(RotaSpeciality) {
+		//Ensure Run
 	}
 
 
-	factory.$inject = [];
+	factory.$inject = ['DataStore'];
 
 	/* @ngInject */
-	function factory() {
-		return RotaSpeciality
+	function factory(DataStore) {
+		return DataStore.create('RotaSpecialities')
+			.key('objectId')
+			.schema({
+				title: '',
+				code: '',
+				category: ''
+			});
 	}
 
 })();

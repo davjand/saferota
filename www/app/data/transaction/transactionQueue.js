@@ -196,9 +196,6 @@
 		 *  - Pops of the last transaction and notifies the repo to update
 		 *  - Reviews any cached transactions that are of the same object an update
 		 *
-		 *  Only supports primary keys at the moment
-		 *  @TODO Foreign key support
-		 *
 		 * @param data
 		 * @returns {*}
 		 */

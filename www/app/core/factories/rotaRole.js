@@ -15,23 +15,20 @@
 	 *
 	 */
 
-	var RotaRole;
-
-	run.$inject = ['DataStore'];
+	run.$inject = ['RotaRole'];
 
 	/* @ngInject */
-	function run(DataStore) {
-		RotaRole =
-			DataStore.create('RotaRoles')
-				.key('objectId')
-				.schema({title: '', code: ''});
+	function run(RotaRole) {
+		//ensure init
 	}
 
-	factory.$inject = [];
+	factory.$inject = ['DataStore'];
 
 	/* @ngInject */
-	function factory() {
-		return RotaRole
+	function factory(DataStore) {
+		return DataStore.create('RotaRoles')
+				.key('objectId')
+				.schema({title: '', code: ''});
 	}
 
 })();

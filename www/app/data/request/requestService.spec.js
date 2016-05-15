@@ -78,10 +78,6 @@ describe('saferota.data RequestService', function () {
 		});
 		_d();
 	});
-
-
-
-
 	it('.pingOnline returns a promise which resolves to false if not online', function (done) {
 		RequestService.$adapter._setOnline(false);
 		RequestService.pingOnline().then(function (online) {
@@ -91,8 +87,6 @@ describe('saferota.data RequestService', function () {
 		});
 		_d();
 	});
-
-
 	it('.pingOnline can reject the promise if passed true and offline', function (done) {
 		RequestService.$adapter._setOnline(false);
 
@@ -164,6 +158,20 @@ describe('saferota.data RequestService', function () {
 			done();
 		});
 		_d();
+	});
+	it('.goOnline will reject the promise if retry is scheduled', function (done) {
+		RequestService.$adapter._setOnline(false);
+		RequestService.scheduleRetryGoOnline();
+
+		RequestService.goOnline().then(function(){
+			expect(true).toBe(false);
+		},function(error){
+			expect(error.code).toBe(100);
+			expect(true).toBe(true);
+			done();
+		});
+		_d();
+
 	});
 
 	/* Go Online should only allow one concurrent going online attempt

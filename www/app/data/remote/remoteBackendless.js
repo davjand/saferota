@@ -276,8 +276,13 @@
 				return $q.reject({code: 3064});
 			}
 
-			return this._xhr('GET', 'users/isvalidusertoken/' + token).then(function () {
-				return $q.when();
+			return this._xhr('GET', 'users/isvalidusertoken/' + token).then(function (valid) {
+				if(valid) {
+					return $q.when();
+				}else{
+					Backendless.LocalCache.clear();
+					return $q.reject();
+				}
 			}, function (error) {
 				error = error || {};
 				//if expired
@@ -415,10 +420,10 @@
 
 			xhr.onreadystatechange = function () {
 				if (xhr.readyState == 4 && xhr.status == 200) {
-					p.resolve();
+					p.resolve(xhr.responseText === 'true');
 				}
 				else if (xhr.readyState == 4) {
-					p.reject(p.response);
+					p.reject(xhr.xhr.responseText);
 				}
 			};
 
