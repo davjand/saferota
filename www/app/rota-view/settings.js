@@ -15,7 +15,6 @@
 
 		vm.user = Session.user;
 
-		vm.edit = edit;
 		vm.logout = logout;
 
 
@@ -27,14 +26,6 @@
 		 * 
 		 */
 
-
-		/**
-		 * edit
-		 *
-		 */
-		function edit() {
-			$state.go('app.edit', {rotaId: vm.rota.getKey()});
-		}
 
 		/**
 		 * logout

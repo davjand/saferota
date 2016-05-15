@@ -6,6 +6,7 @@
 			'angular-ladda',
 			'saferota.core',
 			'saferota.data',
+			'saferota.rota-view',
 			'saferota.backendless'
 		]);
 })();

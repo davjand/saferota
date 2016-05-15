@@ -537,6 +537,7 @@ describe('saferota.data DataStore', function () {
 	it('DataStore listens to RequestService.goOnline event and starts sync', function (done) {
 		spyOn(DataStore, 'syncAll').and.callThrough();
 
+		RequestService.$firstAttemptOnline = false;
 		RequestService.goOnline().then(function () {
 			//a little nbit of digest hacking to get it to work in a testing situation
 			setTimeout(function () {

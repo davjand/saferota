@@ -506,6 +506,7 @@
 		function clear(andCache) {
 			this.$mem = {};
 			if (andCache) {
+				this._updatedAt = null;
 				return this.$local.clear();
 			} else {
 				return $q.when();

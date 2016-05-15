@@ -1,0 +1,43 @@
+<ion-view>
+	<ion-nav-title>Events</ion-nav-title>
+	<ion-content>
+		<div class="card"
+			 ng-repeat="event in vm.events">
+
+			<div class="item item-divider">
+				<span ng-if="!event.exited && event.type === 1"
+					  class="pull-right">
+					Active
+				</span>
+				{{event.timestamp | date : 'medium'}}
+			</div>
+			<div class="item item-text-wrap">
+				<span ng-if="event.type === 1">
+					Enter
+				</span>
+				<span ng-if="event.type === 2">
+					Exit
+				</span>
+				<span ng-if="event.type === 3">
+					Enter & Exit
+				</span>
+				<br/>
+				{{event.location}}
+
+			</div>
+			<div class="item item-divider"
+				 ng-if="event.error">
+				Error: {{event.error}}
+			</div>
+		</div>
+
+		<button class="button button-light button-outline button-block "
+				ng-click="vm.nextPage()"
+				ng-hide="!vm.$more"
+				ladda="vm.$loading"
+				style="margin-bottom: 40px">
+			Load More
+		</button>
+
+	</ion-content>
+</ion-view>

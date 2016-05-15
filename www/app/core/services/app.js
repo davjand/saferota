@@ -37,7 +37,9 @@
 		self.session = Session;
 		self.log = RotaLogService;
 
-		self.ready = Session.ready;
+		self.ready = function () {
+			return Session.ready();
+		};
 
 
 		/*

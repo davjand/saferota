@@ -72,11 +72,11 @@
 		 *
 		 *
 		 * @param userId
-		 * @returns {Function}
+		 * @returns {Promise}
 		 */
 		function start(userId) {
 
-			self._ready = $q.defer();
+			//self._ready = $q.defer();
 
 			/*
 			 * Allow userId to be passed in (ie from login functions etc)
@@ -90,8 +90,8 @@
 			} else {
 				userId = _getCachedUserId();
 				if (!userId) {
-					self._ready.resolve();
-					return;
+					_setReady();
+					return self._ready.promise;
 				}
 			}
 			self.userId = userId;
@@ -127,15 +127,15 @@
 				 * validate the login in the background
 				 */
 				self.isValidLoginToken().then(function(valid){
-					if(!valid){
+					if (valid === false) {
 						self.notAuthenticated();
 					}
 				});
 
-				self._ready.resolve();
+				_setReady();
 			},function(error){
 				self.notAuthenticated(error);
-				self._ready.resolve();
+				_setReady();
 			});
 
 
@@ -187,9 +187,10 @@
 				Backendless.UserService.isValidLogin(
 					new Backendless.Async(
 						function (result) {
-							p.resolve(true);
-						}, function (error) {
-							p.resolve(false);
+							p.resolve(result);
+						}, function () {
+							//might be offline
+							p.resolve();
 						})
 				)
 			} else {
@@ -204,6 +205,15 @@
 		 Private
 
 		 */
+
+		/**
+		 * setReady
+		 */
+		function _setReady() {
+			if (self._ready.resolve) {
+				self._ready.resolve();
+			}
+		}
 
 		/**
 		 * _cacheUserId

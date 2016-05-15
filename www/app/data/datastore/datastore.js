@@ -77,12 +77,14 @@
 		 * Delay the sync so that it doesn't interfere
 		 *
 		 */
-		RequestService.on('goOnline', function () {
-			$timeout(function () {
-				RequestService.ready().then(function () {
-					self.syncAll();
-				});
-			}, 1000)
+		RequestService.on('goOnline', function (firstTime) {
+			if (!firstTime) {
+				$timeout(function () {
+					RequestService.ready().then(function () {
+						self.syncAll();
+					});
+				}, 1000);
+			}
 		});
 
 		/*

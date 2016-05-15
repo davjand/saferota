@@ -3,8 +3,8 @@
 
 	angular
 		.module('saferota.backendless')
-		//.constant('BACKENDLESS_API',"http://localhost:8100/api") //testing
-		.constant('BACKENDLESS_API', "https://api.backendless.com") //live
+		.constant('BACKENDLESS_API', "http://localhost:8100/api") //testing
+		//.constant('BACKENDLESS_API', "https://api.backendless.com") //live
 		.constant('Backendless', Backendless)
 		.config(dataConfig);
 

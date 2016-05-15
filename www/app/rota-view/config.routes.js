@@ -22,16 +22,6 @@
 					}
 				}
 			})
-			.state('app.view.logs', {
-				url: '',
-				views: {
-					'tab-logs': {
-						templateUrl: 'app/rota-view/logs.html',
-						controller: 'RotaViewLogController',
-						controllerAs: 'vm'
-					}
-				}
-			})
 			.state('app.view.stats', {
 				url: '/stats',
 				views: {

@@ -90,6 +90,13 @@
 			self.$adapter = new ($injector.get(DataConfig.remote))(DataConfig.remoteConfig);
 
 			/*
+			 * Flag to store if the first attempt online (per application run)
+			 * Used to tell the going online code whether or not this is the first time
+			 * (in which case don't sync) or later on
+			 */
+			self.$firstAttemptOnline = true;
+
+			/*
 			 * If in the progress of a sync (ie multiple things happening
 			 */
 			self.$inProgress = false;
@@ -194,13 +201,15 @@
 			self.$adapter.online().then(function () {
 				if (!self.$isOnline) {
 					self.$isOnline = true;
-					self.emit('goOnline');
+					self.emit('goOnline', self.$firstAttemptOnline);
+					self.$firstAttemptOnline = false;
 				}
 				p.resolve(true);
 			}, function (error) {
 				if (self.$isOnline) {
 					self.$isOnline = false;
 					self.emit('goOffline');
+					self.$firstAttemptOnline = false;
 				}
 
 				self._processInterceptors(error);

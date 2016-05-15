@@ -14,12 +14,16 @@
 					url: '/app',
 					templateUrl: 'app/rota/app.html',
 					resolve: {
-						isReady: function (App) {
-							return App.ready();
+						/* @ngInject */
+						isReady: function (App, $q, $state) {
+							return App.ready().then(function () {
+								if (!App.session.isLoggedIn) {
+									$state.go('auth.login');
+								}
+								return $q.when();
+							});
 						}
-
 					}
-
 				}
 			)
 			.state('app.list', {
@@ -46,7 +50,7 @@
 			});
 
 
-//by default go here
+		//by default go here
 		$urlRouterProvider.otherwise('/app/list');
 	}
 })

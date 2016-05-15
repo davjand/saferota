@@ -49,7 +49,7 @@
 			DataStore.registerScope(vm.rotas, $scope);
 			vm.activeRotas = activeRotas;
 
-			var offSyncComplete = $rootScope.$on(DATA_EVENTS.SYNC_COMPLETE, _handleSyncComplete);
+			var offSyncComplete = $rootScope.$on(DATA_EVENTS.SYNC_FINISH, _handleSyncComplete);
 
 			$scope.$on('$destroy', function () {
 				offSyncComplete();

@@ -336,8 +336,7 @@
 		 * @private
 		 */
 		function _wrapPromise() {
-			var args = arguments,
-				context = arguments[0],
+			var context = arguments[0],
 				fx = arguments[1],
 				params = [],
 				p = $q.defer();
@@ -423,7 +422,7 @@
 					p.resolve(xhr.responseText === 'true');
 				}
 				else if (xhr.readyState == 4) {
-					p.reject(xhr.xhr.responseText);
+					p.reject(xhr.responseText);
 				}
 			};
 
