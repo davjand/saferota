@@ -1,27 +1,4 @@
 @charset "UTF-8";
-/*
-To customize the look and feel of Ionic, you can override the variables
-in ionic's _variables.scss file.
-
-For example, you might change some of the default colors:
-
-$light:                           #fff !default;
-$stable:                          #f8f8f8 !default;
-$positive:                        #387ef5 !default;
-$calm:                            #11c1f3 !default;
-$balanced:                        #33cd5f !default;
-$energized:                       #ffc900 !default;
-
-$royal:                           #886aea !default;
-$dark:                            #444 !default;
-*/
-/*
-
-
-	Defines
-
-
-*/
 /*!
  *  Font Awesome 4.6.1 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -2205,8 +2182,8 @@ $dark:                            #444 !default;
 */
 @font-face {
   font-family: "Ionicons";
-  src: url("../lib/ionic/fonts/ionicons.eot?v=2.0.1");
-  src: url("../lib/ionic/fonts/ionicons.eot?v=2.0.1#iefix") format("embedded-opentype"), url("../lib/ionic/fonts/ionicons.ttf?v=2.0.1") format("truetype"), url("../lib/ionic/fonts/ionicons.woff?v=2.0.1") format("woff"), url("../lib/ionic/fonts/ionicons.woff") format("woff"), url("../lib/ionic/fonts/ionicons.svg?v=2.0.1#Ionicons") format("svg");
+  src: url("../fonts/ionicons.eot?v=2.0.1");
+  src: url("../fonts/ionicons.eot?v=2.0.1#iefix") format("embedded-opentype"), url("../fonts/ionicons.ttf?v=2.0.1") format("truetype"), url("../fonts/ionicons.woff?v=2.0.1") format("woff"), url("../fonts/ionicons.woff") format("woff"), url("../fonts/ionicons.svg?v=2.0.1#Ionicons") format("svg");
   font-weight: normal;
   font-style: normal; }
 
@@ -6141,14 +6118,14 @@ a.subdued {
     .bar.bar-assertive.bar-footer {
       background-image: linear-gradient(180deg, #e42112, #e42112 50%, transparent 50%); }
   .bar.bar-balanced {
-    border-color: #578f02;
-    background-color: #76c103;
-    background-image: linear-gradient(0deg, #578f02, #578f02 50%, transparent 50%);
+    border-color: #28a54c;
+    background-color: #33cd5f;
+    background-image: linear-gradient(0deg, #28a54c, #28a54c 50%, transparent 50%);
     color: #fff; }
     .bar.bar-balanced .title {
       color: #fff; }
     .bar.bar-balanced.bar-footer {
-      background-image: linear-gradient(180deg, #578f02, #0c60ee 50%, transparent 50%); }
+      background-image: linear-gradient(180deg, #28a54c, #0c60ee 50%, transparent 50%); }
   .bar.bar-energized {
     border-color: #e6b500;
     background-color: #ffc900;
@@ -6159,14 +6136,14 @@ a.subdued {
     .bar.bar-energized.bar-footer {
       background-image: linear-gradient(180deg, #e6b500, #e6b500 50%, transparent 50%); }
   .bar.bar-royal {
-    border-color: #6a4e91;
-    background-color: #7e5fa9;
-    background-image: linear-gradient(0deg, #6a4e91, #6a4e91 50%, transparent 50%);
+    border-color: #6b46e5;
+    background-color: #886aea;
+    background-image: linear-gradient(0deg, #6b46e5, #6b46e5 50%, transparent 50%);
     color: #fff; }
     .bar.bar-royal .title {
       color: #fff; }
     .bar.bar-royal.bar-footer {
-      background-image: linear-gradient(180deg, #6a4e91, #6a4e91 50%, transparent 50%); }
+      background-image: linear-gradient(180deg, #6b46e5, #6b46e5 50%, transparent 50%); }
   .bar.bar-dark {
     border-color: #111;
     background-color: #444444;
@@ -6372,13 +6349,13 @@ a.subdued {
 
 .bar-balanced .button {
   border-color: transparent;
-  background-color: #76c103;
+  background-color: #33cd5f;
   color: #fff; }
   .bar-balanced .button:hover {
     color: #fff;
     text-decoration: none; }
   .bar-balanced .button.active, .bar-balanced .button.activated {
-    background-color: #578f02; }
+    background-color: #28a54c; }
   .bar-balanced .button.button-clear {
     border-color: transparent;
     background: none;
@@ -6410,13 +6387,13 @@ a.subdued {
 
 .bar-royal .button {
   border-color: transparent;
-  background-color: #7e5fa9;
+  background-color: #886aea;
   color: #fff; }
   .bar-royal .button:hover {
     color: #fff;
     text-decoration: none; }
   .bar-royal .button.active, .bar-royal .button.activated {
-    background-color: #6a4e91; }
+    background-color: #6b46e5; }
   .bar-royal .button.button-clear {
     border-color: transparent;
     background: none;
@@ -6602,14 +6579,14 @@ a.subdued {
 
 .tabs-balanced > .tabs,
 .tabs.tabs-balanced {
-  border-color: #578f02;
-  background-color: #76C103;
-  background-image: linear-gradient(0deg, #578f02, #578f02 50%, transparent 50%);
+  border-color: #28a54c;
+  background-color: #33cd5f;
+  background-image: linear-gradient(0deg, #28a54c, #28a54c 50%, transparent 50%);
   color: #fff; }
   .tabs-balanced > .tabs .tab-item .badge,
   .tabs.tabs-balanced .tab-item .badge {
     background-color: #fff;
-    color: #76C103; }
+    color: #33cd5f; }
 
 .tabs-energized > .tabs,
 .tabs.tabs-energized {
@@ -6624,14 +6601,14 @@ a.subdued {
 
 .tabs-royal > .tabs,
 .tabs.tabs-royal {
-  border-color: #6a4e91;
-  background-color: #7E5FA9;
-  background-image: linear-gradient(0deg, #6a4e91, #6a4e91 50%, transparent 50%);
+  border-color: #6b46e5;
+  background-color: #886aea;
+  background-image: linear-gradient(0deg, #6b46e5, #6b46e5 50%, transparent 50%);
   color: #fff; }
   .tabs-royal > .tabs .tab-item .badge,
   .tabs.tabs-royal .tab-item .badge {
     background-color: #fff;
-    color: #7E5FA9; }
+    color: #886aea; }
 
 .tabs-dark > .tabs,
 .tabs.tabs-dark {
@@ -6751,7 +6728,7 @@ a.subdued {
   top: 4%; }
 
 .tabs-striped.tabs-balanced .tabs {
-  background-color: #76C103; }
+  background-color: #33cd5f; }
 
 .tabs-striped.tabs-balanced .tab-item {
   color: rgba(255, 255, 255, 0.4);
@@ -6787,7 +6764,7 @@ a.subdued {
   top: 4%; }
 
 .tabs-striped.tabs-royal .tabs {
-  background-color: #7E5FA9; }
+  background-color: #886aea; }
 
 .tabs-striped.tabs-royal .tab-item {
   color: rgba(255, 255, 255, 0.4);
@@ -6843,7 +6820,7 @@ a.subdued {
   background-image: none; }
 
 .tabs-striped.tabs-background-balanced .tabs {
-  background-color: #76C103;
+  background-color: #33cd5f;
   background-image: none; }
 
 .tabs-striped.tabs-background-energized .tabs {
@@ -6851,7 +6828,7 @@ a.subdued {
   background-image: none; }
 
 .tabs-striped.tabs-background-royal .tabs {
-  background-color: #7E5FA9;
+  background-color: #886aea;
   background-image: none; }
 
 .tabs-striped.tabs-background-dark .tabs {
@@ -6929,14 +6906,14 @@ a.subdued {
       opacity: 1; }
 
 .tabs-striped.tabs-color-balanced .tab-item {
-  color: rgba(118, 193, 3, 0.4);
+  color: rgba(51, 205, 95, 0.4);
   opacity: 1; }
   .tabs-striped.tabs-color-balanced .tab-item .badge {
     opacity: 0.4; }
   .tabs-striped.tabs-color-balanced .tab-item.tab-item-active, .tabs-striped.tabs-color-balanced .tab-item.active, .tabs-striped.tabs-color-balanced .tab-item.activated {
     margin-top: -2px;
-    color: #76C103;
-    border: 0 solid #76C103;
+    color: #33cd5f;
+    border: 0 solid #33cd5f;
     border-top-width: 2px; }
     .tabs-striped.tabs-color-balanced .tab-item.tab-item-active .badge, .tabs-striped.tabs-color-balanced .tab-item.active .badge, .tabs-striped.tabs-color-balanced .tab-item.activated .badge {
       top: 2px;
@@ -6957,14 +6934,14 @@ a.subdued {
       opacity: 1; }
 
 .tabs-striped.tabs-color-royal .tab-item {
-  color: rgba(126, 95, 169, 0.4);
+  color: rgba(136, 106, 234, 0.4);
   opacity: 1; }
   .tabs-striped.tabs-color-royal .tab-item .badge {
     opacity: 0.4; }
   .tabs-striped.tabs-color-royal .tab-item.tab-item-active, .tabs-striped.tabs-color-royal .tab-item.active, .tabs-striped.tabs-color-royal .tab-item.activated {
     margin-top: -2px;
-    color: #7E5FA9;
-    border: 0 solid #7E5FA9;
+    color: #886aea;
+    border: 0 solid #886aea;
     border-top-width: 2px; }
     .tabs-striped.tabs-color-royal .tab-item.tab-item-active .badge, .tabs-striped.tabs-color-royal .tab-item.active .badge, .tabs-striped.tabs-color-royal .tab-item.activated .badge {
       top: 2px;
@@ -7016,9 +6993,9 @@ a.subdued {
 
 .tabs-background-balanced .tabs,
 .tabs-background-balanced > .tabs {
-  background-color: #76C103;
-  background-image: linear-gradient(0deg, #578f02, #578f02 50%, transparent 50%);
-  border-color: #578f02; }
+  background-color: #33cd5f;
+  background-image: linear-gradient(0deg, #28a54c, #28a54c 50%, transparent 50%);
+  border-color: #28a54c; }
 
 .tabs-background-energized .tabs,
 .tabs-background-energized > .tabs {
@@ -7028,9 +7005,9 @@ a.subdued {
 
 .tabs-background-royal .tabs,
 .tabs-background-royal > .tabs {
-  background-color: #7E5FA9;
-  background-image: linear-gradient(0deg, #6a4e91, #6a4e91 50%, transparent 50%);
-  border-color: #6a4e91; }
+  background-color: #886aea;
+  background-image: linear-gradient(0deg, #6b46e5, #6b46e5 50%, transparent 50%);
+  border-color: #6b46e5; }
 
 .tabs-background-dark .tabs,
 .tabs-background-dark > .tabs {
@@ -7094,13 +7071,13 @@ a.subdued {
       opacity: 1; }
 
 .tabs-color-balanced .tab-item {
-  color: rgba(118, 193, 3, 0.4);
+  color: rgba(51, 205, 95, 0.4);
   opacity: 1; }
   .tabs-color-balanced .tab-item .badge {
     opacity: 0.4; }
   .tabs-color-balanced .tab-item.tab-item-active, .tabs-color-balanced .tab-item.active, .tabs-color-balanced .tab-item.activated {
-    color: #76C103;
-    border: 0 solid #76C103; }
+    color: #33cd5f;
+    border: 0 solid #33cd5f; }
     .tabs-color-balanced .tab-item.tab-item-active .badge, .tabs-color-balanced .tab-item.active .badge, .tabs-color-balanced .tab-item.activated .badge {
       opacity: 1; }
 
@@ -7116,13 +7093,13 @@ a.subdued {
       opacity: 1; }
 
 .tabs-color-royal .tab-item {
-  color: rgba(126, 95, 169, 0.4);
+  color: rgba(136, 106, 234, 0.4);
   opacity: 1; }
   .tabs-color-royal .tab-item .badge {
     opacity: 0.4; }
   .tabs-color-royal .tab-item.tab-item-active, .tabs-color-royal .tab-item.active, .tabs-color-royal .tab-item.activated {
-    color: #7E5FA9;
-    border: 0 solid #7E5FA9; }
+    color: #886aea;
+    border: 0 solid #886aea; }
     .tabs-color-royal .tab-item.tab-item-active .badge, .tabs-color-royal .tab-item.active .badge, .tabs-color-royal .tab-item.activated .badge {
       opacity: 1; }
 
@@ -7165,7 +7142,7 @@ ion-tabs.tabs-color-active-assertive .tab-item {
 ion-tabs.tabs-color-active-balanced .tab-item {
   color: #444; }
   ion-tabs.tabs-color-active-balanced .tab-item.tab-item-active, ion-tabs.tabs-color-active-balanced .tab-item.active, ion-tabs.tabs-color-active-balanced .tab-item.activated {
-    color: #76C103; }
+    color: #33cd5f; }
 
 ion-tabs.tabs-color-active-energized .tab-item {
   color: #444; }
@@ -7175,7 +7152,7 @@ ion-tabs.tabs-color-active-energized .tab-item {
 ion-tabs.tabs-color-active-royal .tab-item {
   color: #444; }
   ion-tabs.tabs-color-active-royal .tab-item.tab-item-active, ion-tabs.tabs-color-active-royal .tab-item.active, ion-tabs.tabs-color-active-royal .tab-item.activated {
-    color: #7E5FA9; }
+    color: #886aea; }
 
 ion-tabs.tabs-color-active-dark .tab-item {
   color: #fff; }
@@ -7350,7 +7327,7 @@ ion-tabs.tabs-color-active-dark .tab-item {
   .tab-item.tab-item-active.tab-item-balanced,
   .tab-item.active.tab-item-balanced,
   .tab-item.activated.tab-item-balanced {
-    color: #76C103; }
+    color: #33cd5f; }
   .tab-item.tab-item-active.tab-item-energized,
   .tab-item.active.tab-item-energized,
   .tab-item.activated.tab-item-energized {
@@ -7358,7 +7335,7 @@ ion-tabs.tabs-color-active-dark .tab-item {
   .tab-item.tab-item-active.tab-item-royal,
   .tab-item.active.tab-item-royal,
   .tab-item.activated.tab-item-royal {
-    color: #7E5FA9; }
+    color: #886aea; }
   .tab-item.tab-item-active.tab-item-dark,
   .tab-item.active.tab-item-dark,
   .tab-item.activated.tab-item-dark {
@@ -7897,16 +7874,16 @@ ion-tabs.tabs-color-active-dark .tab-item {
     background-color: #ef473a;
     color: #fff; }
   .item.item-balanced {
-    border-color: #578f02;
-    background-color: #76C103;
+    border-color: #28a54c;
+    background-color: #33cd5f;
     color: #fff; }
   .item.item-energized {
     border-color: #e6b500;
     background-color: #ffc900;
     color: #fff; }
   .item.item-royal {
-    border-color: #6a4e91;
-    background-color: #7E5FA9;
+    border-color: #6b46e5;
+    background-color: #886aea;
     color: #fff; }
   .item.item-dark {
     border-color: #111;
@@ -8021,16 +7998,16 @@ ion-tabs.tabs-color-active-dark .tab-item {
   .item-complex.activated .item-content.item-balanced,
   .item .item-content.active.item-balanced,
   .item .item-content.activated.item-balanced {
-    border-color: #578f02;
-    background-color: #578f02; }
+    border-color: #28a54c;
+    background-color: #28a54c; }
     .item.active.item-balanced.item-complex > .item-content,
     .item.activated.item-balanced.item-complex > .item-content,
     .item-complex.active .item-content.item-balanced.item-complex > .item-content,
     .item-complex.activated .item-content.item-balanced.item-complex > .item-content,
     .item .item-content.active.item-balanced.item-complex > .item-content,
     .item .item-content.activated.item-balanced.item-complex > .item-content {
-      border-color: #578f02;
-      background-color: #578f02; }
+      border-color: #28a54c;
+      background-color: #28a54c; }
   .item.active.item-energized,
   .item.activated.item-energized,
   .item-complex.active .item-content.item-energized,
@@ -8053,16 +8030,16 @@ ion-tabs.tabs-color-active-dark .tab-item {
   .item-complex.activated .item-content.item-royal,
   .item .item-content.active.item-royal,
   .item .item-content.activated.item-royal {
-    border-color: #6a4e91;
-    background-color: #6a4e91; }
+    border-color: #6b46e5;
+    background-color: #6b46e5; }
     .item.active.item-royal.item-complex > .item-content,
     .item.activated.item-royal.item-complex > .item-content,
     .item-complex.active .item-content.item-royal.item-complex > .item-content,
     .item-complex.activated .item-content.item-royal.item-complex > .item-content,
     .item .item-content.active.item-royal.item-complex > .item-content,
     .item .item-content.activated.item-royal.item-complex > .item-content {
-      border-color: #6a4e91;
-      background-color: #6a4e91; }
+      border-color: #6b46e5;
+      background-color: #6b46e5; }
   .item.active.item-dark,
   .item.activated.item-dark,
   .item-complex.active .item-content.item-dark,
@@ -8221,15 +8198,15 @@ a.item-content {
       background-color: #e42112; }
 
 .item-complex.item-balanced > .item-content {
-  border-color: #578f02;
-  background-color: #76C103;
+  border-color: #28a54c;
+  background-color: #33cd5f;
   color: #fff; }
   .item-complex.item-balanced > .item-content.active, .item-complex.item-balanced > .item-content:active {
-    border-color: #578f02;
-    background-color: #578f02; }
+    border-color: #28a54c;
+    background-color: #28a54c; }
     .item-complex.item-balanced > .item-content.active.item-complex > .item-content, .item-complex.item-balanced > .item-content:active.item-complex > .item-content {
-      border-color: #578f02;
-      background-color: #578f02; }
+      border-color: #28a54c;
+      background-color: #28a54c; }
 
 .item-complex.item-energized > .item-content {
   border-color: #e6b500;
@@ -8243,15 +8220,15 @@ a.item-content {
       background-color: #e6b500; }
 
 .item-complex.item-royal > .item-content {
-  border-color: #6a4e91;
-  background-color: #7E5FA9;
+  border-color: #6b46e5;
+  background-color: #886aea;
   color: #fff; }
   .item-complex.item-royal > .item-content.active, .item-complex.item-royal > .item-content:active {
-    border-color: #6a4e91;
-    background-color: #6a4e91; }
+    border-color: #6b46e5;
+    background-color: #6b46e5; }
     .item-complex.item-royal > .item-content.active.item-complex > .item-content, .item-complex.item-royal > .item-content:active.item-complex > .item-content {
-      border-color: #6a4e91;
-      background-color: #6a4e91; }
+      border-color: #6b46e5;
+      background-color: #6b46e5; }
 
 .item-complex.item-dark > .item-content {
   border-color: #111;
@@ -8877,7 +8854,7 @@ button.item.item-button-right {
 
 .tabs .tab-item .badge.badge-balanced,
 .badge.badge-balanced {
-  background-color: #76C103;
+  background-color: #33cd5f;
   color: #fff; }
 
 .tabs .tab-item .badge.badge-energized,
@@ -8887,7 +8864,7 @@ button.item.item-button-right {
 
 .tabs .tab-item .badge.badge-royal,
 .badge.badge-royal {
-  background-color: #7E5FA9;
+  background-color: #886aea;
   color: #fff; }
 
 .tabs .tab-item .badge.badge-dark,
@@ -9582,8 +9559,8 @@ ion-slides {
     stroke: #11c1f3;
     fill: #11c1f3; }
   .spinner.spinner-balanced {
-    stroke: #76C103;
-    fill: #76C103; }
+    stroke: #33cd5f;
+    fill: #33cd5f; }
   .spinner.spinner-assertive {
     stroke: #ef473a;
     fill: #ef473a; }
@@ -9591,8 +9568,8 @@ ion-slides {
     stroke: #ffc900;
     fill: #ffc900; }
   .spinner.spinner-royal {
-    stroke: #7E5FA9;
-    fill: #7E5FA9; }
+    stroke: #886aea;
+    fill: #886aea; }
   .spinner.spinner-dark {
     stroke: #444;
     fill: #444; }
@@ -9624,7 +9601,7 @@ ion-slides {
   stop-color: #11c1f3; }
 
 .spinner-spiral.spinner-balanced .stop2 {
-  stop-color: #76C103; }
+  stop-color: #33cd5f; }
 
 .spinner-spiral.spinner-assertive .stop2 {
   stop-color: #ef473a; }
@@ -9633,7 +9610,7 @@ ion-slides {
   stop-color: #ffc900; }
 
 .spinner-spiral.spinner-royal .stop2 {
-  stop-color: #7E5FA9; }
+  stop-color: #886aea; }
 
 .spinner-spiral.spinner-dark .stop2 {
   stop-color: #444; }
@@ -10029,12 +10006,12 @@ input[type="checkbox"][readonly] {
 
 .checkbox-balanced input:before,
 .checkbox-balanced .checkbox-icon:before {
-  border-color: #76C103; }
+  border-color: #33cd5f; }
 
 .checkbox-balanced input:checked:before,
 .checkbox-balanced input:checked + .checkbox-icon:before {
-  background: #76C103;
-  border-color: #76C103; }
+  background: #33cd5f;
+  border-color: #33cd5f; }
 
 .checkbox-energized input:before,
 .checkbox-energized .checkbox-icon:before {
@@ -10047,12 +10024,12 @@ input[type="checkbox"][readonly] {
 
 .checkbox-royal input:before,
 .checkbox-royal .checkbox-icon:before {
-  border-color: #7E5FA9; }
+  border-color: #886aea; }
 
 .checkbox-royal input:checked:before,
 .checkbox-royal input:checked + .checkbox-icon:before {
-  background: #7E5FA9;
-  border-color: #7E5FA9; }
+  background: #886aea;
+  border-color: #886aea; }
 
 .checkbox-dark input:before,
 .checkbox-dark .checkbox-icon:before {
@@ -10220,16 +10197,16 @@ input:checked + .checkbox-icon:after {
   background-color: #ef473a; }
 
 .toggle.toggle-balanced input:checked + .track {
-  border-color: #76C103;
-  background-color: #76C103; }
+  border-color: #33cd5f;
+  background-color: #33cd5f; }
 
 .toggle.toggle-energized input:checked + .track {
   border-color: #ffc900;
   background-color: #ffc900; }
 
 .toggle.toggle-royal input:checked + .track {
-  border-color: #7E5FA9;
-  background-color: #7E5FA9; }
+  border-color: #886aea;
+  background-color: #886aea; }
 
 .toggle.toggle-dark input:checked + .track {
   border-color: #444;
@@ -10364,10 +10341,10 @@ input:checked + .checkbox-icon:after {
   background-color: #ef473a; }
 
 .toggle-small .toggle-balanced input:checked + .track {
-  background-color: rgba(118, 193, 3, 0.5); }
+  background-color: rgba(51, 205, 95, 0.5); }
 
 .toggle-small .toggle-balanced input:checked + .track .handle {
-  background-color: #76C103; }
+  background-color: #33cd5f; }
 
 .toggle-small .toggle-energized input:checked + .track {
   background-color: rgba(255, 201, 0, 0.5); }
@@ -10376,10 +10353,10 @@ input:checked + .checkbox-icon:after {
   background-color: #ffc900; }
 
 .toggle-small .toggle-royal input:checked + .track {
-  background-color: rgba(126, 95, 169, 0.5); }
+  background-color: rgba(136, 106, 234, 0.5); }
 
 .toggle-small .toggle-royal input:checked + .track .handle {
-  background-color: #7E5FA9; }
+  background-color: #886aea; }
 
 .toggle-small .toggle-dark input:checked + .track {
   background-color: rgba(68, 68, 68, 0.5); }
@@ -10529,9 +10506,9 @@ input:checked + .checkbox-icon:after {
   .range.range-calm input::-ms-fill-lower {
     background: #11c1f3; }
   .range.range-balanced input::-webkit-slider-thumb:before {
-    background: #76C103; }
+    background: #33cd5f; }
   .range.range-balanced input::-ms-fill-lower {
-    background: #76C103; }
+    background: #33cd5f; }
   .range.range-assertive input::-webkit-slider-thumb:before {
     background: #ef473a; }
   .range.range-assertive input::-ms-fill-lower {
@@ -10541,9 +10518,9 @@ input:checked + .checkbox-icon:after {
   .range.range-energized input::-ms-fill-lower {
     background: #ffc900; }
   .range.range-royal input::-webkit-slider-thumb:before {
-    background: #7E5FA9; }
+    background: #886aea; }
   .range.range-royal input::-ms-fill-lower {
-    background: #7E5FA9; }
+    background: #886aea; }
   .range.range-dark input::-webkit-slider-thumb:before {
     background: #444; }
   .range.range-dark input::-ms-fill-lower {
@@ -10658,7 +10635,7 @@ input:checked + .checkbox-icon:after {
   .item-select.item-assertive:after, .item-select.item-assertive .input-label {
     color: #fff; }
   .item-select.item-balanced select {
-    background: #76C103;
+    background: #33cd5f;
     color: #fff; }
   .item-select.item-balanced:after, .item-select.item-balanced .input-label {
     color: #fff; }
@@ -10668,7 +10645,7 @@ input:checked + .checkbox-icon:after {
   .item-select.item-energized:after, .item-select.item-energized .input-label {
     color: #fff; }
   .item-select.item-royal select {
-    background: #7E5FA9;
+    background: #886aea;
     color: #fff; }
   .item-select.item-royal:after, .item-select.item-royal .input-label {
     color: #fff; }
@@ -10873,27 +10850,27 @@ progress {
         color: #fff; }
   .button.button-balanced {
     border-color: transparent;
-    background-color: #76C103;
+    background-color: #33cd5f;
     color: #fff; }
     .button.button-balanced:hover {
       color: #fff;
       text-decoration: none; }
     .button.button-balanced.active, .button.button-balanced.activated {
-      background-color: #578f02; }
+      background-color: #28a54c; }
     .button.button-balanced.button-clear {
       border-color: transparent;
       background: none;
       box-shadow: none;
-      color: #76C103; }
+      color: #33cd5f; }
     .button.button-balanced.button-icon {
       border-color: transparent;
       background: none; }
     .button.button-balanced.button-outline {
-      border-color: #76C103;
+      border-color: #33cd5f;
       background: transparent;
-      color: #76C103; }
+      color: #33cd5f; }
       .button.button-balanced.button-outline.active, .button.button-balanced.button-outline.activated {
-        background-color: #76C103;
+        background-color: #33cd5f;
         box-shadow: none;
         color: #fff; }
   .button.button-energized {
@@ -10923,27 +10900,27 @@ progress {
         color: #fff; }
   .button.button-royal {
     border-color: transparent;
-    background-color: #7E5FA9;
+    background-color: #886aea;
     color: #fff; }
     .button.button-royal:hover {
       color: #fff;
       text-decoration: none; }
     .button.button-royal.active, .button.button-royal.activated {
-      background-color: #6a4e91; }
+      background-color: #6b46e5; }
     .button.button-royal.button-clear {
       border-color: transparent;
       background: none;
       box-shadow: none;
-      color: #7E5FA9; }
+      color: #886aea; }
     .button.button-royal.button-icon {
       border-color: transparent;
       background: none; }
     .button.button-royal.button-outline {
-      border-color: #7E5FA9;
+      border-color: #886aea;
       background: transparent;
-      color: #7E5FA9; }
+      color: #886aea; }
       .button.button-royal.button-outline.active, .button.button-royal.button-outline.activated {
-        background-color: #7E5FA9;
+        background-color: #886aea;
         box-shadow: none;
         color: #fff; }
   .button.button-dark {
@@ -11629,13 +11606,13 @@ a.button {
   border-color: #e42112; }
 
 .balanced, a.balanced {
-  color: #76C103; }
+  color: #33cd5f; }
 
 .balanced-bg {
-  background-color: #76C103; }
+  background-color: #33cd5f; }
 
 .balanced-border {
-  border-color: #578f02; }
+  border-color: #28a54c; }
 
 .energized, a.energized {
   color: #ffc900; }
@@ -11647,13 +11624,13 @@ a.button {
   border-color: #e6b500; }
 
 .royal, a.royal {
-  color: #7E5FA9; }
+  color: #886aea; }
 
 .royal-bg {
-  background-color: #7E5FA9; }
+  background-color: #886aea; }
 
 .royal-border {
-  border-color: #6a4e91; }
+  border-color: #6b46e5; }
 
 .dark, a.dark {
   color: #444; }
@@ -11942,6 +11919,201 @@ a.button {
 .rota-edit .item .icon {
   color: #ccc; }
 
+/*
+ *
+ *
+ * Rota Log Module Stylesheet
+ *
+ *
+ *
+*/
+/*
+To customize the look and feel of Ionic, you can override the variables
+in ionic's _variables.scss file.
+
+For example, you might change some of the default colors:
+
+$light:                           #fff !default;
+$stable:                          #f8f8f8 !default;
+$positive:                        #387ef5 !default;
+$calm:                            #11c1f3 !default;
+$balanced:                        #33cd5f !default;
+$energized:                       #ffc900 !default;
+
+$royal:                           #886aea !default;
+$dark:                            #444 !default;
+*/
+/*
+
+
+	Defines
+
+
+*/
+/*
+
+
+
+
+	Generic
+
+
+
+
+*/
+.button.button-balanced {
+  border: 1px solid #498F24;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2); }
+
+.button.button-light {
+  border: 1px solid #DDDDDD; }
+
+/*
+ * Maps
+*/
+.scroll {
+  height: 100%; }
+
+.map-wrapper {
+  height: 100%;
+  padding-top: 43px;
+  padding-bottom: 43px; }
+
+#map {
+  width: 100%;
+  height: 100%; }
+
+/*
+
+
+
+	Form Styling
+
+
+
+*/
+form label.form-group.has-error {
+  background: #FFDFDF; }
+
+form span.error-msg {
+  display: inline-block;
+  color: #ef473a;
+  font-size: 12px;
+  padding-right: 15px; }
+
+form .form-error {
+  text-align: center;
+  font-weight: 700;
+  color: #ef473a;
+  background: #FFDFDF;
+  padding: 10px; }
+
+form .form-success {
+  text-align: center;
+  font-weight: 700;
+  color: #fff;
+  background: #76C103;
+  padding: 10px; }
+
+.rota-timespan-view .item-divider span {
+  color: #aaaaaa; }
+
+.rota-timespan-view .item.item-timespan a.item-content {
+  padding: 14px 16px 10px 8px; }
+
+.rota-timespan-view .item.item-timespan .duration {
+  text-align: center;
+  float: left;
+  width: 15%;
+  max-width: 120px;
+  font-size: 28px;
+  padding-top: 10px;
+  letter-spacing: -0.2px;
+  color: #666; }
+  .rota-timespan-view .item.item-timespan .duration span span {
+    font-size: 18px;
+    color: #c0c0c0;
+    display: inline-block;
+    margin-right: 4px; }
+
+.rota-timespan-view .item.item-timespan .info {
+  float: left; }
+  .rota-timespan-view .item.item-timespan .info i.icon {
+    position: relative;
+    right: 0;
+    float: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 0 4px;
+    color: #aaaaaa; }
+    .rota-timespan-view .item.item-timespan .info i.icon:before {
+      display: inline; }
+
+.rota-timespan-view .item.item-timespan i.icon {
+  color: #e0e0e0; }
+
+.log-edit .date-item {
+  margin: -35px 0 4px;
+  text-align: center; }
+  .log-edit .date-item .header {
+    color: #aaaaaa;
+    font-size: 14px;
+    padding-bottom: 10px; }
+  .log-edit .date-item .time {
+    font-size: 36px;
+    line-height: 36px;
+    color: #aaaaaa;
+    border: 1px dotted #aaaaaa;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 12px; }
+  .log-edit .date-item .date {
+    font-size: 20px;
+    line-height: 28px;
+    color: #aaaaaa;
+    border: 1px dotted #aaaaaa;
+    border-radius: 6px;
+    padding: 8px; }
+
+.log-edit .duration {
+  text-align: center;
+  font-size: 30px;
+  line-height: 30px;
+  padding: 20px 0 0;
+  color: #aaaaaa; }
+  .log-edit .duration span.label {
+    font-size: 16px;
+    text-transform: uppercase; }
+  .log-edit .duration span span {
+    font-size: 16px; }
+
+.log-edit textarea {
+  width: 100%;
+  min-height: 160px; }
+
+/*
+To customize the look and feel of Ionic, you can override the variables
+in ionic's _variables.scss file.
+
+For example, you might change some of the default colors:
+
+$light:                           #fff !default;
+$stable:                          #f8f8f8 !default;
+$positive:                        #387ef5 !default;
+$calm:                            #11c1f3 !default;
+$balanced:                        #33cd5f !default;
+$energized:                       #ffc900 !default;
+
+$royal:                           #886aea !default;
+$dark:                            #444 !default;
+*/
+/*
+
+
+	Defines
+
+
+*/
 /*
 
 

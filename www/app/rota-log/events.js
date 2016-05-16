@@ -11,7 +11,7 @@
 	function RotaViewEventController(RotaEvent, $scope, RotaViewService) {
 		var vm = this;
 
-		var LIMIT = 3,
+		var LIMIT = 10,
 			eventsCache = [];
 
 		vm.$more = true;
@@ -24,6 +24,12 @@
 		activate();
 
 
+		/**
+		 * activate
+		 *
+		 * Load and register the scope for the events
+		 *
+		 */
 		function activate() {
 			RotaEvent.$find({
 				orderBy: '-timestamp',
@@ -36,6 +42,17 @@
 			})
 		}
 
+		/**
+		 * nextPage
+		 *
+		 * Loads the next page
+		 *
+		 * Sets vm.$more to false when no more events
+		 * Sets vm.$loading to true/false whilst loading
+		 *
+		 * Splices another pages worth from the loaded array onto the vm.events array
+		 *
+		 */
 		function nextPage() {
 			vm.$loading = true;
 

@@ -73,7 +73,6 @@ describe('saferota.rota-log RotaLogService', function () {
 		return DataStore.clearAll().then(function () {
 			return DataStore.save([aRota, aLocation]);
 		});
-
 	}
 
 

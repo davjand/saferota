@@ -22,20 +22,36 @@
 		//ensure run
 	}
 
-	factory.$inject = ['DataStore'];
+	factory.$inject = ['DataStore', 'moment'];
 
 	/* @ngInject */
 	function factory(DataStore) {
-		return DataStore.create('RotaTimespans')
+		return DataStore.create('RotaTimespans', 'moment')
 			.key('objectId')
 			.schema({
 				location: null,
 				enter: null,
 				exit: null,
 				duration: 0,
+				notes: '',
+				deleted: false,
 				ownerId: ''
 			})
-			.relationship('hasOne', 'rota', 'Rotas');
+			.relationship('hasOne', 'rota', 'Rotas')
+			.methods({
+
+				/**
+				 * calculateDuration
+				 *
+				 * Calculates the duration
+				 *
+				 */
+				calculateDuration: function () {
+					this.duration = moment
+						.duration(moment(this.exit).diff(this.enter))
+						.as('minutes');
+				}
+			});
 	}
 })();
 

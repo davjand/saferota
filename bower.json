@@ -21,7 +21,8 @@
     "angular-tiny-eventemitter": "^1.1.0",
     "ionic-datepicker": "^1.1.0",
     "font-awesome": "fontawesome#^4.6.1",
-    "Ionicons": "ionicons#^2.0.1"
+    "Ionicons": "ionicons#^2.0.1",
+    "ionic-timepicker": "^0.5.1"
   },
   "resolutions": {
     "angular": "1.5.0",

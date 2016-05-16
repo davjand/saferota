@@ -1,0 +1,49 @@
+<ion-view class="rota-timespan-view">
+	<ion-nav-title>Logs</ion-nav-title>
+	<ion-nav-buttons side="primary">
+		<button class="button" ng-click="vm.change()">Switch</button>
+	</ion-nav-buttons>
+	<ion-content>
+		<ion-list>
+			<div ng-repeat="week in vm.logs">
+				<ion-item ng-if="week.items.length > 0"
+						  class="item-divider">
+					{{vm.moment(week.start).format('ddd Do')}}
+
+					<span> to </span>
+					{{vm.moment(week.end).format('Do MMM YY')}}
+				</ion-item>
+
+				<ion-item ng-repeat="timespan in week.items"
+						  class="item-timespan item-icon-right"
+						  ui-sref="app.view.logs-edit({timespanId: timespan.getKey()})">
+
+					<div class="duration">
+						<span ng-bind-html="timespan.duration | formatHoursMinutes"></span>
+					</div>
+					<div class="info">
+						<h2>
+							{{vm.moment(timespan.enter).format('dddd Do')}}
+						</h2>
+						<p>
+							{{timespan.enter | date : 'HH:mm'}}
+							<i class="icon ion-ios-arrow-thin-right"></i>
+							{{timespan.exit | date : 'HH:mm'}}
+						</p>
+					</div>
+					<i class="icon ion-ios-arrow-right"></i>
+
+					<ion-option-button class="button-assertive"
+									   ng-click="vm.remove(timespan)">
+						Delete
+					</ion-option-button>
+
+				</ion-item>
+
+			</div>
+
+		</ion-list>
+
+
+	</ion-content>
+</ion-view>

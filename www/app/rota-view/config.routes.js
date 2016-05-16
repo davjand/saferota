@@ -22,26 +22,26 @@
 					}
 				}
 			})
-			.state('app.view.stats', {
-				url: '/stats',
-				views: {
-					'tab-stats': {
-						templateUrl: 'app/rota-view/logs.html',
-						controller: 'RotaViewLogController',
-						controllerAs: 'vm'
-					}
-				}
-			})
-			.state('app.view.share', {
-				url: '/share',
-				views: {
-					'tab-share': {
-						templateUrl: 'app/rota-view/logs.html',
-						controller: 'RotaViewLogController',
-						controllerAs: 'vm'
-					}
-				}
-			})
+			// .state('app.view.stats', {
+			// 	url: '/stats',
+			// 	views: {
+			// 		'tab-stats': {
+			// 			templateUrl: '../rota-log/logs.html',
+			// 			controller: 'RotaViewLogController',
+			// 			controllerAs: 'vm'
+			// 		}
+			// 	}
+			// })
+			// .state('app.view.share', {
+			// 	url: '/share',
+			// 	views: {
+			// 		'tab-share': {
+			// 			templateUrl: '../rota-log/logs.html',
+			// 			controller: 'RotaViewLogController',
+			// 			controllerAs: 'vm'
+			// 		}
+			// 	}
+			// })
 			.state('app.view.settings', {
 				url: '/settings',
 				views: {

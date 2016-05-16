@@ -21,12 +21,28 @@
 
 			})
 			.state('app.view.logs', {
-				url: '',
+				url: '/logs',
 				views: {
 					'tab-logs': {
-						templateUrl: 'app/rota-view/logs.html',
+						templateUrl: 'app/rota-log/logs.html',
 						controller: 'RotaViewLogController',
 						controllerAs: 'vm'
+					}
+				}
+			})
+			.state('app.view.logs-edit', {
+				url: '/logs/edit/:timespanId',
+				views: {
+					'tab-logs': {
+						templateUrl: 'app/rota-log/edit.html',
+						controller: 'RotaLogEditController',
+						controllerAs: 'vm',
+						resolve: {
+							/* @ngInject */
+							currentTimespan: function (RotaTimespan, $stateParams) {
+								return RotaTimespan.$get($stateParams.timespanId);
+							}
+						}
 					}
 				}
 			})

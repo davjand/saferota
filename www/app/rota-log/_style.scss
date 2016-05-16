@@ -1,0 +1,119 @@
+/*
+ *
+ *
+ * Rota Log Module Stylesheet
+ *
+ *
+ *
+*/
+@import "../../../scss/theme";
+
+.rota-timespan-view {
+
+	.item-divider {
+		span {
+			color: $greyMed;
+		}
+	}
+
+	.item.item-timespan {
+
+		a.item-content {
+			padding: 14px 16px 10px 8px;
+		}
+
+		.duration {
+			text-align: center;
+			float: left;
+			width: 15%;
+			max-width: 120px;
+			font-size: 28px;
+			padding-top: 10px;
+			letter-spacing: -0.2px;
+			color: #666;
+			span span {
+				font-size: 18px;
+				color: #c0c0c0;
+				display: inline-block;
+				margin-right: 4px;
+			}
+		}
+		.info {
+			float: left;
+
+			i.icon {
+				position: relative;
+				right: 0;
+				float: none;
+				display: inline-block;
+				font-size: 16px;
+				margin: 0 4px;
+				color: $greyMed;
+
+				&:before {
+					display: inline;
+				}
+			}
+		}
+		i.icon {
+			color: $greyLight;
+		}
+	}
+}
+
+.log-edit {
+	.date-item {
+		margin: -35px 0 4px;
+
+		text-align: center;
+
+		.header {
+			color: $greyMed;
+			font-size: 14px;
+			padding-bottom: 10px;
+		}
+
+		.time {
+			font-size: 36px;
+			line-height: 36px;
+			color: $greyMed;
+
+			border: 1px dotted $greyMed;
+			border-radius: 6px;
+			padding: 8px;
+			margin-bottom: 12px;
+		}
+
+		.date {
+			font-size: 20px;
+			line-height: 28px;
+			color: $greyMed;
+
+			border: 1px dotted $greyMed;
+			border-radius: 6px;
+			padding: 8px;
+		}
+
+	}
+	.duration {
+		text-align: center;
+		font-size: 30px;
+		line-height: 30px;
+		padding: 20px 0 0;
+		color: $greyMed;
+
+		span.label {
+			font-size: 16px;
+			text-transform: uppercase;
+		}
+		span span {
+			font-size: 16px;
+		}
+	}
+
+	textarea {
+		width: 100%;
+		min-height: 160px;
+	}
+
+}

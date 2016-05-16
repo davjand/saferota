@@ -7,6 +7,8 @@
 			'saferota.core',
 			'saferota.data',
 			'saferota.rota-view',
-			'saferota.backendless'
+			'saferota.backendless',
+			'ionic-timepicker',
+			'ionic-datepicker'
 		]);
 })();
