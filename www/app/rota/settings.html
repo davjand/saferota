@@ -1,10 +1,8 @@
-<ion-view hide-back-button="true">
-	<ion-nav-title>Settings</ion-nav-title>
-	<ion-nav-buttons side="primary">
-		<button class="button" ui-sref="app.list" nav-direction="swap">
-			Close
-		</button>
-	</ion-nav-buttons>
+<ion-modal-view ng-controller="SettingsController as vm">
+	<ion-header-bar class="bar-balanced">
+		<h1 class="title">Settings</h1>
+		<button class="button button-clear button-primary" ng-click="hide()">Close</button>
+	</ion-header-bar>
 	<ion-content>
 		<!-- Rota Settings -->
 		<div class="card">
@@ -16,9 +14,9 @@
 				   ng-click="vm.sync()">
 					Sync Now
 				</a>
-				<a class="button button-light button-outline pull-right"
+				<a class="button button-assertive button-outline pull-right"
 				   ng-click="vm.refresh()">
-					Refresh All Data
+					Refresh From Server
 				</a>
 			</div>
 		</div>
@@ -33,11 +31,11 @@
 			</div>
 			<div class="item">
 				<a class="button button-stable button-outline">Edit Password</a>
-				<a class="button button-stable button-outline pull-right"
-				   ng-click="vm.logout()">Logout</a>
+				<a class="button button-assertive button-outline pull-right"
+				   ng-click="vm.logout(hide)">Logout</a>
 			</div>
 		</div>
 
 
 	</ion-content>
-</ion-view>
+</ion-modal-view>

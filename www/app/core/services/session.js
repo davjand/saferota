@@ -12,16 +12,18 @@
 		'$rootScope',
 		'CacheFactory',
 		'$log',
+		'$ionicPopup',
 		'AUTH_EVENTS'];
 
 	/* @ngInject */
-	function Session(	$injector,
-						 Backendless,
-						 $q,
-						 $rootScope,
-						 CacheFactory,
-						 $log,
-						 AUTH_EVENTS) {
+	function Session($injector,
+					 Backendless,
+					 $q,
+					 $rootScope,
+					 CacheFactory,
+					 $log,
+					 $ionicPopup,
+					 AUTH_EVENTS) {
 
 		var self = this;
 		var $s = $rootScope.$new();
@@ -109,34 +111,42 @@
 			 * Find the user object and store in memory
 			 */
 
-			//assume logged in until proven otherwise
-			if(userId && token) {
-				self.isLoggedIn = true;
-			}
+			if (userId) {
 
-			User.$get(userId, $s).then(function (user) {
-
-				if (user && token) {
-					self.user = user;
+				//assume logged in until proven otherwise
+				if (token) {
 					self.isLoggedIn = true;
-				}else{
-					self.isLoggedIn = false;
 				}
 
-				/*
-				 * validate the login in the background
-				 */
-				self.isValidLoginToken().then(function(valid){
-					if (valid === false) {
-						self.notAuthenticated();
-					}
-				});
+				User.$get(userId, $s).then(function (user) {
 
-				_setReady();
-			},function(error){
-				self.notAuthenticated(error);
-				_setReady();
-			});
+					if (user && token) {
+						self.user = user;
+						self.isLoggedIn = true;
+					} else {
+						self.isLoggedIn = false;
+					}
+
+					/*
+					 * validate the login in the background
+					 */
+					self.isValidLoginToken().then(function (result) {
+						result.error = result.error || {};
+
+						if (result.valid === false) {
+							self.notAuthenticated();
+						} else if (result.error.code === 3064) {
+							self.notAuthenticated();
+						}
+
+					});
+
+					_setReady();
+				}, function (error) {
+					self.notAuthenticated(error);
+					_setReady();
+				});
+			}
 
 
 			return self.ready();
@@ -150,10 +160,14 @@
 		 *
 		 * @param error
 		 */
-		function notAuthenticated(error){
-			if(error){
+		function notAuthenticated(error) {
+			if (error) {
 				$log.log(error);
 			}
+			$ionicPopup.alert({
+				title: 'You have been logged out, please login again',
+				okType: 'button-balanced'
+			});
 			self.clear();
 			$rootScope.$emit(AUTH_EVENTS.notAuthenticated);
 		}
@@ -187,10 +201,17 @@
 				Backendless.UserService.isValidLogin(
 					new Backendless.Async(
 						function (result) {
-							p.resolve(result);
-						}, function () {
+							p.resolve({
+								result: result,
+								error: null
+							});
+						}, function (error) {
+							error = error || {};
 							//might be offline
-							p.resolve();
+							p.resolve({
+								result: null,
+								error: error
+							});
 						})
 				)
 			} else {
@@ -225,8 +246,11 @@
 		 */
 		function _cacheUserId(id) {
 			var cache = _cache();
-
-			cache.put('user', id);
+			if (id === null) {
+				cache.remove('user');
+			} else {
+				cache.put('user', id);
+			}
 		}
 
 		/**
@@ -238,8 +262,7 @@
 		 * @private
 		 */
 		function _getCachedUserId() {
-			var cache = _cache();
-			return cache.get('user');
+			return _cache().get('user');
 		}
 
 

@@ -6,35 +6,71 @@
 		.controller('NewRotaController', NewRotaController);
 
 	NewRotaController.$inject = [
+		'$rootScope',
+		'UI_EVENTS',
 		'$scope',
 		'$state',
 		'$ionicHistory',
-		'NewRotaService',
-		'Rota',
-		'ionicDatePicker',
-		'ModalSelect',
-		'RotaRole',
-		'RotaOrganisation',
-		'RotaSpeciality'];
+		'NewRotaService'
+	];
 
 	/* @ngInject */
-	function NewRotaController($scope,
+	function NewRotaController($rootScope,
+							   UI_EVENTS,
+							   $scope,
 							   $state,
 							   $ionicHistory,
 							   NewRotaService) {
 		var vm = this;
 
-		vm.rota = NewRotaService.create($scope);
-
 		vm.save = save;
 		vm.cancel = cancel;
-		
+		vm.activate = activate;
+		vm.deactivate = deactivate;
+
+
+		activate();
 
 		////////////////////////////////////////////////////////////////
 
 		// Function Definitions
 
 		////////////////////////////////////////////////////////////////
+
+
+		/**
+		 * activate
+		 *
+		 * Gets a new rota
+		 *
+		 * shows the keyboard accessory
+		 *
+		 */
+		function activate() {
+
+			//deactivate when closed
+			$scope.$on('$destroy', vm.deactivate);
+
+			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_SHOW);
+
+			if (NewRotaService.rota) {
+				vm.rota = NewRotaService.rota;
+				vm.rota.$register($scope);
+			} else {
+				vm.rota = NewRotaService.create($scope);
+			}
+		}
+
+		/**
+		 * deactivate
+		 *
+		 * rehides the keyboard accessory
+		 *
+		 */
+		function deactivate() {
+			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_HIDE);
+		}
+
 
 		/**
 		 * save

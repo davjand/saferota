@@ -5,10 +5,28 @@
 		.module('saferota.rota')
 		.controller('SettingsController', SettingsController);
 
-	SettingsController.$inject = ['Session', '$rootScope', 'AuthService', '$ionicLoading', 'APP_MSG', '$state'];
+	SettingsController.$inject = [
+		'Session',
+		'$rootScope',
+		'$scope',
+		'AuthService',
+		'$ionicLoading',
+		'$ionicHistory',
+		'$ionicPopup',
+		'APP_MSG',
+		'$state'
+	];
 
 	/* @ngInject */
-	function SettingsController(Session, $rootScope, AuthService, $ionicLoading, APP_MSG, $state) {
+	function SettingsController(Session,
+								$rootScope,
+								$scope,
+								AuthService,
+								$ionicLoading,
+								$ionicHistory,
+								$ionicPopup,
+								APP_MSG,
+								$state) {
 		var vm = this;
 
 		vm.user = Session.user;
@@ -18,14 +36,23 @@
 		vm.logout = logout;
 
 		/**
-		 * sync
+		 * refresh
 		 *
-		 * Trigger a sync
+		 * Trigger a complete resync
 		 *
 		 */
 		function refresh() {
-			$rootScope.$emit(APP_MSG.SYNC_FRESH);
+			_createConfirm('Are you sure you wish to refresh all data?', function () {
+				$rootScope.$emit(APP_MSG.SYNC_FRESH);
+			});
 		}
+
+		/**
+		 * sync
+		 *
+		 * Trigger a diff sync
+		 *
+		 */
 		function sync() {
 			$rootScope.$emit(APP_MSG.SYNC_NOW);
 		}
@@ -33,12 +60,42 @@
 		/**
 		 * logout
 		 *
+		 * @param hide {Function} The function to hide the modal
 		 */
-		function logout() {
-			$ionicLoading.show();
-			AuthService.logout().then(function () {
-				$ionicLoading.hide();
-				$state.go('auth.login');
+		function logout(hide) {
+			_createConfirm('Are you sure you wish to logout?', function () {
+				$ionicLoading.show();
+				AuthService.logout().then(function () {
+					$ionicLoading.hide();
+
+					$ionicHistory.nextViewOptions({disableAnimate: true, historyRoot: true});
+					$state.go('auth.login');
+					if (hide) {
+						hide();
+					}
+				});
+			});
+		}
+
+
+		/**
+		 * _createConfirm
+		 *
+		 * Helper function to create a confirm dialog and then
+		 * execute a callback of the 'confirm' button is clicked
+		 *
+		 * @param title
+		 * @param callback
+		 * @private
+		 */
+		function _createConfirm(title, callback) {
+			$ionicPopup.confirm({
+				title: title,
+				okType: 'button-assertive button-outline'
+			}).then(function (ok) {
+				if (ok) {
+					callback();
+				}
 			});
 		}
 

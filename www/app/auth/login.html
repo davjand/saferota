@@ -1,12 +1,13 @@
 <ion-view class="auth login"
 		  ng-controller="LoginController as vm"
-		  hide-back-button="true">
+		  cache-view="false">
 	<ion-nav-title>Login</ion-nav-title>
 	<ion-content>
 
 		<!-- LOGO -->
-		<img src="img/auth/auth-logo.png" title="Logo" class="logo"/>
-
+		<div class="text-center">
+			<img src="img/auth/auth-logo@2x.png" title="Logo" class="logo"/>
+		</div>
 		<!-- FORM -->
 		<form method="post"
 			  name="loginForm"
@@ -23,6 +24,7 @@
 					<input type="email"
 						   placeholder="Email"
 						   ng-model="vm.email"
+						   ng-model-options="{updateOn:'blur'}"
 						   email-err-type="authEmail"
 						   required-err-type="authRequired"
 						   required>
@@ -30,6 +32,7 @@
 				<label class="item item-input form-group">
 					<input type="password"
 						   placeholder="Password"
+						   ng-model-options="{updateOn:'blur'}"
 						   ng-model="vm.password"
 						   required-err-type="authRequired"
 						   required>
@@ -39,21 +42,20 @@
 			<div class="padding-horizontal padding-top">
 
 				<button class="button button-balanced button-full"
-						type="submit"
-						ladda="vm.loading">Login
+						type="submit">Login
 				</button>
 			</div>
 		</form>
 
 		<div class="row">
 			<div class="col">
-				<button class="button button-subtle button-outline button-block"
-						ng-click="vm.signup()">Sign Up Now
+				<button class="button button-light button-block"
+						ui-sref="auth.signup">Sign Up
 				</button>
 			</div>
 			<div class="col">
-				<button class="button button-subtle button-outline button-block"
-						ng-click="vm.resetPassword()">Forgot Password?
+				<button class="button button-light button-block"
+						ui-sref="auth.resetPassword">Forgot Password?
 				</button>
 			</div>
 		</div>

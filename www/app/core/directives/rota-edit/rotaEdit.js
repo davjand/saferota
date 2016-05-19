@@ -26,6 +26,7 @@
 
 	RotaEditController.$inject = [
 		'$scope',
+		'moment',
 		'Rota',
 		'ionicDatePicker',
 		'ModalSelect',
@@ -36,6 +37,7 @@
 
 	/* @ngInject */
 	function RotaEditController($scope,
+								moment,
 								Rota,
 								ionicDatePicker,
 								ModalSelect,
@@ -161,7 +163,7 @@
 			ionicDatePicker.openDatePicker({
 				inputDate: new Date(vm.rota.dateStart),
 				callback: function (val) {
-					vm.rota.dateStart = val;
+					vm.rota.dateStart = moment(val).valueOf();
 				}
 			});
 		}
@@ -176,7 +178,7 @@
 			ionicDatePicker.openDatePicker({
 				inputDate: vm.rota.dateEnd ? new Date(vm.rota.dateEnd) : new Date(),
 				callback: function (val) {
-					vm.rota.dateEnd = val;
+					vm.rota.dateEnd = moment(val).valueOf();
 				}
 			});
 		}

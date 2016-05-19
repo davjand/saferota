@@ -10,3 +10,16 @@
 		color: #ccc;
 	}
 }
+
+.modal-select {
+	ul.list li.item {
+		text-transform: lowercase;
+		&::first-letter {
+			text-transform: uppercase;
+		}
+	}
+	.search-prompt {
+		color: #ccc;
+	}
+
+}

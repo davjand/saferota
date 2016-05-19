@@ -1,11 +1,14 @@
 <ion-view class="auth signup"
-		  ng-controller="SignupController as vm">
+		  ng-controller="SignupController as vm"
+		  hide-back-button="true"
+		  cache-view="false">
 	<ion-nav-title>Sign Up</ion-nav-title>
 	<ion-content>
 
 		<!-- LOGO -->
-		<img src="img/auth/auth-logo.png" title="Logo" class="logo"/>
-
+		<div class="text-center">
+			<img src="img/auth/auth-logo@2x.png" title="Logo" class="logo"/>
+		</div>
 		<!-- FORM -->
 		<form method="post"
 			  name="signupForm"
@@ -25,7 +28,7 @@
 			<div class="list">
 				<label class="item item-input form-group">
 					<input type="text"
-						   placeholder="Name"
+						   placeholder="Full Name"
 						   ng-model="vm.name"
 						   ng-model-options="{updateOn:'blur'}"
 						   required-err-type="authRequired"
@@ -60,14 +63,14 @@
 			</div>
 			<div class="padding-horizontal signup">
 				<button class="button button-balanced button-full"
-						type="submit"
-						ladda="vm.loading">Sign Up</button>
+						type="submit">Sign Up
+				</button>
 			</div>
 		</form>
 
 		<div class="login padding">
 			<button class="button button-light button-full"
-					ng-click="vm.login()">I have an account - Login
+					ui-sref="auth.login">I have an account - login
 			</button>
 
 		</div>

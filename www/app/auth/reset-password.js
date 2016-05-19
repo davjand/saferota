@@ -5,25 +5,28 @@
 		.module('saferota.auth')
 		.controller('ResetPasswordController', ResetPasswordController);
 
-	ResetPasswordController.$inject = ['AuthService', '$state'];
+	ResetPasswordController.$inject = ['AuthService', '$stateParams', '$ionicLoading'];
 
 	/* @ngInject */
-	function ResetPasswordController(AuthService, $state) {
+	function ResetPasswordController(AuthService, $stateParams, $ionicLoading) {
 		var vm = this;
-		vm.email = $state.params && $state.params.email ? $state.params.email : '';
+		vm.email = $stateParams.email ? $stateParams.email : '';
 		vm.error = false;
 		vm.success = false;
 		vm.loading = false;
 
 		vm.resetPassword = resetPassword;
-		vm.login = function () {
-			$state.go('login');
-		};
 
 
 		////////////////
 
 
+		/**
+		 * resetPassword
+		 *
+		 *
+		 * @param resetPasswordForm
+		 */
 		function resetPassword(resetPasswordForm) {
 
 			if (!resetPasswordForm.$valid) {
@@ -31,15 +34,16 @@
 			}
 			vm.error = false;
 			vm.success = false;
-			vm.loading = true;
+
+			$ionicLoading.show();
 
 			AuthService.resetPassword(vm.email)
 				.then(function () {
-					vm.loading = false;
-					vm.success = "Please check your emails";
+					vm.success = "Password Reset: Please check your emails";
+					$ionicLoading.hide();
 				}, function (error) {
 					vm.error = error;
-					vm.loading = false;
+					$ionicLoading.hide();
 				});
 		}
 	}

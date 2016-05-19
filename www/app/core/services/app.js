@@ -13,6 +13,7 @@
 		'$q',
 		'$rootScope',
 		'$ionicLoading',
+		'$ionicHistory',
 		'$state',
 		'APP_MSG',
 		'AUTH_EVENTS'
@@ -26,6 +27,7 @@
 				 $q,
 				 $rootScope,
 				 $ionicLoading,
+				 $ionicHistory,
 				 $state,
 				 APP_MSG,
 				 AUTH_EVENTS) {
@@ -66,7 +68,10 @@
 		 * Sync on Login
 		 */
 		$rootScope.$on(AUTH_EVENTS.loginSuccess, function(){
-			syncNow(true);
+			syncNow(true).then(function () {
+				$ionicHistory.nextViewOptions({historyRoot: true, disableAnimate: true});
+				$state.go('app.list');
+			})
 		});
 
 		/*
@@ -135,7 +140,7 @@
 
 			$ionicLoading.show();
 
-			$q.when().then(function () {
+			return $q.when().then(function () {
 				return clear ?
 					DataStore.clearAll() :
 					$q.when();
@@ -144,6 +149,7 @@
 				return DataStore.syncAll()
 			}).then(function () {
 				$ionicLoading.hide();
+				return $q.when();
 			}, function (error) {
 				//@TODO Error handling
 				throw(error);

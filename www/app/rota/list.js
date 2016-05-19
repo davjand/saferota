@@ -12,6 +12,7 @@
 		'activeRotas',
 		'$rootScope',
 		'DATA_EVENTS',
+		'$ionicModal',
 		'DataStore',
 		'Rota',
 		'$ionicListDelegate',
@@ -26,6 +27,7 @@
 								activeRotas,
 								$rootScope,
 								DATA_EVENTS,
+								$ionicModal,
 								DataStore,
 								Rota,
 								$ionicListDelegate,
@@ -35,31 +37,48 @@
 
 		vm.edit = edit;
 		vm.isActive = isActive;
-
 		vm.activate = activateRota;
 		vm.deactivate = deactivate;
 		vm.selectRota = selectRota;
+		vm.settings = settings;
 
 		activate();
 
-		////////////////
+		////////////////////////////////////////////////
+
+		//Function Definitions
+
+		////////////////////////////////////////////////
 
 		function activate() {
+
 			vm.rotas = userRotas;
-			DataStore.registerScope(vm.rotas, $scope);
 			vm.activeRotas = activeRotas;
+			vm.$settingsModal = null;
+
+
+			/*
+			 * Register the $scope for the objects
+			 */
+			DataStore.registerScope(vm.rotas, $scope);
+
 
 			var offSyncComplete = $rootScope.$on(DATA_EVENTS.SYNC_FINISH, _handleSyncComplete);
 
 			$scope.$on('$destroy', function () {
 				offSyncComplete();
+
+				//Upload the settings modal;
+				if (vm.$settingsModal) {
+					vm.$settingsModal.remove();
+				}
 			})
 		}
 
 		function _handleSyncComplete() {
 			//reload
 			Rota.$find().then(function (rotas) {
-				if (rotas.length > vm.rotas.length) {
+				if (rotas.length !== vm.rotas.length) {
 					$state.go($state.current, {}, {reload: true});
 				}
 			});
@@ -75,6 +94,32 @@
 		function edit(rota) {
 			$ionicListDelegate.closeOptionButtons();
 			$state.go('app.edit', {rotaId: rota.getKey()});
+		}
+
+
+		/**
+		 * settings
+		 *
+		 * Display the settings panel using a modal display
+		 *
+		 * Creates a new $scope and gives it a hide() method so that
+		 * the settings view just needs to call hide() to remove
+		 * the view
+		 *
+		 */
+		function settings() {
+			var $settingsScope = $rootScope.$new(true);
+
+			$settingsScope.hide = function () {
+				vm.$settingsModal.hide();
+			};
+
+			$ionicModal.fromTemplateUrl('app/rota/settings.html', {
+				scope: $settingsScope
+			}).then(function (modal) {
+				vm.$settingsModal = modal;
+				vm.$settingsModal.show();
+			})
 		}
 
 		/**

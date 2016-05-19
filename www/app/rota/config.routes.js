@@ -18,7 +18,7 @@
 						isReady: function (App, $q, $state) {
 							return App.ready().then(function () {
 								if (!App.session.isLoggedIn) {
-									$state.go('auth.login');
+									$state.go('auth.signup');
 								}
 								return $q.when();
 							});
@@ -41,12 +41,6 @@
 						return RotaGeoFenceService.getActiveRotaIds()
 					}
 				}
-			})
-			.state('app.settings', {
-				url: '/settings',
-				templateUrl: 'app/rota/settings.html',
-				controller: 'SettingsController',
-				controllerAs: 'vm'
 			});
 
 

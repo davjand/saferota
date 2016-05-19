@@ -5,10 +5,13 @@
 		.module('saferota.auth')
 		.controller('SignupController', SignupController);
 
-	SignupController.$inject = ['AuthService', '$state'];
+	SignupController.$inject = [
+		'AuthService',
+		'$ionicLoading'
+	];
 
 	/* @ngInject */
-	function SignupController(AuthService, $state) {
+	function SignupController(AuthService, $ionicLoading) {
 		var vm = this;
 		vm.name = '';
 		vm.email = '';
@@ -16,13 +19,9 @@
 		vm.error = null;
 		vm.terms = false;
 		vm.submit = false;
-		vm.loading = false;
 
 
 		vm.signup = signup;
-		vm.login = function () {
-			$state.go('login');
-		};
 
 		////////////////
 
@@ -33,18 +32,17 @@
 				return;
 			}
 			vm.error = null;
-			vm.loading = true;
+
+			$ionicLoading.show();
 
 			AuthService.signup(
 				vm.name,
 				vm.email,
 				vm.password
 			).then(function () {
-				vm.loading = false;
 			}, function (error) {
-				//vm.loading = false;
 				vm.error = error;
-				vm.loading = false;
+				$ionicLoading.hide();
 			});
 		}
 	}

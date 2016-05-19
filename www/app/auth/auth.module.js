@@ -6,7 +6,6 @@
 			'angular-cache',
 			'ui.router',
 			'jcs-autoValidate',
-			'angular-ladda',
 			'saferota.backendless',
 			'saferota.core'
 		]);

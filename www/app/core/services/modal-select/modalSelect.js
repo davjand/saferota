@@ -53,6 +53,8 @@
 			$scope.selected = options.selected || null;
 			$scope.callback = options.callback || null;
 
+			$scope.filteredItems = [];
+
 			/*
 			 * Support promised data
 			 */

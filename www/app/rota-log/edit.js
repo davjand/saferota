@@ -12,7 +12,9 @@
 		'ionicTimePicker',
 		'ionicDatePicker',
 		'$ionicPopup',
-		'$state'
+		'$state',
+		'$rootScope',
+		'UI_EVENTS'
 	];
 
 	/* @ngInject */
@@ -22,7 +24,9 @@
 								   ionicTimePicker,
 								   ionicDatePicker,
 								   $ionicPopup,
-								   $state) {
+								   $state,
+								   $rootScope,
+								   UI_EVENTS) {
 		var vm = this;
 
 		/*
@@ -33,6 +37,8 @@
 		vm.editDate = editDate;
 		vm.editTime = editTime;
 
+		vm.activate = activate;
+		vm.deactivate = deactivate;
 
 		/*
 		 * Helper for date formatting (dateFilter does not support 1st etc)
@@ -50,9 +56,24 @@
 		 *
 		 */
 		function activate() {
+			//deactivate when closed
+			$scope.$on('$destroy', vm.deactivate);
+			//setup keyboard
+			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_SHOW);
+
 			//Register Variables
 			vm.timespan = currentTimespan;
 			vm.timespan.$register($scope);
+		}
+
+		/**
+		 * deactivate
+		 *
+		 * rehides the keyboard accessory
+		 *
+		 */
+		function deactivate() {
+			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_HIDE);
 		}
 
 

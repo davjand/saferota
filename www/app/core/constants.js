@@ -14,8 +14,11 @@
 			loginSuccess: 'auth-login-success',
 			loginFailed: 'auth-login-failed',
 			logoutSuccess: 'auth-logout-success',
-			notAuthenticated: 'auth-not-authenticated',
+				notAuthenticated: 'auth-not-authenticated'
 		}
-	);
+		).constant('UI_EVENTS', {
+		KEYBOARD_ACCESSORY_SHOW: 'KEYBOARD_ACCESSORY_SHOW',
+		KEYBOARD_ACCESSORY_HIDE: 'KEYBOARD_ACCESSORY_HIDE'
+	})
 
 })();
