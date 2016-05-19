@@ -1,30 +1,32 @@
-<ion-tabs class="tabs-stable tabs-icon-top">
+<ion-view cache-view="false">
+	<ion-tabs class="tabs-stable tabs-icon-top">
 
-	<ion-tab title="Logs"
-			 icon-on="ion-ios-clock"
-			 icon-off="ion-ios-clock-outline"
-			 href="{{vm.url}}">
-		<ion-nav-view name="tab-logs"></ion-nav-view>
-	</ion-tab>
+		<ion-tab title="Logs"
+				 icon-on="ion-ios-clock"
+				 icon-off="ion-ios-clock-outline"
+				 href="{{vm.url}}">
+			<ion-nav-view name="tab-logs"></ion-nav-view>
+		</ion-tab>
 
-	<ion-tab title="Stats"
-			 icon-on="ion-ios-speedometer"
-			 icon-off="ion-ios-speedometer-outline"
-			 href="{{vm.url}}/stats">
-		<ion-nav-view name="tab-stats"></ion-nav-view>
-	</ion-tab>
+		<ion-tab title="Stats"
+				 icon-on="ion-ios-speedometer"
+				 icon-off="ion-ios-speedometer-outline"
+				 href="{{vm.url}}/stats">
+			<ion-nav-view name="tab-stats"></ion-nav-view>
+		</ion-tab>
 
-	<ion-tab title="Share"
-			 icon-on="ion-ios-people"
-			 icon-off="ion-ios-people-outline"
-			 href="{{vm.url}}/share">
-		<ion-nav-view name="tab-share"></ion-nav-view>
-	</ion-tab>
-	<ion-tab title="Settings"
-			 icon-on="ion-ios-gear"
-			 icon-off="ion-ios-gear-outline"
-			 href="{{vm.url}}/settings">
-		<ion-nav-view name="tab-settings"></ion-nav-view>
-	</ion-tab>
+		<ion-tab title="Share"
+				 icon-on="ion-ios-people"
+				 icon-off="ion-ios-people-outline"
+				 href="{{vm.url}}/share">
+			<ion-nav-view name="tab-share"></ion-nav-view>
+		</ion-tab>
+		<ion-tab title="Settings"
+				 icon-on="ion-ios-gear"
+				 icon-off="ion-ios-gear-outline"
+				 href="{{vm.url}}/settings">
+			<ion-nav-view name="tab-settings"></ion-nav-view>
+		</ion-tab>
 
-</ion-tabs>
+	</ion-tabs>
+</ion-view>

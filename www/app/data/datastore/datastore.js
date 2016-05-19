@@ -603,6 +603,9 @@
 				p.push(repo.clear(true));
 			});
 
+			//clear any cached transactions
+			p.push(RequestService.$queue.clear());
+
 			return $q.all(p)
 		}
 

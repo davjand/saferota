@@ -13,6 +13,7 @@
 		'$rootScope',
 		'DATA_EVENTS',
 		'$ionicModal',
+		'$ionicPopup',
 		'DataStore',
 		'Rota',
 		'$ionicListDelegate',
@@ -28,6 +29,7 @@
 								$rootScope,
 								DATA_EVENTS,
 								$ionicModal,
+								$ionicPopup,
 								DataStore,
 								Rota,
 								$ionicListDelegate,
@@ -35,6 +37,7 @@
 								$ionicLoading) {
 		var vm = this;
 
+		vm.archive = archive;
 		vm.edit = edit;
 		vm.isActive = isActive;
 		vm.activate = activateRota;
@@ -75,9 +78,14 @@
 			})
 		}
 
+		/**
+		 * _handleSyncComplete
+		 *
+		 * @private
+		 */
 		function _handleSyncComplete() {
 			//reload
-			Rota.$find().then(function (rotas) {
+			Rota.$find({filter: {archived: false}}).then(function (rotas) {
 				if (rotas.length !== vm.rotas.length) {
 					$state.go($state.current, {}, {reload: true});
 				}
@@ -94,6 +102,30 @@
 		function edit(rota) {
 			$ionicListDelegate.closeOptionButtons();
 			$state.go('app.edit', {rotaId: rota.getKey()});
+		}
+
+		/**
+		 * archive a rota
+		 *
+		 * @param rota
+		 */
+		function archive(rota) {
+			$ionicListDelegate.closeOptionButtons();
+			$ionicPopup.confirm({
+				title: 'Are you sure you want to archive this rota?',
+				subtitle: 'It will be deactivated',
+				okType: 'button-energized'
+			}).then(function (ok) {
+				if (ok) {
+					RotaGeoFenceService.deactivate(rota, true).then(function () {
+						rota.archived = true;
+						return rota.$save();
+					}).then(function () {
+						_handleSyncComplete();
+					});
+				}
+			});
+
 		}
 
 

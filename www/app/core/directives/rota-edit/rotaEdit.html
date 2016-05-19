@@ -13,7 +13,7 @@
 
 	<a class="item"
 	   href="#"
-	   ng-click="vm.selectOrganisation()">
+	   ng-click="vm.selectOrganisation($event)">
 		Organisation
 				<span class="item-note">
 					<span ng-if="vm.organisation.name">
@@ -24,7 +24,7 @@
 	</a>
 	<a class="item"
 	   href="#"
-	   ng-click="vm.selectSpeciality()">
+	   ng-click="vm.selectSpeciality($event)">
 		Speciality
 				<span class="item-note">
 					<span ng-if="vm.speciality.title">
@@ -35,7 +35,7 @@
 	</a>
 	<a class="item"
 	   href="#"
-	   ng-click="vm.selectRole()">
+	   ng-click="vm.selectRole($event)">
 		Role
 				<span class="item-note">
 					<span ng-if="vm.role.title">

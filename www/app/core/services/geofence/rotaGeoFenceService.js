@@ -176,6 +176,7 @@
 		 *
 		 *
 		 * @param rota
+		 * @param bypassError {Boolean}
 		 * @returns {*}
 		 */
 		function deactivate(rota, bypassError) {

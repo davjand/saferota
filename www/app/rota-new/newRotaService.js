@@ -78,7 +78,7 @@
 				.then(RotaGeoFenceService.activate(self.rota))
 				.then(function () {
 
-					var id = self.rota.id;
+					var id = self.rota.getKey();
 					self.rota = null;
 					self.locations = [];
 

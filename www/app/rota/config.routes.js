@@ -34,7 +34,7 @@
 				resolve: {
 					/* @ngInject */
 					userRotas: function (Rota) {
-						return Rota.$find();
+						return Rota.$find({filter: {archived: false}, orderBy: 'label'});
 					},
 					/* @ngInject */
 					activeRotas: function (RotaGeoFenceService) {

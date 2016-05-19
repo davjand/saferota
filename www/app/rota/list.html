@@ -37,9 +37,13 @@
 					<span ng-if="!vm.isActive(rota)"> Inactive</span>
 				</p>
 
+				<ion-option-button class="button-energized"
+								   ng-click="vm.archive(rota)">
+					Archive
+				</ion-option-button>
 				<ion-option-button class="button-positive"
 								   ng-click="vm.edit(rota)">
-					Edit Details
+					Edit Rota
 				</ion-option-button>
 
 				<ion-option-button class="button-assertive"

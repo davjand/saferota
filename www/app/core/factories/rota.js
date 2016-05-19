@@ -23,10 +23,10 @@
 	}
 
 
-	factory.$inject = ['Session', 'DataStore'];
+	factory.$inject = ['Session', 'DataStore', 'moment'];
 
 	/* @ngInject */
-	function factory(Session,DataStore) {
+	function factory(Session, DataStore, moment) {
 		var BANDING_OPTIONS = [
 			{name: 'None', value: 0},
 			{name: '1c', value: 30},
@@ -40,10 +40,11 @@
 			.schema({
 				label: '',
 				hours: 40,
-				dateStart: new Date(),
+				dateStart: moment().valueOf(),
 				dateEnd: null,
 				banding: 0,
-				ownerId: ''
+				ownerId: '',
+				archived: false
 			})
 			.relationship('hasOne', 'organisation', 'RotaOrganisations')
 			.relationship('hasOne', 'speciality', 'RotaSpecialities')

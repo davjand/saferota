@@ -5,17 +5,28 @@
 		.module('saferota.core')
 		.service('ModalSelect', ModalSelect);
 
-	ModalSelect.$inject = ['$rootScope', '$ionicModal', '$q'];
+	ModalSelect.$inject = [
+		'$rootScope',
+		'$ionicModal',
+		'$q',
+		'$ionicScrollDelegate',
+		'$timeout'
+	];
 
 	/* @ngInject */
-	function ModalSelect($rootScope, $ionicModal, $q) {
+	function ModalSelect($rootScope,
+						 $ionicModal,
+						 $q,
+						 $ionicScrollDelegate,
+						 $timeout) {
 		var self = this,
-			modal = null,
 			offScope = null;
 
 
 		self.show = show;
 		self.hide = hide;
+		self.modal = null;
+		self.$scope = null;
 
 		////////////////
 
@@ -40,54 +51,56 @@
 		function show(options, $currentScope) {
 			options = options || {};
 
-			if (modal) {
+			if (self.modal) {
 				self.hide();
 			}
 
-			var $scope = $rootScope.$new(false);
+			self.$scope = $rootScope.$new(false);
 
 			/*
 			 * Required items (with intelligent defaults)
 			 */
-			$scope.title = options.title || 'Please Select';
-			$scope.selected = options.selected || null;
-			$scope.callback = options.callback || null;
-
-			$scope.filteredItems = [];
+			self.$scope.title = options.title || 'Please Select';
+			self.$scope.selected = options.selected || null;
+			self.$scope.callback = options.callback || null;
 
 			/*
 			 * Support promised data
 			 */
 			$q.when(options.items || {}).then(function (items) {
-				$scope.items = items;
+				self.$scope.items = items;
 			});
 
 			//Check a function
-			if (!angular.isFunction($scope.callback)) {
+			if (!angular.isFunction(self.$scope.callback)) {
 				throw('No Callback Passed');
 			}
 
 			/*
 			 * Optional
 			 */
-			$scope.valueKey = options.valueKey || 'objectId';
-			$scope.nameKey = options.nameKey || 'name';
+			self.$scope.valueKey = options.valueKey || 'objectId';
+			self.$scope.nameKey = options.nameKey || 'name';
 
 			/*
 			 * System functions
 			 */
-			$scope.search = "";
-			$scope.hide = hide;
+			self.$scope.search = "";
+			self.$scope.hide = self.hide;
 
 			/*
 			 * Create the modal
 			 */
 			$ionicModal.fromTemplateUrl('app/core/services/modal-select/modalSelect.html', {
-				scope: $scope,
+				scope: self.$scope,
 				animation: 'slide-in-up'
 			}).then(function (createdModal) {
-				modal = createdModal;
-				modal.show();
+				self.modal = createdModal;
+				return self.modal.show()
+			}).then(function () {
+				$timeout(function () {
+					$ionicScrollDelegate.resize(); //adjust the size as the keyboard will probable be up
+				}, 500)
 			});
 
 			/*
@@ -113,10 +126,14 @@
 				offScope = null;
 			}
 
-			if (modal) {
-				modal.hide();
+			self.$scope.$destroy();
+			self.$scope = null;
+
+			if (self.modal) {
+				self.modal.remove().then(function () {
+					self.modal = null;
+				});
 			}
-			modal = null;
 		}
 	}
 

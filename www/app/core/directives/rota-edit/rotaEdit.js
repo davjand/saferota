@@ -101,8 +101,10 @@
 		 *
 		 * Opens a select picker to select the Organisation
 		 *
+		 * @param $event
 		 */
-		function selectOrganisation() {
+		function selectOrganisation($event) {
+			$event.preventDefault();
 			ModalSelect.show({
 				items: RotaOrganisation.$find({orderBy: 'name'}),
 				selected: vm.rota.organisation,
@@ -119,8 +121,11 @@
 		 *
 		 * Opens a select picker to select the Role
 		 *
+		 * @param $event
+		 *
 		 */
-		function selectRole() {
+		function selectRole($event) {
+			$event.preventDefault();
 			ModalSelect.show({
 				items: RotaRole.$find({orderBy: 'title'}),
 				selected: vm.rota.role,
@@ -139,8 +144,10 @@
 		 *
 		 * Opens a select picker to select the speciality
 		 *
+		 * @param $event
 		 */
-		function selectSpeciality() {
+		function selectSpeciality($event) {
+			$event.preventDefault();
 			ModalSelect.show({
 				items: RotaSpeciality.$find({orderBy: 'title'}),
 				selected: vm.rota.speciality,

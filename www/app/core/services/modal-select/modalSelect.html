@@ -10,6 +10,7 @@
 			<input type="search"
 				   placeholder="Search"
 				   ng-model="search"
+				   ng-model-options="{ debounce: { 'default': 400} }"
 				   focus-me/>
 		</label>
 	</ion-header>

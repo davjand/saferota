@@ -5,10 +5,23 @@
 		.module('saferota.rota-view')
 		.controller('RotaViewSettingsController', RotaViewSettingsController);
 
-	RotaViewSettingsController.$inject = ['RotaViewService', 'Session', '$state', 'AuthService', '$ionicLoading'];
+	RotaViewSettingsController.$inject = [
+		'RotaViewService',
+		'Session',
+		'$state',
+		'AuthService',
+		'$ionicLoading',
+		'$ionicHistory',
+		'$ionicPopup'];
 
 	/* @ngInject */
-	function RotaViewSettingsController(RotaViewService, Session, $state, AuthService, $ionicLoading) {
+	function RotaViewSettingsController(RotaViewService,
+										Session,
+										$state,
+										AuthService,
+										$ionicLoading,
+										$ionicHistory,
+										$ionicPopup) {
 		var vm = this;
 		vm.rota = RotaViewService.rota;
 		vm.change = RotaViewService.change;
@@ -33,11 +46,21 @@
 		 *
 		 */
 		function logout() {
-			$ionicLoading.show();
-			AuthService.logout().then(function () {
-				$ionicLoading.hide();
-				$state.go('auth.login');
+			$ionicPopup.confirm({
+				title: 'Are you sure you wish to logout?',
+				okType: 'button-assertive button-outline'
+			}).then(function (ok) {
+				if (ok) {
+					$ionicLoading.show();
+					AuthService.logout().then(function () {
+						$ionicLoading.hide();
+						$ionicHistory.nextViewOptions({disableAnimate: true, historyRoot: true});
+						$state.go('auth.login');
+					});
+				}
 			});
+
+
 		}
 	}
 
