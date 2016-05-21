@@ -15,7 +15,8 @@
 			link: link,
 			templateUrl: 'app/core/directives/rota-edit/rotaEdit.html',
 			scope: {
-				rota: '='
+				rota: '=',
+				edit: '@' //whether an edit form or not
 			}
 		};
 
@@ -46,6 +47,7 @@
 								RotaSpeciality) {
 		var vm = this;
 
+
 		/*
 		 * Module Definition
 		 */
@@ -67,6 +69,8 @@
 			vm.BANDING = Rota.BANDING_OPTIONS;
 			vm.rota = $scope.rota;
 			vm.valid = false;
+
+			vm.edit = typeof $scope.edit !== 'undefined' ? $scope.edit : false;
 
 			vm.role = {};
 			vm.organisation = {};
@@ -165,8 +169,11 @@
 		 *
 		 * Opens a date picker to select the start date
 		 *
+		 * @param $event
+		 *
 		 */
-		function selectStart() {
+		function selectStart($event) {
+			$event.preventDefault();
 			ionicDatePicker.openDatePicker({
 				inputDate: new Date(vm.rota.dateStart),
 				callback: function (val) {
@@ -180,8 +187,10 @@
 		 *
 		 * Opens a date picker to select the end date
 		 *
+		 * @param $event
 		 */
-		function selectEnd() {
+		function selectEnd($event) {
+			$event.preventDefault();
 			ionicDatePicker.openDatePicker({
 				inputDate: vm.rota.dateEnd ? new Date(vm.rota.dateEnd) : new Date(),
 				callback: function (val) {

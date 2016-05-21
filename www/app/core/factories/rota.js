@@ -53,7 +53,6 @@
 			.relationship('hasOne', 'user', 'Users')
 			.validators({
 				label: true,
-				organisation: true,
 				speciality: true,
 				role: true
 			})

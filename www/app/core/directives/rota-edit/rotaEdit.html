@@ -1,5 +1,7 @@
 <div class="list rota-edit">
 
+	<div class="item-divider item">Rota</div>
+
 	<label class="item item-input">
 		<div class="input-label">
 			Rota Name
@@ -11,17 +13,27 @@
 			   focus-me/>
 	</label>
 
-	<a class="item"
-	   href="#"
-	   ng-click="vm.selectOrganisation($event)">
-		Organisation
-				<span class="item-note">
-					<span ng-if="vm.organisation.name">
-						{{vm.organisation.name}}
-					</span>
-					<span ng-if="!vm.organisation.name">Please Select</span>
-				</span>
-	</a>
+	<label class="item item-input item-select">
+		<div class="input-label">
+			Banding
+		</div>
+		<select ng-model="vm.rota.banding"
+				ng-options="item.value as item.name for item in vm.BANDING"
+				convert-to-number>
+		</select>
+	</label>
+
+	<label class="item item-input">
+		<div class="input-label">
+			Rota Hours
+		</div>
+		<input type="number"
+			   class="text-right"
+			   ng-model="vm.rota.hours"/>
+	</label>
+
+	<div class="item-divider item">Job Details</div>
+
 	<a class="item"
 	   href="#"
 	   ng-click="vm.selectSpeciality($event)">
@@ -45,31 +57,23 @@
 				</span>
 	</a>
 
-	<div class="item-divider item">Banding &amp; Dates</div>
+	<a class="item"
+	   href="#"
+	   ng-click="vm.selectOrganisation($event)">
+		Organisation
+				<span class="item-note">
+					<span ng-if="vm.organisation.name">
+						{{vm.organisation.name}}
+					</span>
+					<span ng-if="!vm.organisation.name">Please Select</span>
+				</span>
+	</a>
 
-	<label class="item item-input item-select">
-		<div class="input-label">
-			Banding
-		</div>
-		<select ng-model="vm.rota.banding"
-				ng-options="item.value as item.name for item in vm.BANDING"
-				convert-to-number>
-		</select>
-	</label>
-
-	<label class="item item-input">
-		<div class="input-label">
-			Rota Hours
-		</div>
-		<input type="number"
-			   class="text-right"
-			   ng-model="vm.rota.hours"/>
-	</label>
-
+	<div class="item-divider item">Rotation Dates</div>
 
 	<a class="item"
 	   href="#"
-	   ng-click="vm.selectStart()">
+	   ng-click="vm.selectStart($event)">
 		Start Date
 				<span class="item-note">
 					{{ vm.rota.dateStart | date : "dd MMM yy"}}
@@ -78,7 +82,8 @@
 	<a class="item"
 	   ng-class="{'item-icon-right': vm.rota.dateEnd}"
 	   href="#"
-	   ng-click="vm.selectEnd()">
+	   ng-if="vm.edit"
+	   ng-click="vm.selectEnd($event)">
 		End Date
 		<i class="icon fa fa-times-circle"
 		   ng-show="vm.rota.dateEnd"

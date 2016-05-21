@@ -11,6 +11,7 @@
 		'$scope',
 		'$state',
 		'$ionicHistory',
+		'$ionicPopup',
 		'NewRotaService'
 	];
 
@@ -20,6 +21,7 @@
 							   $scope,
 							   $state,
 							   $ionicHistory,
+							   $ionicPopup,
 							   NewRotaService) {
 		var vm = this;
 
@@ -78,7 +80,15 @@
 		 * Saves a rota and progresses to next screen
 		 */
 		function save() {
-			$state.go('app.new-location');
+			if (!vm.rota.isValid()) {
+				$ionicPopup.alert({
+					title: 'Please enter a Rota Name, Speciality and Role',
+					okType: 'button-balanced'
+				})
+			} else {
+				$state.go('app.new-location');
+			}
+
 		}
 
 		function cancel() {
