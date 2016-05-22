@@ -167,7 +167,19 @@
 			 * Updated Date
 			 */
 			if (options.updatedDate) {
-				var cond = 'updated > ' + options.updatedDate.getTime();
+
+				/*
+				 * Backendless doesn't set an updated date when a new item is created
+				 * Only when it has been edited. As such we need to do it by created
+				 * date as well just in case
+				 *
+				 */
+				var cond = '(updated > ' + options.updatedDate.getTime() +
+					' OR created > ' + options.updatedDate.getTime();
+
+				/*
+				 * Concat the the query
+				 */
 				if (query.condition) {
 					query.condition = query.condition + " and " + cond;
 				} else {
@@ -176,6 +188,9 @@
 			}
 
 
+			/*
+			 * Find and process
+			 */
 			return self._wrapPromise(
 				self._persistance(Model),
 				'find',
