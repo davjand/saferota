@@ -37,6 +37,9 @@
     },
     "angular-ui-router": {
       "main": []
+    },
+    "ionic": {
+      "main": []
     }
   }
 }

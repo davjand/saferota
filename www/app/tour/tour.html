@@ -1,0 +1,80 @@
+<ion-modal-view ng-controller='TourController as vm'
+				class="tour-modal">
+	<ion-header-bar class="bar-balanced">
+		<h1 class="title">Tour</h1>
+		<button class="button button-primary" ng-click="vm.done()">
+			{{vm.doneButton}}
+		</button>
+	</ion-header-bar>
+	<ion-content>
+		<ion-slide-box on-slide-changed="vm.slideHasChanged($index)">
+			<ion-slide>
+				<div class="box tour-item one">
+					<div class="image">
+						<div>
+							<img src="img/tour/Tour-Start@2x.png" alt="Tour Title"/>
+						</div>
+					</div>
+					<div class="content">
+						<h1>Welcome to SafeRota</h1>
+						<p>The innovative patient safety app. We track the hours spent in the workplace to identify
+							risks to patient safety.</p>
+						<div class="footer">
+							<button class="button button-balanced button-block"
+									ng-click="vm.next()">Swipe to Continue
+							</button>
+						</div>
+					</div>
+				</div>
+			</ion-slide>
+			<ion-slide>
+				<div class="box tour-item two">
+					<div class="image">
+						<img src="img/tour/Tour-Map@2x.png" alt="Geolocation on a Map"/>
+					</div>
+					<div class="content">
+						<h1>Intelligent tracking with GPS</h1>
+						<p>
+							Using low power GeoFencing technology,<br/>
+							SafeRota tracks when you enter and leave your workplace.
+						</p>
+					</div>
+				</div>
+			</ion-slide>
+			<ion-slide>
+				<div class="box tour-item three">
+					<div class="image">
+						<img src="img/tour/Tour-Stats@2x.png" alt="Statistics Panel"/>
+					</div>
+					<div class="content">
+						<h1>Intelligent Calculations</h1>
+						<p>SafeRota calculates how long you are in work and compares this to your contract.</p>
+						<p>Giving your true insight into shift patterns.</p>
+
+					</div>
+				</div>
+			</ion-slide>
+			<ion-slide>
+				<div class="box tour-item four">
+					<div class="image">
+						<img src="img/tour/Tour-Table@2x.png" alt="League Table of Hospitals"/>
+					</div>
+					<div class="content">
+						<h1>Intelligent tracking with GPS</h1>
+						<p>SafeRota anonymously uses your data to collate hospital rotas</p>
+						<p>
+							<strong>Risks to patient safety can then be identified</strong> from our public statistics.
+						</p>
+
+						<div class="footer">
+							<button class="button button-balanced button-block"
+									ng-click="vm.done()">Finish Tour
+							</button>
+						</div>
+					</div>
+
+				</div>
+			</ion-slide>
+		</ion-slide-box>
+	</ion-content>
+</ion-modal-view>

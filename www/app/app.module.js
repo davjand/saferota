@@ -8,6 +8,7 @@
 			'saferota.rota',
 			'saferota.rota-new',
 			'saferota.rota-edit',
-			'saferota.rota-view'
+			'saferota.rota-view',
+			'saferota.tour'
 		]);
 })();

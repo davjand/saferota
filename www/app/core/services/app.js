@@ -10,11 +10,13 @@
 		'AuthService',
 		'Session',
 		'RotaLogService',
+		'TourService',
 		'$q',
 		'$rootScope',
 		'$ionicLoading',
 		'$ionicHistory',
 		'$state',
+		'Cache',
 		'APP_MSG',
 		'AUTH_EVENTS'
 	];
@@ -24,11 +26,13 @@
 				 AuthService,
 				 Session,
 				 RotaLogService,
+				 TourService,
 				 $q,
 				 $rootScope,
 				 $ionicLoading,
 				 $ionicHistory,
 				 $state,
+				 Cache,
 				 APP_MSG,
 				 AUTH_EVENTS) {
 
@@ -38,6 +42,8 @@
 		self.auth = AuthService;
 		self.session = Session;
 		self.log = RotaLogService;
+		self.cache = Cache;
+		self.tour = TourService;
 
 		self.ready = function () {
 			return Session.ready();
@@ -46,7 +52,7 @@
 
 		/*
 		 *
-		 * Start
+		 * Start Session / Bootstrap
 		 *
 		 */
 		self.start = function() {
@@ -54,7 +60,13 @@
 		};
 
 
-
+		/*
+		 *
+		 * Tour
+		 *
+		 *
+		 */
+		self.tour.showIfFirstTime();
 
 
 

@@ -13,6 +13,7 @@
 		'$ionicLoading',
 		'$ionicHistory',
 		'$ionicPopup',
+		'TourService',
 		'APP_MSG',
 		'$state'
 	];
@@ -25,6 +26,7 @@
 								$ionicLoading,
 								$ionicHistory,
 								$ionicPopup,
+								TourService,
 								APP_MSG,
 								$state) {
 		var vm = this;
@@ -34,6 +36,7 @@
 		vm.sync = sync;
 		vm.refresh = refresh;
 		vm.logout = logout;
+		vm.playTour = playTour;
 
 		/**
 		 * refresh
@@ -97,6 +100,11 @@
 					callback();
 				}
 			});
+		}
+
+
+		function playTour() {
+			TourService.show();
 		}
 
 

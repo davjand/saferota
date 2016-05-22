@@ -1,4 +1,4 @@
-
+@import "theme";
 
 // Deps
 @import 'www/lib/font-awesome/scss/font-awesome.scss';
@@ -10,5 +10,7 @@
 @import "www/app/auth/style";
 @import "www/app/core/style";
 @import "www/app/rota-log/style";
-@import "theme";
+@import "www/app/tour/style";
+
+
 
