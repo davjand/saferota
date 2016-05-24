@@ -4,8 +4,7 @@
 	angular
 		.module('saferota.core')
 		.config(laddaConfig)
-		.run(ionicRun)
-	.run(appRun);
+		.run(ionicRun);
 
 
 	/*
@@ -48,20 +47,12 @@
 	 * Config Ladda
 	 */
 	/* @ngInject */
-	function laddaConfig(laddaProvider){
+	function laddaConfig(laddaProvider) {
 		laddaProvider.setOption({
 			style: 'zoom-in',
 			spinnerSize: 35,
 			spinnerColor: '#ffffff'
 		});
-	}
-
-	/*
-	 * App Run
-	 */
-	/* @ngInject */
-	function appRun(App){
-		App.start();
 	}
 
 

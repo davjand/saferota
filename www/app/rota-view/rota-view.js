@@ -13,7 +13,7 @@
 
 		RotaViewService.start(currentRota);
 
-		vm.url = '#/app/view/' + currentRota.getKey();
+		vm.id = RotaViewService.rota.getKey();
 	}
 
 })();

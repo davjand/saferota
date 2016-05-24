@@ -5,7 +5,7 @@
 		.module('saferota.data')
 		.factory('LocalAdapterLocalForage', LocalAdapterLocalForage);
 
-	LocalAdapterLocalForage.$inject = ['$localForage', 'LocalAdapterInterface', '$q'];
+	LocalAdapterLocalForage.$inject = ['$localForage', 'LocalAdapterInterface', '$q', '$log'];
 
 	//allow all to be cleared easily
 	var allCaches = [];
@@ -14,7 +14,7 @@
 
 
 	/* @ngInject */
-	function LocalAdapterLocalForage($localForage, LocalAdapterInterface, $q) {
+	function LocalAdapterLocalForage($localForage, LocalAdapterInterface, $q, $log) {
 
 		return LocalAdapterInterface({
 			initialize: initialize,
@@ -62,6 +62,8 @@
 				}
 			}).then(function () {
 				self._ready.resolve();
+			}, function (error) {
+				$log(error);
 			})
 		}
 
@@ -198,10 +200,7 @@
 		 * @returns {*}
 		 */
 		function clear() {
-			var self = this;
-			return self.isReady().then(function () {
-				return self.$cache.clear();
-			});
+			return this.$cache.clear();
 		}
 
 		/**

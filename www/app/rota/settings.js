@@ -14,6 +14,7 @@
 		'$ionicHistory',
 		'$ionicPopup',
 		'TourService',
+		'RotaGeoFenceService',
 		'APP_MSG',
 		'$state'
 	];
@@ -27,6 +28,7 @@
 								$ionicHistory,
 								$ionicPopup,
 								TourService,
+								RotaGeoFenceService,
 								APP_MSG,
 								$state) {
 		var vm = this;
@@ -37,6 +39,7 @@
 		vm.refresh = refresh;
 		vm.logout = logout;
 		vm.playTour = playTour;
+		vm.deactivateAll = deactivateAll;
 
 		/**
 		 * refresh
@@ -103,8 +106,22 @@
 		}
 
 
+		/**
+		 * playTour
+		 *
+		 */
 		function playTour() {
 			TourService.show();
+		}
+
+		/**
+		 * deactivateAll
+		 *
+		 * Deactivates all geofences
+		 *
+		 */
+		function deactivateAll() {
+			RotaGeoFenceService.deactivateAll();
 		}
 
 

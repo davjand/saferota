@@ -1,0 +1,29 @@
+/*
+
+	saferota.share SCSS
+
+
+*/
+
+.rota-share {
+	margin-top: 40px;
+
+	.icon-top {
+		color: $greyLight;
+		font-size: 120px;
+		line-height: 120px;
+	}
+
+	h3 {
+		color: $greyMed;
+		font-weight: 300;
+		margin-top: 10px;
+		margin-bottom: 50px;
+	}
+
+	button {
+		margin-top: 20px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+}

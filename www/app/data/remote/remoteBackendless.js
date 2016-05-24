@@ -175,7 +175,7 @@
 				 *
 				 */
 				var cond = '(updated > ' + options.updatedDate.getTime() +
-					' OR created > ' + options.updatedDate.getTime();
+					' OR created > ' + options.updatedDate.getTime() + ')';
 
 				/*
 				 * Concat the the query
@@ -292,9 +292,9 @@
 			}
 
 			return this._xhr('GET', 'users/isvalidusertoken/' + token).then(function (valid) {
-				if(valid) {
+				if (valid) {
 					return $q.when();
-				}else{
+				} else {
 					Backendless.LocalCache.clear();
 					return $q.reject();
 				}

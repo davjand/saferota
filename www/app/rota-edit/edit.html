@@ -1,5 +1,10 @@
-<ion-view cache-view="false">
+<ion-view cache-view="false" hide-back-button="true">
 	<ion-nav-title>Edit SafeRota</ion-nav-title>
+	<ion-nav-buttons side="primary">
+		<button class="button"
+				ng-click="vm.cancel()">Cancel
+		</button>
+	</ion-nav-buttons>
 	<ion-nav-buttons side="secondary">
 		<button class="button"
 				ng-click="vm.save()"

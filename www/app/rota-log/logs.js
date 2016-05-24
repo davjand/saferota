@@ -19,7 +19,7 @@
 								   RotaTimespan,
 								   moment) {
 		var vm = this;
-
+		vm.rota = RotaViewService.rota;
 		vm.logs = {};
 		vm.change = RotaViewService.change;
 		vm.moment = moment;

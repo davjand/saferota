@@ -9,6 +9,7 @@
 		'$rootScope',
 		'$ionicModal',
 		'$q',
+		'$filter',
 		'$ionicScrollDelegate',
 		'$timeout'
 	];
@@ -17,6 +18,7 @@
 	function ModalSelect($rootScope,
 						 $ionicModal,
 						 $q,
+						 $filter,
 						 $ionicScrollDelegate,
 						 $timeout) {
 		var self = this,
@@ -64,11 +66,15 @@
 			self.$scope.selected = options.selected || null;
 			self.$scope.callback = options.callback || null;
 
+			self.$scope.items = [];
+			self.$scope.otherItem = {};
+
 			/*
 			 * Support promised data
 			 */
 			$q.when(options.items || {}).then(function (items) {
 				self.$scope.items = items;
+				self.$scope.otherItem = $filter('filter')(items, {other: true}, true);
 			});
 
 			//Check a function

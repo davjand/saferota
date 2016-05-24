@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('saferota.core')
+		.module('saferota.app')
 		.service('App', App);
 
 	App.$inject = [
@@ -17,6 +17,7 @@
 		'$ionicHistory',
 		'$state',
 		'Cache',
+		'RotaGeoFenceService',
 		'APP_MSG',
 		'AUTH_EVENTS'
 	];
@@ -33,6 +34,7 @@
 				 $ionicHistory,
 				 $state,
 				 Cache,
+				 RotaGeoFenceService,
 				 APP_MSG,
 				 AUTH_EVENTS) {
 
@@ -89,7 +91,10 @@
 		/*
 		 * Clear cache on logout
 		 */
-		$rootScope.$on(AUTH_EVENTS.logoutSuccess, self.data.clearAll);
+		$rootScope.$on(AUTH_EVENTS.logoutSuccess, function () {
+			RotaGeoFenceService.deactivateAll();
+			self.data.clearAll();
+		});
 
 		/*
 		 * Go to login if has expired

@@ -44,7 +44,8 @@
 				dateEnd: null,
 				banding: 0,
 				ownerId: '',
-				archived: false
+				archived: false,
+				minimumTime: 30
 			})
 			.relationship('hasOne', 'organisation', 'RotaOrganisations')
 			.relationship('hasOne', 'speciality', 'RotaSpecialities')

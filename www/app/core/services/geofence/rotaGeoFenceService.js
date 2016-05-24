@@ -39,6 +39,7 @@
 
 		self.activate = activate;
 		self.deactivate = deactivate;
+		self.deactivateAll = deactivateAll;
 		self.isActive = isActive;
 
 
@@ -48,13 +49,25 @@
 		 * getActiveLocations
 		 *
 		 * get a list of active locations
+		 *
+		 * Uses uniqueIdentifier from location as ID can cahnged
+		 *
 		 * @returns {Promise}
 		 */
 		function getActiveLocations() {
 			return geofence.ready()
 				.then(geofence.api.getWatched)
 				.then(function (results) {
-					return JSON.parse(results);
+					var ids = [];
+					angular.forEach(JSON.parse(results), function (item) {
+						ids.push(item.id);
+					});
+
+					return RotaLocation.$find({
+						filter: {
+							uniqueIdentifier: ids
+						}
+					});
 				});
 		}
 
@@ -63,6 +76,8 @@
 		 * getActiveRotaIds
 		 *
 		 * get a list of active
+		 *
+		 *
 		 *
 		 */
 		function getActiveRotaIds() {
@@ -102,7 +117,7 @@
 				.then(function (list) {
 					var f = false;
 					angular.forEach(list, function (item) {
-						f = f || location.getKey() === item.id;
+						f = f || location.getKey() === item.getKey();
 					});
 					return $q.when(f);
 				});
@@ -121,10 +136,10 @@
 			return self.locationIsActive(location)
 				.then(function (result) {
 					if (result) {
-						return $q.reject('RotaGeoFenceService: Cannot Activate Location ' + location.getKey() + ", already active");
+						return $q.reject('RotaGeoFenceService: Cannot Activate Location ' + location.uniqueIdentifier + ", already active");
 					}
 					return geofence.api.addOrUpdate({
-						id: location.getKey(),
+						id: location.uniqueIdentifier,
 						latitude: parseFloat(location.lat),
 						longitude: parseFloat(location.long),
 						radius: parseFloat(location.radius),
@@ -147,9 +162,9 @@
 						if (bypassError) {
 							return $q.when();
 						}
-						return $q.reject('RotaGeoFenceService: Cannot Deactivate Location ' + location.getKey() + ", is not active");
+						return $q.reject('RotaGeoFenceService: Cannot Deactivate Location ' + location.uniqueIdentifier + ", is not active");
 					}
-					return geofence.api.remove(location.getKey())
+					return geofence.api.remove(location.uniqueIdentifier)
 				})
 		}
 
@@ -203,6 +218,17 @@
 						self.locationIsActive(locations[0]) :
 						$q.when(false);
 				})
+		}
+
+		/**
+		 * deactivateAll
+		 *
+		 * Removes any active geofences
+		 *
+		 * @returns {*}
+		 */
+		function deactivateAll() {
+			return geofence.api.removeAll();
 		}
 	}
 

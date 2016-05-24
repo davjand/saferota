@@ -188,7 +188,7 @@ describe('saferota.rota-log RotaLogService', function () {
 	});
 
 	//.createRotaTimeSpan
-	it('.createRotaTimeSpan takes an enter and an exit and creates a timespan object', function () {
+	it('.createRotaTimespan takes an enter and an exit and creates a timespan object', function () {
 		var enter = moment('2013-02-08 12:00:00.000').valueOf();
 		var exit = moment('2013-02-08 14:30:00.000').valueOf();
 
@@ -208,7 +208,7 @@ describe('saferota.rota-log RotaLogService', function () {
 				exited: false
 			});
 
-		var ts = RotaLogService.createRotaTimespan(e1, e2);
+		var ts = RotaLogService.createRotaTimespan(e1, e2, aRota);
 
 		expect(ts.location).toEqual('loc1');
 		expect(ts.rota).toEqual('rota1');
@@ -217,6 +217,38 @@ describe('saferota.rota-log RotaLogService', function () {
 		expect(ts.duration).toBe(150);
 
 	});
+	it('.createRotaTimespan returns null if less than min duration', function () {
+		var enter = moment('2013-02-08 12:00:00.000').valueOf();
+		var exit = moment('2013-02-08 12:15:00.000').valueOf();
+
+		aRota.minimumTime = 30;
+
+		var e1 = RotaEvent.create({ //should find
+				objectId: 'e1',
+				timestamp: enter,
+				location: 'loc1',
+				rota: 'rota1',
+				type: 1,
+				exited: false
+			}),
+			e2 = RotaEvent.create({ //should find
+				objectId: 'e2',
+				timestamp: exit,
+				location: 'loc1',
+				type: 2,
+				exited: false
+			});
+
+		var ts = RotaLogService.createRotaTimespan(e1, e2, aRota);
+
+		expect(ts).toBeNull();
+
+		expect(e2.error).not.toBe(null);
+	});
+
+
+
+
 
 	//.calculateDuration
 	it('.calculateDuration can calculate the duration and return in minutes', function () {

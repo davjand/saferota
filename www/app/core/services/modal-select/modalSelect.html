@@ -24,9 +24,10 @@
 				{{ item[nameKey ]}}
 			</li>
 
-			<li class="text-center padding search-prompt"
-				ng-if="search && filteredItems.length === 0">
-				No Results Found
+			<li class="item"
+				ng-if="search && filteredItems.length === 0"
+				ng-click="callback(item[otherItem[valueKey]]); hide();">
+				Other
 			</li>
 
 		</ul>

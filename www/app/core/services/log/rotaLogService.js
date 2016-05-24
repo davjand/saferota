@@ -12,6 +12,7 @@
 
 	RotaLogService.$inject = [
 		'RotaLocation',
+		'Rota',
 		'RotaEvent',
 		'RotaTimespan',
 		'$rootScope',
@@ -23,6 +24,7 @@
 
 	/* @ngInject */
 	function RotaLogService(RotaLocation,
+							Rota,
 							RotaEvent,
 							RotaTimespan,
 							$rootScope,
@@ -102,6 +104,7 @@
 				var fence = geofences[i];
 
 				var event,
+					rota,
 					toSave = [];
 
 
@@ -123,6 +126,8 @@
 						 * Find and process previous enter event(s)
 						 * Multiple if error
 						 */
+						var thisEnterEvent = null;
+
 						return self.findEnterEvents(event).then(function (enterEvents) {
 							if (enterEvents === null || enterEvents.length < 1) {
 								event.error = 'Cannot find matching enter event';
@@ -130,15 +135,28 @@
 							}
 
 							toSave = toSave.concat(enterEvents);
+
 							return processEnterEvents(enterEvents)
-						}).then(function (thisEnterEvent) {
+						}).then(function (enterEvent) {
+
+							if (enterEvent !== null) {
+								thisEnterEvent = enterEvent;
+								return Rota.$get(thisEnterEvent.rota);
+							}
+							else {
+								return $q.when(null);
+							}
+
+						}).then(function (rota) {
 
 							/*
 							 * create timespan object
 							 */
 							if (thisEnterEvent !== null) {
-								var timespan = self.createRotaTimespan(thisEnterEvent, event);
-								toSave.push(timespan);
+								var timespan = self.createRotaTimespan(thisEnterEvent, event, rota);
+								if (timespan !== null) {
+									toSave.push(timespan);
+								}
 							}
 
 							//Save and clear the models
@@ -187,7 +205,7 @@
 					event.location = location.getKey();
 					event.rota = location.rota;
 				} else {
-					event.error = 'Could not find location with ID: ' + geofence.id;
+					event.error = 'Could not find location with identifier: ' + geofence.id;
 				}
 				return $q.when(event);
 			});
@@ -255,17 +273,30 @@
 		 *
 		 * Creates a timespan object
 		 *
+		 * Uses the rota.minimumtTime to determine if to create an object
+		 * Returns null if the duration is < min time
+		 *
 		 * @param enter
 		 * @param exit
+		 * @param rota
 		 * @returns {*}
 		 */
-		function createRotaTimespan(enter, exit) {
+		function createRotaTimespan(enter, exit, rota) {
+			var duration = self.calculateDuration(enter.timestamp, exit.timestamp);
+			var min = rota.minimumTime || 0;
+
+			if (duration < min) {
+				exit.error = 'Duration ' + duration + ' mins, less than minimum of ' + min;
+				return null;
+			}
+
+
 			return RotaTimespan.create({
 				location: enter.location,
 				rota: enter.rota,
 				enter: enter.timestamp,
 				exit: exit.timestamp,
-				duration: self.calculateDuration(enter.timestamp, exit.timestamp)
+				duration: duration
 			}, $s);
 		}
 

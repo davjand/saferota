@@ -27,7 +27,8 @@
 
 			if (!CacheFactory.get(CACHE_NAME)) {
 				CacheFactory.createCache(CACHE_NAME, {
-					storageMode: 'localStorage'
+					storageMode: 'localStorage',
+					deleteOnExpire: 'none'
 				});
 			}
 			return CacheFactory.get(CACHE_NAME);

@@ -4,6 +4,22 @@
 		<button class="button button-clear button-primary" ng-click="hide()">Close</button>
 	</ion-header-bar>
 	<ion-content>
+
+		<!-- Account Settings -->
+		<div class="card">
+			<div class="item item-divider">
+				Your Account
+			</div>
+			<div class="item text-wrap">
+				<p>Email: {{vm.user.email}} </p>
+			</div>
+			<div class="item">
+				<a class="button button-stable button-outline">Edit Password</a>
+				<a class="button button-assertive button-outline pull-right"
+				   ng-click="vm.logout(hide)">Logout</a>
+			</div>
+		</div>
+
 		<!-- Rota Settings -->
 		<div class="card">
 			<div class="item item-divider">
@@ -21,20 +37,19 @@
 			</div>
 		</div>
 
-		<!-- Account Settings -->
+		<!-- Location Settings -->
 		<div class="card">
 			<div class="item item-divider">
-				Your Account
-			</div>
-			<div class="item text-wrap">
-				<p>Email: {{vm.user.email}} </p>
+				Location
 			</div>
 			<div class="item">
-				<a class="button button-stable button-outline">Edit Password</a>
-				<a class="button button-assertive button-outline pull-right"
-				   ng-click="vm.logout(hide)">Logout</a>
+				<a class="button button-stable button-outline button-block"
+				   ng-click="vm.deactivateAll()">
+					Deactivate All Rotas
+				</a>
 			</div>
 		</div>
+
 
 		<!-- Tour -->
 		<div class="card">

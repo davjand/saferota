@@ -29,22 +29,26 @@
 		'$scope',
 		'moment',
 		'Rota',
+		'$q',
 		'ionicDatePicker',
 		'ModalSelect',
 		'RotaRole',
 		'RotaOrganisation',
-		'RotaSpeciality'
+		'RotaSpeciality',
+		'$ionicScrollDelegate'
 	];
 
 	/* @ngInject */
 	function RotaEditController($scope,
 								moment,
 								Rota,
+								$q,
 								ionicDatePicker,
 								ModalSelect,
 								RotaRole,
 								RotaOrganisation,
-								RotaSpeciality) {
+								RotaSpeciality,
+								$ionicScrollDelegate) {
 		var vm = this;
 
 
@@ -76,9 +80,13 @@
 			vm.organisation = {};
 			vm.speciality = {};
 
-			_getRel('role');
-			_getRel('organisation');
-			_getRel('speciality');
+			$q.all([
+				_getRel('role'),
+				_getRel('organisation'),
+				_getRel('speciality')
+			]).then(function () {
+				$ionicScrollDelegate.resize(); //update scrollview after adding in text
+			})
 		}
 
 
@@ -93,10 +101,11 @@
 		 */
 		function _getRel(key) {
 			if (vm.rota[key]) {
-				vm.rota.$getRel(key).then(function (result) {
+				return vm.rota.$getRel(key).then(function (result) {
 					vm[key] = result;
 				});
 			}
+			return $q.when();
 		}
 
 

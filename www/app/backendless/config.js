@@ -25,7 +25,7 @@
 
 		/*
 		 *
-		 * if not unit testing
+		 * Not unit testing
 		 *
 		 * @TODO Might be a better way of achieving this
 		 *
@@ -49,7 +49,7 @@
 
 			}
 
-			DataConfigProvider.setLocal('LocalAdapterLocalForage');
+			DataConfigProvider.setLocal('LocalAdapterLocalForage', {});
 			DataConfigProvider.setRemote('RemoteAdapterBackendless', {
 				application: APP,
 				secret: SECRET,

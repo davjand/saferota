@@ -13,6 +13,15 @@
 			   focus-me/>
 	</label>
 
+	<label class="item item-input">
+		<div class="input-label">
+			Rota Hours
+		</div>
+		<input type="number"
+			   class="text-right"
+			   ng-model="vm.rota.hours"/>
+	</label>
+
 	<label class="item item-input item-select">
 		<div class="input-label">
 			Banding
@@ -23,14 +32,6 @@
 		</select>
 	</label>
 
-	<label class="item item-input">
-		<div class="input-label">
-			Rota Hours
-		</div>
-		<input type="number"
-			   class="text-right"
-			   ng-model="vm.rota.hours"/>
-	</label>
 
 	<div class="item-divider item">Job Details</div>
 
@@ -94,5 +95,17 @@
 				</span>
 
 	</a>
+
+	<div class="item-divider item">Settings</div>
+
+	<label class="item item-input"
+		   ng-if="vm.edit">
+		<div class="input-label">
+			Min Time (min)
+		</div>
+		<input type="number"
+			   class="text-right"
+			   ng-model="vm.rota.minimumTime"/>
+	</label>
 
 </div>

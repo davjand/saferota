@@ -12192,3 +12192,25 @@ form .form-success {
     max-width: 250px; }
   .tour-item.four .image img {
     max-width: 300px; }
+
+/*
+
+	saferota.share SCSS
+
+
+*/
+.rota-share {
+  margin-top: 40px; }
+  .rota-share .icon-top {
+    color: #e0e0e0;
+    font-size: 120px;
+    line-height: 120px; }
+  .rota-share h3 {
+    color: #aaaaaa;
+    font-weight: 300;
+    margin-top: 10px;
+    margin-bottom: 50px; }
+  .rota-share button {
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px; }
