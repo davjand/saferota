@@ -34,7 +34,8 @@
 			.schema({
 				title: '',
 				code: '',
-				category: ''
+				category: '',
+				other: false
 			});
 	}
 

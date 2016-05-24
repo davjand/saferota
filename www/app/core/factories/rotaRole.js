@@ -28,7 +28,7 @@
 	function factory(DataStore) {
 		return DataStore.create('RotaRoles')
 				.key('objectId')
-				.schema({title: '', code: ''});
+			.schema({title: '', code: '', other: false});
 	}
 
 })();

@@ -66,15 +66,24 @@
 			self.$scope.selected = options.selected || null;
 			self.$scope.callback = options.callback || null;
 
+			/*
+			 * Optional
+			 */
+			self.$scope.valueKey = options.valueKey || 'objectId';
+			self.$scope.nameKey = options.nameKey || 'name';
+
 			self.$scope.items = [];
-			self.$scope.otherItem = {};
+			self.$scope.otherItem = null;
 
 			/*
 			 * Support promised data
 			 */
 			$q.when(options.items || {}).then(function (items) {
 				self.$scope.items = items;
-				self.$scope.otherItem = $filter('filter')(items, {other: true}, true);
+				var otherItemVal = $filter('filter')(items, {other: true}, true);
+				if (otherItemVal && otherItemVal.length > 0) {
+					self.$scope.otherItem = otherItemVal[0][self.$scope.valueKey];
+				}
 			});
 
 			//Check a function
@@ -82,11 +91,6 @@
 				throw('No Callback Passed');
 			}
 
-			/*
-			 * Optional
-			 */
-			self.$scope.valueKey = options.valueKey || 'objectId';
-			self.$scope.nameKey = options.nameKey || 'name';
 
 			/*
 			 * System functions

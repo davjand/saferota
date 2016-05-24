@@ -39,7 +39,8 @@
 				address2: '',
 				address3: '',
 				address4: '',
-				address5: ''
+				address5: '',
+				other: false
 			});
 	}
 
