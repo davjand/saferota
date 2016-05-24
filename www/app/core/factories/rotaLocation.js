@@ -29,13 +29,18 @@
 		return DataStore.create('RotaLocations')
 			.key('objectId')
 			.schema({
-				uniqueIdentifier: guid(),
+				uniqueIdentifier: null,
 				lat: null,
 				long: null,
 				ownerId: '',
 				radius: 400
 			})
-			.relationship('hasOne', 'rota', 'Rotas');
+			.relationship('hasOne', 'rota', 'Rotas')
+			.methods({
+				generateUID: function () {
+					this.uniqueIdentifier = guid();
+				}
+			});
 
 
 		/**

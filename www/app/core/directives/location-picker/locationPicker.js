@@ -7,11 +7,13 @@
 
 	locationPicker.$inject = [
 		'$cordovaGeolocation',
-		'google'];
+		'google',
+		'$timeout'];
 
 	/* @ngInject */
 	function locationPicker($cordovaGeolocation,
-							google) {
+							google,
+							$timeout) {
 
 		return {
 			templateUrl: 'app/core/directives/location-picker/locationPicker.html',
@@ -101,10 +103,24 @@
 
 					/*
 					 * Event handler to watch for a click
+					 *
+					 * A bit timeout code to prevent double clicks triggering
+					 *
 					 */
+					var clickTimeout = null;
+
 					$scope.map.addListener('click', function (event) {
-						$scope.setPosition(event.latLng);
-						$scope.drawLocation();
+						clickTimeout = $timeout(function () {
+							$scope.setPosition(event.latLng);
+							$scope.drawLocation();
+						}, 200);
+					});
+
+					$scope.map.addListener('dblclick', function (event) {
+						if (clickTimeout) {
+							$timeout.cancel(clickTimeout);
+							clickTimeout = null;
+						}
 					});
 
 					/*

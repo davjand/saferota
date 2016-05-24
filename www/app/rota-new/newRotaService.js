@@ -56,6 +56,7 @@
 		 */
 		function createLocation($scope) {
 			var location = RotaLocation.create({}, $scope);
+			location.generateUID();
 			location.$register($serviceScope);
 			self.locations.push(location);
 

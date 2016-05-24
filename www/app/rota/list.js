@@ -71,7 +71,7 @@
 			$scope.$on('$destroy', function () {
 				offSyncComplete();
 
-				//Upload the settings modal;
+				//Unload the settings modal;
 				if (vm.$settingsModal) {
 					vm.$settingsModal.remove();
 				}

@@ -167,21 +167,6 @@ describe('saferota.core rotaGeoFenceService', function () {
 		});
 		_d();
 	});
-	it('.activateLocation should throw an error if already active', function (done) {
-		var l1 = RotaLocation.create({objectId: "10", rota: "1"});
-
-		geofence.ready().then(function () {
-			spyOn(RotaGeoFenceService, 'getActiveLocations').and.returnValue($q.when([l1]));
-			spyOn(geofence.api, 'addOrUpdate').and.returnValue($q.when());
-			return RotaGeoFenceService.activateLocation(l1);
-		}).then(function () {
-			expect(true).toBe(false);
-		}, function (error) {
-			expect(error).toBeDefined();
-			done();
-		});
-		_d();
-	});
 
 	//.deactivateLocation
 	it('.deactivateLocation can deactivate a location', function (done) {
@@ -203,7 +188,7 @@ describe('saferota.core rotaGeoFenceService', function () {
 
 		geofence.ready().then(function () {
 			spyOn(geofence.api, 'getWatched').and.returnValue($q.when('[]'));
-			return RotaGeoFenceService.deactivateLocation(l1);
+			return RotaGeoFenceService.deactivateLocation(l1, false);
 		}).then(function () {
 			expect(true).toBe(false);
 		}, function (error) {

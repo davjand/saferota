@@ -12176,10 +12176,11 @@ form .form-success {
       color: #ADADAD;
       font-size: 24px;
       line-height: 1em;
-      margin: 0 15px 0.5em; }
+      margin: 0 30px 0.5em;
+    }
     .tour-item .content p {
       color: #4A4A4A;
-      margin: 0 15px 0.5em;
+      margin: 0 30px 0.5em;
       font-weight: 400;
       font-size: 14px;
       line-height: 18px; }

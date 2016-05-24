@@ -5,7 +5,7 @@
 		.module('saferota.core')
 		.service('RotaGeoFenceService', rotaGeoFenceService);
 
-	rotaGeoFenceService.$inject = ['geofence', 'RotaLocation', '$q'];
+	rotaGeoFenceService.$inject = ['geofence', 'RotaLocation', '$q', '$log'];
 
 	/*
 	 * Spec
@@ -26,7 +26,8 @@
 	/* @ngInject */
 	function rotaGeoFenceService(geofence,
 								 RotaLocation,
-								 $q) {
+								 $q,
+								 $log) {
 
 		var self = this;
 
@@ -136,7 +137,8 @@
 			return self.locationIsActive(location)
 				.then(function (result) {
 					if (result) {
-						return $q.reject('RotaGeoFenceService: Cannot Activate Location ' + location.uniqueIdentifier + ", already active");
+						$log.warn('RotaGeoFenceService: Cannot Activate Location ' + location.uniqueIdentifier + ", already active");
+						return $q.when();
 					}
 					return geofence.api.addOrUpdate({
 						id: location.uniqueIdentifier,
@@ -156,6 +158,7 @@
 		 * @returns {*}
 		 */
 		function deactivateLocation(location, bypassError) {
+			bypassError = typeof bypassError !== 'undefined' ? bypassError : true;
 			return self.locationIsActive(location)
 				.then(function (result) {
 					if (!result) {

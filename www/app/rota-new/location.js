@@ -48,7 +48,7 @@
 				$ionicHistory.nextViewOptions({
 					historyRoot: true
 				});
-				$state.go('app.list', {id: id});
+				$state.go('app.list');
 			});
 		}
 
