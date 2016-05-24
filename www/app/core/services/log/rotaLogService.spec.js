@@ -40,16 +40,17 @@ describe('saferota.rota-log RotaLogService', function () {
 
 
 		aEnter1 = {
-			id: 'loc1',
+			id: 'unique1',
 			transitionType: 1
 		};
 		aExit1 = {
-			id: 'loc1',
+			id: 'unique1',
 			transitionType: 2
 		};
 
 		aLocation = RotaLocation.create({
 			objectId: 'loc1',
+			uniqueIdentifier: 'unique1',
 			lat: 1.5,
 			long: 1.5,
 			rota: 'rota1'
@@ -280,7 +281,7 @@ describe('saferota.rota-log RotaLogService', function () {
 			 * Send a create event
 			 */
 			return RotaLogService.receiveNotification([{
-				id: 'loc1',
+				id: 'unique1',
 				transitionType: GEOFENCE_EVENTS.ENTER,
 				latitude: 0,
 				longitude: 0
@@ -295,7 +296,7 @@ describe('saferota.rota-log RotaLogService', function () {
 			 */
 			FAKE_TIME = TIME_2;
 			return RotaLogService.receiveNotification([{
-				id: 'loc1',
+				id: 'unique1',
 				transitionType: GEOFENCE_EVENTS.EXIT
 			}]);
 		}).then(function () {

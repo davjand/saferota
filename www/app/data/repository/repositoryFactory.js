@@ -190,7 +190,8 @@
 			triggerUpdateEvent = typeof triggerUpdateEvent !== 'undefined' ? triggerUpdateEvent : false;
 
 			var self = this,
-				toSave = {};
+				toSave = {},
+				triggerNewEvent = false;
 
 			if (!angular.isArray(model)) {
 				model = [model];
@@ -262,6 +263,7 @@
 						 */
 						if (!data[modelKey] || data[modelKey] === null) {
 							toSave[modelKey] = modelVal;
+							triggerNewEvent = true;
 						}
 						/*
 						 If found then do a diff sync
@@ -278,8 +280,17 @@
 									localModel.updatedDate = new Date(localModel.updatedDate);
 								}
 
-								//Compare
-								if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
+								/*
+								 * Compare
+								 *
+								 * If no local dates for whatever reason, use the passed object
+								 *
+								 * Otherwise Diff sync
+								 */
+								if (modelVal.updatedDate === null || localModel.updatedDate === null) {
+									localModel.setData(modelVal.toObject());
+								}
+								else if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
 									localModel.setData(modelVal.toObject());
 								}
 							}
@@ -291,7 +302,15 @@
 					return self.$local.data(toSave);
 				}).then(function () {
 					return saveMemory(toSave);
-				});
+				}).then(function () {
+					/*
+					 * Trigger a new event on the factory
+					 */
+					if (triggerNewEvent) {
+						self._Model.emit('new');
+					}
+					return $q.when();
+				})
 			}
 		}
 

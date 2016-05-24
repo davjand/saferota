@@ -589,6 +589,7 @@ describe('saferota.data Repository', function () {
 		_d();
 	});
 
+
 	/*
 	 .notifyUpdate
 	 */
@@ -638,4 +639,29 @@ describe('saferota.data Repository', function () {
 		});
 		_d();
 	});
+
+	/*
+	 *
+	 * Events
+	 *
+	 */
+	it('when a new model is saved, a new event is triggered', function (done) {
+		var flag = 0;
+
+		TestModel.on('new', function () {
+			flag++;
+		});
+
+		repo.save(m1).then(function () {
+			expect(flag).toBe(1);
+			return repo.save(m1);
+		}).then(function () {
+			expect(flag).toBe(1);//should only be called once
+			done();
+		});
+		_d();
+	});
+
+
+
 });

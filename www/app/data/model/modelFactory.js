@@ -98,6 +98,9 @@
 		};
 
 
+		//Events
+		eventEmitter.inject(CreateModel);
+
 		return CreateModel;
 
 		////////////////

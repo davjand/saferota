@@ -75,7 +75,9 @@
 			return self.rota.$save().then(function () {
 				return self.rota.$setRel('locations', self.locations);
 			})
-				.then(RotaGeoFenceService.activate(self.rota))
+				.then(function () {
+					return RotaGeoFenceService.activate(self.rota);
+				})
 				.then(function () {
 
 					var id = self.rota.getKey();

@@ -192,7 +192,7 @@
 		 * @returns {*}
 		 */
 		function createRotaEvent(geofence) {
-			return RotaLocation.$get(geofence.id).then(function (location) {
+			return RotaLocation.$find({filter: {uniqueIdentifier: geofence.id}}).then(function (location) {
 				var event = RotaEvent.create({
 					timestamp: self.getTimeStamp(),
 					rota: null,
@@ -201,7 +201,8 @@
 					type: geofence.transitionType
 				}, $s);
 
-				if (location) {
+				if (location && location.length > 0) {
+					location = location [0];
 					event.location = location.getKey();
 					event.rota = location.rota;
 				} else {
@@ -286,7 +287,7 @@
 			var min = rota.minimumTime || 0;
 
 			if (duration < min) {
-				exit.error = 'Duration ' + duration + ' mins, less than minimum of ' + min;
+				exit.error = 'Duration ' + Math.round(duration) + ' mins, less than minimum of ' + min;
 				return null;
 			}
 

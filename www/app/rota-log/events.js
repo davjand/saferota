@@ -5,10 +5,10 @@
 		.module('saferota.rota-log')
 		.controller('RotaViewEventController', RotaViewEventController);
 
-	RotaViewEventController.$inject = ['RotaEvent', '$scope', 'RotaViewService'];
+	RotaViewEventController.$inject = ['RotaEvent', '$scope', '$q', 'RotaViewService'];
 
 	/* @ngInject */
-	function RotaViewEventController(RotaEvent, $scope, RotaViewService) {
+	function RotaViewEventController(RotaEvent, $scope, $q, RotaViewService) {
 		var vm = this;
 
 		var LIMIT = 10,
@@ -20,25 +20,45 @@
 		vm.events = [];
 
 		vm.nextPage = nextPage;
+		vm.find = find;
 
 		activate();
 
+		////////////////////////////////////
+
+		// Function Definitions
+
+		////////////////////////////////////
+
+		function activate() {
+			vm.find();
+
+			//Watch for new items
+			RotaEvent.on('new', vm.find);
+
+			$scope.$on('$destroy', function () {
+				RotaEvent.off('new', vm.find);
+			});
+		}
+
 
 		/**
-		 * activate
+		 * find
 		 *
 		 * Load and register the scope for the events
 		 *
 		 */
-		function activate() {
-			RotaEvent.$find({
+		function find() {
+			return RotaEvent.$find({
 				orderBy: '-timestamp',
 				filter: {
 					rota: RotaViewService.rota.getKey()
 				}
 			}, $scope).then(function (events) {
 				eventsCache = events || [];
+				vm.events = [];
 				vm.nextPage();
+				return $q.when();
 			})
 		}
 

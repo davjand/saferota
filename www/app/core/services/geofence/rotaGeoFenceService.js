@@ -91,7 +91,7 @@
 						return $q.when([]);
 					}
 					angular.forEach(locations, function (item) {
-						filter.objectId.push(item.id)
+						filter.objectId.push(item.getKey());
 					});
 					return RotaLocation.$find({filter: filter});
 				}).then(function (locationObjects) {

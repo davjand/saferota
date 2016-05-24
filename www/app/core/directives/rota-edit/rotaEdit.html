@@ -96,16 +96,18 @@
 
 	</a>
 
-	<div class="item-divider item">Settings</div>
+	<div ng-if="vm.edit">
+		<div class="item-divider item">Settings</div>
 
-	<label class="item item-input"
-		   ng-if="vm.edit">
-		<div class="input-label">
-			Min Time (min)
-		</div>
-		<input type="number"
-			   class="text-right"
-			   ng-model="vm.rota.minimumTime"/>
-	</label>
+		<label class="item item-input">
+			<div class="input-label">
+				Min Time (min)
+			</div>
+			<input type="number"
+				   class="text-right"
+				   ng-model="vm.rota.minimumTime"/>
+		</label>
+
+	</div>
 
 </div>

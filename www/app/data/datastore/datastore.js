@@ -375,7 +375,7 @@
 						return $q.when(models);
 					});
 				} else {
-					return repo.save(models, $scope).then(function () {
+					return repo.save(models, $scope, false).then(function () {
 						return $q.when(models);
 					})
 				}
