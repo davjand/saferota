@@ -64,6 +64,40 @@ form .form-success {
   background: #76C103;
   padding: 10px; }
 
+/*
+
+
+	No Data
+
+
+*/
+.no-data-wrapper {
+  padding: 120px 30px 20px;
+  text-align: center; }
+  .no-data-wrapper .icon-top {
+    color: #e0e0e0;
+    font-size: 120px;
+    line-height: 120px; }
+  .no-data-wrapper h3 {
+    color: #aaaaaa;
+    font-weight: 300;
+    margin-top: 28px;
+    margin-bottom: 20px; }
+  .no-data-wrapper h4 {
+    color: #aaaaaa;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.4em; }
+  .no-data-wrapper p {
+    color: #aaaaaa; }
+  .no-data-wrapper a {
+    color: #aaaaaa;
+    text-decoration: underline; }
+  .no-data-wrapper button {
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px; }
+
 /*!
  *  Font Awesome 4.6.1 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -12065,6 +12099,40 @@ form .form-success {
   background: #76C103;
   padding: 10px; }
 
+/*
+
+
+	No Data
+
+
+*/
+.no-data-wrapper {
+  padding: 120px 30px 20px;
+  text-align: center; }
+  .no-data-wrapper .icon-top {
+    color: #e0e0e0;
+    font-size: 120px;
+    line-height: 120px; }
+  .no-data-wrapper h3 {
+    color: #aaaaaa;
+    font-weight: 300;
+    margin-top: 28px;
+    margin-bottom: 20px; }
+  .no-data-wrapper h4 {
+    color: #aaaaaa;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.4em; }
+  .no-data-wrapper p {
+    color: #aaaaaa; }
+  .no-data-wrapper a {
+    color: #aaaaaa;
+    text-decoration: underline; }
+  .no-data-wrapper button {
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px; }
+
 .rota-timespan-view .item-divider span {
   color: #aaaaaa; }
 
@@ -12176,8 +12244,7 @@ form .form-success {
       color: #ADADAD;
       font-size: 24px;
       line-height: 1em;
-      margin: 0 30px 0.5em;
-    }
+      margin: 0 30px 0.5em; }
     .tour-item .content p {
       color: #4A4A4A;
       margin: 0 30px 0.5em;
@@ -12215,3 +12282,10 @@ form .form-success {
     margin-top: 20px;
     padding-left: 20px;
     padding-right: 20px; }
+
+/*
+
+	saferota.stats SCSS
+
+
+*/

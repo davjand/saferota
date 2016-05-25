@@ -62,10 +62,17 @@
 			var id = EditRotaService.rota.getKey();
 
 			EditRotaService.completeEdit().then(function () {
-				$ionicHistory.nextViewOptions({
-					historyRoot: true
-				});
-				$state.go('app.view.settings', {rotaId: id});
+
+				var history = $ionicHistory.viewHistory();
+
+				if (Object.keys(history.views).length > 2) {
+					$ionicHistory.goBack(-2);
+				} else {
+					$ionicHistory.nextViewOptions({historyRoot: true});
+					$state.go('app.list', {rotaId: id});
+				}
+
+
 			});
 		}
 

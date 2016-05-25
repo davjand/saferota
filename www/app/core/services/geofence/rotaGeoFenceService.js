@@ -5,29 +5,32 @@
 		.module('saferota.core')
 		.service('RotaGeoFenceService', rotaGeoFenceService);
 
-	rotaGeoFenceService.$inject = ['geofence', 'RotaLocation', '$q', '$log'];
+	rotaGeoFenceService.$inject = [
+		'geofence',
+		'RotaLocation',
+		'$q',
+		'$log',
+		'$rootScope',
+		'APP_MSG'];
 
-	/*
-	 * Spec
+	/**
+	 * RotaGeoFenceService
 	 *
-	 * [X] getActiveGeofences - Get a list of active locations
-	 * [X] getActiveRotas - Get a list of active rotas
-	 * [X] activateLocation(location) - Activate a location
-	 * [X] deactivateLocation(location) - Deactivates the location
-	 * [X] locationIsActive(location) - true/false if active
+	 * Service to handle interactions between rotas/locations and geofences.
 	 *
-	 * [X] rotaIsActive(Rota) - true/false if active
-	 * [X] activate(Rota) - activates all locations in a rota
-	 * [X] deactivate(Rota) - deactivates all locations in a rota
+	 * Handles:
+	 *  - All access to geofence API
+	 *  - Activating and deactivating geofences
 	 *
-	 * [X] Emits an event when the geofence transitionTo callback is called.
 	 */
 
 	/* @ngInject */
 	function rotaGeoFenceService(geofence,
 								 RotaLocation,
 								 $q,
-								 $log) {
+								 $log,
+								 $rootScope,
+								 APP_MSG) {
 
 		var self = this;
 
@@ -147,7 +150,7 @@
 						radius: parseFloat(location.radius),
 						transitionType: 3
 					})
-				})
+				});
 		}
 
 		/**
@@ -175,18 +178,24 @@
 		/**
 		 * activate
 		 *
+		 * Activate a rota's geofence(s)
+		 * Emits a GEO_ACTIVATE event when complete
 		 *
 		 * @param rota
 		 * @returns {*}
 		 */
 		function activate(rota) {
-			return rota.$getRel('locations').then(function (locations) {
-				var p = [];
-				angular.forEach(locations, function (item) {
-					p.push(self.activateLocation(item));
+			return rota.$getRel('locations')
+				.then(function (locations) {
+					var p = [];
+					angular.forEach(locations, function (item) {
+						p.push(self.activateLocation(item));
+					});
+					return $q.all(p);
+				}).then(function () {
+					$rootScope.$emit(APP_MSG.GEO_ACTIVATE);
+					return $q.when();
 				});
-				return $q.all(p);
-			});
 		}
 
 		/**
@@ -195,6 +204,10 @@
 		 *
 		 * @param rota
 		 * @param bypassError {Boolean}
+		 *
+		 * Deactivate a rota's geofences
+		 * Emits a GEO_DEACTIVATE event when complete
+		 *
 		 * @returns {*}
 		 */
 		function deactivate(rota, bypassError) {
@@ -204,7 +217,10 @@
 					p.push(self.deactivateLocation(item, bypassError));
 				});
 				return $q.all(p);
-			});
+			}).then(function () {
+				$rootScope.$emit(APP_MSG.GEO_DEACTIVATE);
+				return $q.when();
+			})
 		}
 
 		/**
@@ -231,7 +247,10 @@
 		 * @returns {*}
 		 */
 		function deactivateAll() {
-			return geofence.api.removeAll();
+			return geofence.api.removeAll().then(function () {
+				$rootScope.$emit(APP_MSG.GEO_DEACTIVATE);
+				return $q.when();
+			})
 		}
 	}
 

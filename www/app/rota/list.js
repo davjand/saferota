@@ -8,35 +8,47 @@
 	RotaListController.$inject = [
 		'$state',
 		'$scope',
-		'userRotas',
-		'activeRotas',
 		'$rootScope',
 		'DATA_EVENTS',
 		'$ionicModal',
 		'$ionicPopup',
-		'DataStore',
 		'Rota',
 		'$ionicListDelegate',
 		'RotaGeoFenceService',
-		'$ionicLoading'
+		'$ionicLoading',
+		'APP_MSG'
 	];
 
 	/* @ngInject */
 	function RotaListController($state,
 								$scope,
-								userRotas,
-								activeRotas,
 								$rootScope,
 								DATA_EVENTS,
 								$ionicModal,
 								$ionicPopup,
-								DataStore,
 								Rota,
 								$ionicListDelegate,
 								RotaGeoFenceService,
-								$ionicLoading) {
+								$ionicLoading,
+								APP_MSG) {
 		var vm = this;
 
+
+		/*
+		 *
+		 * Interface
+		 *
+		 */
+
+		//Constructors
+		vm.up = up;
+		vm.down = down;
+
+		//Data loading
+		vm.loadRotas = loadRotas;
+		vm.loadActiveRotas = loadActiveRotas;
+
+		//Rota Interactions
 		vm.archive = archive;
 		vm.edit = edit;
 		vm.isActive = isActive;
@@ -45,7 +57,14 @@
 		vm.selectRota = selectRota;
 		vm.settings = settings;
 
-		activate();
+
+		//Internal
+		var _listeners;
+
+
+		//Start
+		vm.up();
+
 
 		////////////////////////////////////////////////
 
@@ -53,44 +72,104 @@
 
 		////////////////////////////////////////////////
 
-		function activate() {
-
-			vm.rotas = userRotas;
-			vm.activeRotas = activeRotas;
+		/**
+		 * activate
+		 *
+		 * Constructor Function
+		 *
+		 */
+		function up() {
+			/*
+			 *
+			 * Variables
+			 *
+			 */
+			vm.rotas = [];
+			vm.activeRotas = [];
 			vm.$settingsModal = null;
 
 
 			/*
-			 * Register the $scope for the objects
+			 *
+			 * Setup listeners
+			 *
 			 */
-			DataStore.registerScope(vm.rotas, $scope);
+			_listeners = [
+				$rootScope.$on(APP_MSG.GEO_ACTIVATE, vm.loadActiveRotas),
+				$rootScope.$on(APP_MSG.GEO_DEACTIVATE, vm.loadActiveRotas),
+				$rootScope.$on(DATA_EVENTS.SYNC_FINISH, vm.loadRotas),
+				Rota.on('new', vm.loadRotas)
+			];
+
+			/*
+			 * Setup destructor
+			 */
+			$scope.$on('$destroy', vm.down);
 
 
-			var offSyncComplete = $rootScope.$on(DATA_EVENTS.SYNC_FINISH, _handleSyncComplete);
+			/*
+			 *
+			 * Load Data
+			 *
+			 */
+			vm.loadRotas()
+				.then(vm.loadActiveRotas);
 
-			$scope.$on('$destroy', function () {
-				offSyncComplete();
 
-				//Unload the settings modal;
-				if (vm.$settingsModal) {
-					vm.$settingsModal.remove();
-				}
-			})
 		}
 
+
 		/**
-		 * _handleSyncComplete
+		 * down
+		 *
+		 * Destructor function
+		 *
+		 */
+		function down() {
+			//Unbind listeners
+			angular.forEach(_listeners, function (l) {
+				l();
+			});
+
+			//Unload the settings modal;
+			if (vm.$settingsModal) {
+				vm.$settingsModal.remove();
+			}
+		}
+
+
+		/**
+		 * loadRotas
 		 *
 		 * @private
 		 */
-		function _handleSyncComplete() {
+		function loadRotas() {
 			//reload
-			Rota.$find({filter: {archived: false}}).then(function (rotas) {
+			return Rota.$find({filter: {archived: false}}, $scope).then(function (rotas) {
 				if (rotas.length !== vm.rotas.length) {
-					$state.go($state.current, {}, {reload: true});
+					vm.rotas = rotas;
 				}
 			});
 		}
+
+
+		/**
+		 * loadActiveRotas
+		 *
+		 *
+		 * @returns {*}
+		 */
+		function loadActiveRotas() {
+			return RotaGeoFenceService.getActiveRotaIds().then(function (activeIds) {
+				vm.activeRotas = [];
+				angular.forEach(vm.rotas, function (rota) {
+					if (activeIds.indexOf(rota.getKey()) !== -1) {
+						vm.activeRotas.push(rota);
+					}
+				});
+			});
+		}
+
 
 		/**
 		 * edit
@@ -100,6 +179,7 @@
 		 * @param rota
 		 */
 		function edit(rota) {
+			//noinspection JSUnresolvedFunction
 			$ionicListDelegate.closeOptionButtons();
 			$state.go('app.edit', {rotaId: rota.getKey()});
 		}
@@ -110,6 +190,7 @@
 		 * @param rota
 		 */
 		function archive(rota) {
+			//noinspection JSUnresolvedFunction
 			$ionicListDelegate.closeOptionButtons();
 			$ionicPopup.confirm({
 				title: 'Are you sure you want to archive this rota?',
@@ -121,7 +202,7 @@
 						rota.archived = true;
 						return rota.$save();
 					}).then(function () {
-						_handleSyncComplete();
+						vm.loadRotas();
 					});
 				}
 			});
@@ -163,7 +244,11 @@
 		 * @returns {boolean}
 		 */
 		function isActive(rota) {
-			return vm.activeRotas.indexOf(rota.getKey()) !== -1;
+			var flag = false;
+			angular.forEach(vm.activeRotas, function (r) {
+				flag = flag || r.getKey() === rota.getKey();
+			});
+			return flag;
 		}
 
 		/**
@@ -178,11 +263,10 @@
 			$event.stopPropagation();
 			$ionicLoading.show();
 			RotaGeoFenceService.activate(rota)
-				.then(RotaGeoFenceService.getActiveRotaIds)
-				.then(function (activeRotas) {
-					vm.activeRotas = activeRotas;
+				.then(function () {
+					//noinspection JSUnresolvedFunction
+					$ionicListDelegate.closeOptionButtons();
 					$ionicLoading.hide();
-					$state.go($state.current, {}, {reload: true});
 				});
 		}
 
@@ -198,11 +282,10 @@
 			$event.stopPropagation();
 			$ionicLoading.show();
 			RotaGeoFenceService.deactivate(rota)
-				.then(RotaGeoFenceService.getActiveRotaIds)
-				.then(function (activeRotas) {
-					vm.activeRotas = activeRotas;
+				.then(function () {
+					//noinspection JSUnresolvedFunction
+					$ionicListDelegate.closeOptionButtons();
 					$ionicLoading.hide();
-					$state.go($state.current, {}, {reload: true});
 				});
 		}
 

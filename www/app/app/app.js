@@ -57,7 +57,7 @@
 		 * Start Session / Bootstrap
 		 *
 		 */
-		self.start = function() {
+		self.start = function () {
 			self.session.start();
 		};
 
@@ -68,8 +68,8 @@
 		 *
 		 *
 		 */
+		//noinspection JSUnresolvedFunction
 		self.tour.showIfFirstTime();
-
 
 
 		/*
@@ -81,7 +81,7 @@
 		/*
 		 * Sync on Login
 		 */
-		$rootScope.$on(AUTH_EVENTS.loginSuccess, function(){
+		$rootScope.$on(AUTH_EVENTS.loginSuccess, function () {
 			syncNow(true).then(function () {
 				$ionicHistory.nextViewOptions({historyRoot: true, disableAnimate: true});
 				$state.go('app.list');
@@ -92,8 +92,9 @@
 		 * Clear cache on logout
 		 */
 		$rootScope.$on(AUTH_EVENTS.logoutSuccess, function () {
-			RotaGeoFenceService.deactivateAll();
-			self.data.clearAll();
+			RotaGeoFenceService.deactivateAll().then(function () {
+				self.data.clearAll();
+			})
 		});
 
 		/*
@@ -163,6 +164,7 @@
 					$q.when();
 
 			}).then(function () {
+				//noinspection JSUnresolvedFunction
 				return DataStore.syncAll()
 			}).then(function () {
 				$ionicLoading.hide();

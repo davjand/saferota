@@ -36,7 +36,14 @@
 		 * Initialiser
 		 */
 		function activate() {
-			vm.location = NewRotaService.createLocation($scope);
+			/*
+			 * create or get the location
+			 */
+			if (NewRotaService.locations.length < 1) {
+				vm.location = NewRotaService.createLocation($scope);
+			} else {
+				vm.location = NewRotaService.locations[0];
+			}
 		}
 
 

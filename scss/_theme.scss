@@ -30,18 +30,6 @@ $greyLight: #e0e0e0;
 
 
 */
-.button {
-
-}
-
-//.button.button-balanced {
-//	border: 1px solid $balancedBorder;
-//	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-//}
-
-//.button.button-light {
-//	border: 1px solid #DDDDDD;
-//}
 
 /*
  * Maps
@@ -97,6 +85,50 @@ form {
 		color: #fff;
 		background: $balanced;
 		padding: 10px;
+	}
+}
+
+/*
+
+
+	No Data
+
+
+*/
+.no-data-wrapper {
+
+	padding: 120px 30px 20px;
+	text-align: center;
+
+	.icon-top {
+		color: $greyLight;
+		font-size: 120px;
+		line-height: 120px;
+	}
+
+	h3 {
+		color: $greyMed;
+		font-weight: 300;
+		margin-top: 28px;
+		margin-bottom: 20px;
+	}
+	h4 {
+		color: $greyMed;
+		font-weight: 300;
+		font-size: 18px;
+		line-height: 1.4em;
+	}
+	p {
+		color: $greyMed;
+	}
+	a {
+		color: $greyMed;
+		text-decoration: underline;
+	}
+	button {
+		margin-top: 20px;
+		padding-left: 20px;
+		padding-right: 20px;
 	}
 }
 

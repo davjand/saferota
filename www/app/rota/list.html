@@ -1,6 +1,5 @@
 <ion-view class=""
-		  hide-back-button="true"
-		  cache-view="false">
+		  hide-back-button="true">
 
 	<ion-nav-title>My SafeRotas</ion-nav-title>
 
@@ -17,8 +16,15 @@
 			Add
 		</button>
 	</ion-nav-buttons>
-
 	<ion-content>
+		<div class="no-data-wrapper"
+			 ng-if="vm.rotas.length < 1"
+			 ui-sref="app.new">
+			<div class="icon-top ion-plus-circled"></div>
+			<h3>Create SafeRota</h3>
+			<h4>Tap to add your first rota</h4>
+		</div>
+
 		<ion-list>
 			<ion-item ng-repeat="rota in vm.rotas"
 					  ng-click="vm.selectRota(rota)"

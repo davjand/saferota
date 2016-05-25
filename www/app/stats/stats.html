@@ -1,0 +1,15 @@
+<ion-view>
+	<ion-nav-title>{{vm.rota.label}}</ion-nav-title>
+	<ion-nav-buttons side="secondary">
+		<button class="button" ng-click="vm.change()">Change</button>
+	</ion-nav-buttons>
+
+	<ion-content class="text-center padding rota-stats">
+		<div class="no-data-wrapper"
+			 ng-if="!vm.displayStats">
+			<div class="icon-top ion-ios-speedometer"></div>
+			<h3>Not Enough Data</h3>
+			<h4>Please keep using the app and we'll generate your first stats after 1 week</h4>
+		</div>
+	</ion-content>
+</ion-view>

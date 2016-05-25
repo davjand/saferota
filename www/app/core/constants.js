@@ -8,7 +8,9 @@
 		.constant('google', window.google || {})
 		.constant('APP_MSG', {
 			SYNC_NOW: 'SYNC_NOW',
-			SYNC_FRESH: 'SYNC_FRESH'
+			SYNC_FRESH: 'SYNC_FRESH',
+			GEO_ACTIVATE: 'GEO_ACTIVATE',
+			GEO_DEACTIVATE: 'GEO_DEACTIVATE'
 		})
 		.constant('AUTH_EVENTS', {
 			loginSuccess: 'auth-login-success',

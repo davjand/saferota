@@ -11,6 +11,7 @@
 			'saferota.rota-edit',
 			'saferota.rota-view',
 			'saferota.tour',
-			'saferota.share'
+			'saferota.share',
+			'saferota.stats'
 		]);
 })();

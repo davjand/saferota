@@ -4,6 +4,17 @@
 		<button class="button" ng-click="vm.change()">Change</button>
 	</ion-nav-buttons>
 	<ion-content>
+		<div class="no-data-wrapper"
+			 ng-if="vm.logs.length < 1">
+			<div class="icon-top ion-ios-clock-outline"></div>
+			<h3>No Logs Generated</h3>
+			<h4>When we've logged your shifts they will appear here.</h4>
+			<p>
+				<a ui-sref="app.view.events({rotaId: vm.rota.getKey()})">
+					If you thing there should be some here, please visit Settings / Event Log and contact support
+				</a>
+			</p>
+		</div>
 		<ion-list>
 			<div ng-repeat="week in vm.logs">
 				<ion-item ng-if="week.items.length > 0"

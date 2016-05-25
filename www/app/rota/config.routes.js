@@ -31,16 +31,6 @@
 				templateUrl: 'app/rota/list.html',
 				controller: 'RotaListController',
 				controllerAs: 'vm',
-				resolve: {
-					/* @ngInject */
-					userRotas: function (Rota) {
-						return Rota.$find({filter: {archived: false}, orderBy: 'label'});
-					},
-					/* @ngInject */
-					activeRotas: function (RotaGeoFenceService) {
-						return RotaGeoFenceService.getActiveRotaIds()
-					}
-				}
 			});
 
 

@@ -121,7 +121,11 @@
 		 *
 		 */
 		function deactivateAll() {
-			RotaGeoFenceService.deactivateAll();
+			$ionicLoading.show();
+			RotaGeoFenceService.deactivateAll()
+				.then(function () {
+					$ionicLoading.hide();
+				})
 		}
 
 
