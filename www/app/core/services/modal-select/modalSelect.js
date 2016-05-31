@@ -11,7 +11,8 @@
 		'$q',
 		'$filter',
 		'$ionicScrollDelegate',
-		'$timeout'
+		'$timeout',
+		'$window'
 	];
 
 	/* @ngInject */
@@ -20,7 +21,8 @@
 						 $q,
 						 $filter,
 						 $ionicScrollDelegate,
-						 $timeout) {
+						 $timeout,
+						 $window) {
 		var self = this,
 			offScope = null;
 
@@ -29,6 +31,17 @@
 		self.hide = hide;
 		self.modal = null;
 		self.$scope = null;
+		
+		
+		/*
+		 * Keyboard Bind
+		 */
+		$window.addEventListener('native.keyboardshow', function (e) {
+			if (self.$scope) {
+				self.$scope.keyboardHeight = e.keyboardHeight;
+			}
+		});
+
 
 		////////////////
 
@@ -48,7 +61,7 @@
 		 * - valueKey - The key were the value van be reached
 		 *
 		 * @param options
-		 * @param $currentScope - Used to bind a destroy if needed @TODO
+		 * @param $currentScope - Used to bind a destroy if needed
 		 */
 		function show(options, $currentScope) {
 			options = options || {};
@@ -74,6 +87,7 @@
 
 			self.$scope.items = [];
 			self.$scope.otherItem = null;
+			self.$scope.keyboardHeight = 250; //rough default
 
 			/*
 			 * Support promised data
@@ -102,15 +116,14 @@
 			 * Create the modal
 			 */
 			$ionicModal.fromTemplateUrl('app/core/services/modal-select/modalSelect.html', {
-				scope: self.$scope,
-				animation: 'slide-in-up'
+				scope:           self.$scope,
+				animation:       'slide-in-up',
+				focusFirstInput: true,
+
 			}).then(function (createdModal) {
 				self.modal = createdModal;
 				return self.modal.show()
 			}).then(function () {
-				$timeout(function () {
-					$ionicScrollDelegate.resize(); //adjust the size as the keyboard will probable be up
-				}, 1000)
 			});
 
 			/*
@@ -121,6 +134,7 @@
 					hide();
 				});
 			}
+			
 		}
 
 		/**

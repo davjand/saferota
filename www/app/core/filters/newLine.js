@@ -10,7 +10,16 @@
 		
 		////////////////
 		
+		/**
+		 * converts \n into <br/>
+		 *
+		 * @param text
+		 * @returns {*}
+		 */
 		function newlinesFilter(text) {
+			if (!text || text == null) {
+				return '';
+			}
 			return text.replace(/\n/g, '<br/>');
 		}
 	}

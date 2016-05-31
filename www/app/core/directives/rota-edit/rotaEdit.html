@@ -62,9 +62,9 @@
 	   href="#"
 	   ng-click="vm.selectOrganisation($event)">
 		Organisation
-				<span class="item-note">
+				<span class="item-note item-text-wrap">
 					<span ng-if="vm.organisation.name">
-						{{vm.organisation.name | limitTo : 30}}
+						{{vm.organisation.name}}
 					</span>
 					<span ng-if="!vm.organisation.name">Please Select</span>
 				</span>

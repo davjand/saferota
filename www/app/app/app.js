@@ -18,6 +18,7 @@
 		'$state',
 		'Cache',
 		'RotaGeoFenceService',
+		'DevicePermissions',
 		'APP_MSG',
 		'AUTH_EVENTS'
 	];
@@ -35,6 +36,7 @@
 				 $state,
 				 Cache,
 				 RotaGeoFenceService,
+				 DevicePermissions,
 				 APP_MSG,
 				 AUTH_EVENTS) {
 
@@ -77,7 +79,11 @@
 		 *
 		 */
 		
-		
+		/**
+		 * activate
+		 *
+		 *
+		 */
 		function activate() {
 			
 			/*
@@ -88,14 +94,7 @@
 			 */
 			self.tour.showIfFirstTime();
 			
-			
-			/*
-			 *
-			 * Authentication Events
-			 T			 *
-			 */
-			
-			
+
 			/*
 			 * Sync on Login
 			 */
@@ -139,13 +138,6 @@
 			
 			
 			/*
-			 *
-			 * Error Handling
-			 *
-			 */
-			
-			
-			/*
 			 * Handle DataStore Errors
 			 */
 			DataStore.interceptor(function (error) {
@@ -155,6 +147,12 @@
 					$rootScope.$emit(AUTH_EVENTS.notAuthenticated);
 				}
 			}, 'error');
+			
+			
+			/*
+			 * Check device permissions
+			 */
+			DevicePermissions.checkAndShowError();
 		}
 
 
