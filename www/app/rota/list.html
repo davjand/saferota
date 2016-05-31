@@ -18,7 +18,7 @@
 	</ion-nav-buttons>
 	<ion-content>
 		<div class="no-data-wrapper"
-			 ng-if="vm.rotas.length < 1"
+			 ng-if="vm.rotas.length < 1 && !vm.loading"
 			 ui-sref="app.new">
 			<div class="icon-top ion-plus-circled"></div>
 			<h3>Create SafeRota</h3>

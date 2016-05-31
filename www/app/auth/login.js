@@ -7,10 +7,10 @@
 
 	LoginController.$inject = [
 		'AuthService',
-		'$ionicLoading'];
+		'Loading'];
 
 	/* @ngInject */
-	function LoginController(AuthService, $ionicLoading) {
+	function LoginController(AuthService, Loading) {
 		var vm = this;
 
 		vm.email = '';
@@ -37,8 +37,8 @@
 				return;
 			}
 			vm.error = null;
-
-			$ionicLoading.show();
+			
+			Loading.show('Logging In');
 
 			AuthService.login(
 				vm.email,
@@ -48,8 +48,8 @@
 				vm.error = error;
 				vm.password = '';
 				loginForm.$setPristine();
-
-				$ionicLoading.hide();
+				
+				Loading.hide();
 			});
 		}
 	}

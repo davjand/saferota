@@ -19,10 +19,6 @@
 				 ng-if="vm.error">
 				{{vm.error}}
 			</div>
-			<div class="form-error"
-				 ng-if="!vm.terms && vm.submit">
-				Please agree to our Terms and Conditions
-			</div>
 
 
 			<div class="list">
@@ -56,21 +52,20 @@
 			</div>
 
 
-			<div class="padding terms-and-conditions">
-				<ion-checkbox class="form-group" ng-model="vm.terms">
-					Terms &amp; Conditions
-				</ion-checkbox>
+			<div class="padding terms-and-conditions text-center"
+				 ng-click="vm.showTerms()">
+				By registering, you agree to our terms and conditions
 			</div>
 			<div class="padding-horizontal signup">
 				<button class="button button-balanced button-full"
-						type="submit">Sign Up
+						type="submit">Register
 				</button>
 			</div>
 		</form>
 
 		<div class="login padding">
 			<button class="button button-light button-full"
-					ui-sref="auth.login">I have an account - login
+					ui-sref="auth.login">I have an account - Login
 			</button>
 
 		</div>

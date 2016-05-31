@@ -7,33 +7,40 @@
 
 	SignupController.$inject = [
 		'AuthService',
-		'$ionicLoading'
+		'Loading',
+		'$scope',
 	];
 
 	/* @ngInject */
-	function SignupController(AuthService, $ionicLoading) {
+	function SignupController(AuthService, Loading, $scope) {
 		var vm = this;
 		vm.name = '';
 		vm.email = '';
 		vm.password = '';
 		vm.error = null;
-		vm.terms = false;
 		vm.submit = false;
 
 
 		vm.signup = signup;
+		vm.showTerms = showTerms;
 
 		////////////////
-
-
+		
+		
+		/**
+		 * signup
+		 *
+		 *
+		 * @param signupForm
+		 */
 		function signup(signupForm) {
 			vm.submit = true;
-			if (!vm.terms || !signupForm.$valid) {
+			if (!signupForm.$valid) {
 				return;
 			}
 			vm.error = null;
-
-			$ionicLoading.show();
+			
+			Loading.show('Registering');
 
 			AuthService.signup(
 				vm.name,
@@ -42,8 +49,17 @@
 			).then(function () {
 			}, function (error) {
 				vm.error = error;
-				$ionicLoading.hide();
+				Loading.hide();
 			});
+		}
+		
+		/**
+		 * showTerms
+		 *
+		 * @TODO
+		 */
+		function showTerms() {
+
 		}
 	}
 

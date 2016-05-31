@@ -10,7 +10,7 @@
 		'$rootScope',
 		'$scope',
 		'AuthService',
-		'$ionicLoading',
+		'Loading',
 		'$ionicHistory',
 		'$ionicPopup',
 		'TourService',
@@ -24,7 +24,7 @@
 								$rootScope,
 								$scope,
 								AuthService,
-								$ionicLoading,
+								Loading,
 								$ionicHistory,
 								$ionicPopup,
 								TourService,
@@ -70,9 +70,9 @@
 		 */
 		function logout(hide) {
 			_createConfirm('Are you sure you wish to logout?', function () {
-				$ionicLoading.show();
+				Loading.show();
 				AuthService.logout().then(function () {
-					$ionicLoading.hide();
+					Loading.hide();
 
 					$ionicHistory.nextViewOptions({disableAnimate: true, historyRoot: true});
 					$state.go('auth.login');
@@ -121,10 +121,10 @@
 		 *
 		 */
 		function deactivateAll() {
-			$ionicLoading.show();
+			Loading.show();
 			RotaGeoFenceService.deactivateAll()
 				.then(function () {
-					$ionicLoading.hide();
+					Loading.hide();
 				})
 		}
 

@@ -23,10 +23,8 @@
 
 	&.signup{
 		.terms-and-conditions{
-			label.item{
-				border:none;
-				font-size: 13px;
-			}
+			color: $greyMed;
+			margin-bottom: 10px;
 		}
 		.signup button{
 			margin-top: 0;

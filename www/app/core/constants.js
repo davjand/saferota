@@ -7,20 +7,25 @@
 		.constant('moment', moment)
 		.constant('google', window.google || {})
 		.constant('APP_MSG', {
-			SYNC_NOW: 'SYNC_NOW',
-			SYNC_FRESH: 'SYNC_FRESH',
-			GEO_ACTIVATE: 'GEO_ACTIVATE',
+			SYNC_NOW:       'SYNC_NOW',
+			SYNC_FRESH:     'SYNC_FRESH',
+			GEO_ACTIVATE:   'GEO_ACTIVATE',
 			GEO_DEACTIVATE: 'GEO_DEACTIVATE'
 		})
 		.constant('AUTH_EVENTS', {
-			loginSuccess: 'auth-login-success',
-			loginFailed: 'auth-login-failed',
-			logoutSuccess: 'auth-logout-success',
+				loginSuccess:         'auth-login-success',
+				loginFailed:          'auth-login-failed',
+				logoutSuccess:        'auth-logout-success',
 				notAuthenticated: 'auth-not-authenticated'
-		}
-		).constant('UI_EVENTS', {
-		KEYBOARD_ACCESSORY_SHOW: 'KEYBOARD_ACCESSORY_SHOW',
-		KEYBOARD_ACCESSORY_HIDE: 'KEYBOARD_ACCESSORY_HIDE'
-	})
+			}
+		)
+		.constant('UI_EVENTS', {
+			KEYBOARD_ACCESSORY_SHOW: 'KEYBOARD_ACCESSORY_SHOW',
+			KEYBOARD_ACCESSORY_HIDE: 'KEYBOARD_ACCESSORY_HIDE'
+		})
+		.constant('$ionicLoadingConfig', {
+				template: "<ion-spinner class='light'></ion-spinner><br /><span ng-bind-html='message'></span>"
+			}
+		);
 
 })();

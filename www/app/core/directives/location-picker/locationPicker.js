@@ -18,7 +18,7 @@
 		return {
 			templateUrl: 'app/core/directives/location-picker/locationPicker.html',
 			scope: {
-				location: '='
+				location: '=',
 			},
 			link: function ($scope, element, attrs) {
 

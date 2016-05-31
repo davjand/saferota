@@ -13,7 +13,7 @@
 		'TourService',
 		'$q',
 		'$rootScope',
-		'$ionicLoading',
+		'Loading',
 		'$ionicHistory',
 		'$state',
 		'Cache',
@@ -30,7 +30,7 @@
 				 TourService,
 				 $q,
 				 $rootScope,
-				 $ionicLoading,
+				 Loading,
 				 $ionicHistory,
 				 $state,
 				 Cache,
@@ -60,89 +60,103 @@
 		self.start = function () {
 			self.session.start();
 		};
+		
+		
+		activate();
 
 
 		/*
 		 *
-		 * Tour
 		 *
-		 *
-		 */
-		//noinspection JSUnresolvedFunction
-		self.tour.showIfFirstTime();
-
-
-		/*
-		 *
-		 * Authentication Events
-		 *
-		 */
-
-		/*
-		 * Sync on Login
-		 */
-		$rootScope.$on(AUTH_EVENTS.loginSuccess, function () {
-			syncNow(true).then(function () {
-				$ionicHistory.nextViewOptions({historyRoot: true, disableAnimate: true});
-				$state.go('app.list');
-			})
-		});
-
-		/*
-		 * Clear cache on logout
-		 */
-		$rootScope.$on(AUTH_EVENTS.logoutSuccess, function () {
-			RotaGeoFenceService.deactivateAll().then(function () {
-				self.data.clearAll();
-			})
-		});
-
-		/*
-		 * Go to login if has expired
-		 */
-		$rootScope.$on(AUTH_EVENTS.notAuthenticated, function () {
-			$state.go('auth.login');
-		});
-
-
-		/*
-		 *
-		 * Sync Events
 		 * 
-		 */
-		$rootScope.$on(APP_MSG.SYNC_FRESH, function () {
-			syncNow(true);
-		});
-		$rootScope.$on(APP_MSG.SYNC_NOW, function () {
-			syncNow(false);
-		});
-
-
-		/*
-		 *
-		 * Error Handling
-		 *
-		 */
-
-
-		/*
-		 * Handle DataStore Errors
-		 */
-		DataStore.interceptor(function (error) {
-			error = error || {};
-			if (error.code === 3064) {
-				$rootScope.$emit(AUTH_EVENTS.notAuthenticated);
-			}
-		}, 'error');
-
-
-		/*
-		 *
-		 *
+		 * 
 		 * Function Definitions
 		 *
+		 * 
+		 * 
 		 *
 		 */
+		
+		
+		function activate() {
+			
+			/*
+			 *
+			 * Tour
+			 *
+			 *
+			 */
+			self.tour.showIfFirstTime();
+			
+			
+			/*
+			 *
+			 * Authentication Events
+			 T			 *
+			 */
+			
+			
+			/*
+			 * Sync on Login
+			 */
+			$rootScope.$on(AUTH_EVENTS.loginSuccess, function () {
+				syncNow(true, true)
+					.then(function () {
+							$ionicHistory.nextViewOptions({historyRoot: true, disableAnimate: true});
+							$state
+								.go('app.list');
+						}
+					)
+			});
+			/*
+			 * Clear cache on logout
+			 */
+			$rootScope.$on(AUTH_EVENTS.logoutSuccess, function () {
+				RotaGeoFenceService.deactivateAll().then(function () {
+					self.data.clearAll();
+				})
+			});
+			/*
+			 * Go to login if has expired
+			 */
+			$rootScope.$on(AUTH_EVENTS.notAuthenticated, function () {
+				$state.go('auth.login');
+			});
+			
+			
+			/*
+			 *
+			 * Sync Events
+			 *
+			 */
+			$rootScope.$on(APP_MSG.SYNC_FRESH, function () {
+				syncNow(true);
+			})
+			;
+			$rootScope.$on(APP_MSG.SYNC_NOW, function () {
+				syncNow(false);
+			});
+			
+			
+			/*
+			 *
+			 * Error Handling
+			 *
+			 */
+			
+			
+			/*
+			 * Handle DataStore Errors
+			 */
+			DataStore.interceptor(function (error) {
+				error = error || {};
+				if (
+					error.code === 3064) {
+					$rootScope.$emit(AUTH_EVENTS.notAuthenticated);
+				}
+			}, 'error');
+		}
+
 
 		/**
 		 * syncNow
@@ -153,10 +167,16 @@
 		 *
 		 * @param clear
 		 */
-		function syncNow(clear) {
+		function syncNow(clear, isFirstSync) {
 			clear = typeof clear !== 'undefined' ? clear : false;
-
-			$ionicLoading.show();
+			isFirstSync = typeof isFirstSync !== 'undefined' ? isFirstSync : false;
+			
+			if (isFirstSync) {
+				Loading.show('Performing first setup,<br/>please be patient');
+			}
+			else {
+				Loading.show('Synchronising,<br/>please be patient');
+			}
 
 			return $q.when().then(function () {
 				return clear ?
@@ -167,7 +187,7 @@
 				//noinspection JSUnresolvedFunction
 				return DataStore.syncAll()
 			}).then(function () {
-				$ionicLoading.hide();
+				Loading.hide();
 				return $q.when();
 			}, function (error) {
 				//@TODO Error handling

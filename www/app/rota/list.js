@@ -62,10 +62,6 @@
 		var _listeners;
 
 
-		//Start
-		vm.up();
-
-
 		////////////////////////////////////////////////
 
 		//Function Definitions
@@ -112,6 +108,7 @@
 			 * Load Data
 			 *
 			 */
+			vm.loading = true;
 			vm.loadRotas()
 				.then(vm.loadActiveRotas);
 
@@ -144,8 +141,8 @@
 		 * @private
 		 */
 		function loadRotas() {
-			//reload
 			return Rota.$find({filter: {archived: false}}, $scope).then(function (rotas) {
+				vm.loading = false;
 				if (rotas.length !== vm.rotas.length) {
 					vm.rotas = rotas;
 				}

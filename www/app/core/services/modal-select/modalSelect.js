@@ -110,7 +110,7 @@
 			}).then(function () {
 				$timeout(function () {
 					$ionicScrollDelegate.resize(); //adjust the size as the keyboard will probable be up
-				}, 500)
+				}, 1000)
 			});
 
 			/*

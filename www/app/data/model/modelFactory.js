@@ -332,8 +332,8 @@
 
 				/*
 				 don't set update date - we can use this to know if it has been saved or not
-				if (model.updatedDate === null) {
-					model.updatedDate = new Date();
+				 if (model.updatedDate === null) {
+				 model.updatedDate = new Date();
 				 }*/
 
 				//callbacks when created

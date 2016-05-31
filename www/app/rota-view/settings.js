@@ -10,7 +10,7 @@
 		'Session',
 		'$state',
 		'AuthService',
-		'$ionicLoading',
+		'Loading',
 		'$ionicHistory',
 		'$ionicPopup'];
 
@@ -19,7 +19,7 @@
 										Session,
 										$state,
 										AuthService,
-										$ionicLoading,
+										Loading,
 										$ionicHistory,
 										$ionicPopup) {
 		var vm = this;
@@ -51,9 +51,9 @@
 				okType: 'button-assertive button-outline'
 			}).then(function (ok) {
 				if (ok) {
-					$ionicLoading.show();
+					Loading.show();
 					AuthService.logout().then(function () {
-						$ionicLoading.hide();
+						Loading.hide();
 						$ionicHistory.nextViewOptions({disableAnimate: true, historyRoot: true});
 						$state.go('auth.login');
 					});

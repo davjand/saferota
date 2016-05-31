@@ -10,7 +10,6 @@
 		'UI_EVENTS',
 		'$scope',
 		'$state',
-		'$ionicHistory',
 		'$ionicPopup',
 		'NewRotaService'
 	];
@@ -20,7 +19,6 @@
 							   UI_EVENTS,
 							   $scope,
 							   $state,
-							   $ionicHistory,
 							   $ionicPopup,
 							   NewRotaService) {
 		var vm = this;
@@ -52,8 +50,8 @@
 
 			//deactivate when closed
 			$scope.$on('$destroy', vm.deactivate);
-
-			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_SHOW);
+			
+			//$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_SHOW);
 
 			if (NewRotaService.rota) {
 				vm.rota = NewRotaService.rota;
@@ -66,11 +64,11 @@
 		/**
 		 * deactivate
 		 *
-		 * rehides the keyboard accessory
+		 * re hides the keyboard accessory
 		 *
 		 */
 		function deactivate() {
-			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_HIDE);
+			//$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_HIDE);
 		}
 
 

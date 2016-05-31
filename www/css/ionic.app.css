@@ -12001,9 +12001,10 @@ a.button {
 .auth .list .item:first-child {
   border-top: none !important; }
 
-.auth.signup .terms-and-conditions label.item {
-  border: none;
-  font-size: 13px; }
+.auth.signup .terms-and-conditions {
+  color: #aaaaaa;
+  margin-bottom: 10px;
+}
 
 .auth.signup .signup button {
   margin-top: 0; }
