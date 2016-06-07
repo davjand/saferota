@@ -514,12 +514,20 @@
 		 *
 		 * @param model {Model|Array}
 		 * @param $scope
+		 *
+		 * @return {Model\Array} The passed objects
 		 */
 		function registerScope(model, $scope) {
-			model = angular.isArray(model) ? model : [model];
+			var wasPassedArray = angular.isArray(model);
+			
+			model = wasPassedArray ? model : [model];
 			angular.forEach(model, function (m) {
 				RepositoryService.get(m.className()).registerModel(m, $scope);
 			});
+			if (!wasPassedArray) {
+				return model[0];
+			}
+			return model;
 		}
 
 		/**

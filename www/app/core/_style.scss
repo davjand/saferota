@@ -9,15 +9,14 @@
 	.item .icon {
 		color: #ccc;
 	}
+	.item.item-input {
+		label {
+			font-size: 16px;
+		}
+	}
 }
 
 .modal-select {
-	ul.list li.item {
-		text-transform: lowercase;
-		&::first-letter {
-			text-transform: uppercase;
-		}
-	}
 	.search-prompt {
 		color: #ccc;
 	}

@@ -29,26 +29,36 @@
 		'$scope',
 		'moment',
 		'Rota',
+		'RotaLocation',
+		'$state',
 		'$q',
 		'ionicDatePicker',
 		'ModalSelect',
 		'RotaRole',
 		'RotaOrganisation',
 		'RotaSpeciality',
-		'$ionicScrollDelegate'
+		'$ionicScrollDelegate',
+		'$ionicListDelegate',
+		'$ionicPopup',
+		'RotaGeoFenceService'
 	];
 
 	/* @ngInject */
 	function RotaEditController($scope,
 								moment,
 								Rota,
+								RotaLocation,
+								$state,
 								$q,
 								ionicDatePicker,
 								ModalSelect,
 								RotaRole,
 								RotaOrganisation,
 								RotaSpeciality,
-								$ionicScrollDelegate) {
+								$ionicScrollDelegate,
+								$ionicListDelegate,
+								$ionicPopup,
+								RotaGeoFenceService) {
 		var vm = this;
 
 
@@ -61,6 +71,10 @@
 		vm.selectStart = selectStart;
 		vm.selectEnd = selectEnd;
 		vm.clearEnd = clearEnd;
+		
+		vm.addLocation = addLocation;
+		vm.editLocation = editLocation;
+		vm.deleteLocation = deleteLocation;
 
 		activate();
 
@@ -79,6 +93,7 @@
 			vm.role = {};
 			vm.organisation = {};
 			vm.speciality = {};
+			vm.locations = [];
 
 			$q.all([
 				_getRel('role'),
@@ -86,7 +101,11 @@
 				_getRel('speciality')
 			]).then(function () {
 				$ionicScrollDelegate.resize(); //update scrollview after adding in text
-			})
+			});
+			
+			vm.rota.$getRel('locations').then(function (locations) {
+				vm.locations = locations;
+			});
 		}
 
 
@@ -106,6 +125,60 @@
 				});
 			}
 			return $q.when();
+		}
+		
+		
+		/**
+		 * add a location
+		 *
+		 */
+		function addLocation() {
+			var newLocation = RotaLocation.create({rota: vm.rota.getKey()}, $scope);
+			vm.locations.push(newLocation);
+			vm.editLocation(newLocation);
+		}
+		
+		/**
+		 * Edit a location
+		 *
+		 * @param location
+		 */
+		function editLocation(location) {
+			$state.go('app.edit-location', {
+				rotaId:     vm.rota.getKey(),
+				locationId: location.getKey()
+			});
+		}
+		
+		/**
+		 * Remove a location
+		 *
+		 * @param location
+		 * @param $event
+		 * @returns {*}
+		 */
+		function deleteLocation(location, $event) {
+			$ionicListDelegate.closeOptionButtons();
+			if (vm.locations.length < 2) {
+				$ionicPopup.alert({
+					title:    'Cannot delete',
+					subTitle: 'A rota must have at least 1 location',
+					okType:   'button-energized'
+				});
+				return;
+			}
+			
+			$event.stopPropagation();
+			return RotaGeoFenceService.deactivateLocation(location).then(function () {
+				location.archived = true;
+				
+				var index = vm.locations.indexOf(location);
+				if (index !== -1) {
+					vm.locations.splice(index, 1);
+				}
+				return location.$save();
+			});
+
 		}
 
 

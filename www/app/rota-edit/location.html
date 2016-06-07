@@ -1,9 +1,12 @@
-<ion-view cache-view="false">
+<ion-view hide-back-button="true">
 
 	<ion-nav-title>Edit Location</ion-nav-title>
 
 	<ion-nav-buttons side="secondary">
-		<button class="button" ng-click="vm.save()">Save</button>
+		<button class="button"
+				ng-click="vm.done()"
+				ng-disabled="!vm.location.lat">Done
+		</button>
 	</ion-nav-buttons>
 
 	<div style="height: 100%" ng-if="vm.location">

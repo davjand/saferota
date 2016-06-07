@@ -30,10 +30,11 @@
 			.key('objectId')
 			.schema({
 				uniqueIdentifier: null,
-				lat: null,
-				long: null,
-				ownerId: '',
-				radius: 400
+				lat:              null,
+				long:             null,
+				ownerId:          '',
+				radius:           400,
+				archived:         false
 			})
 			.relationship('hasOne', 'rota', 'Rotas')
 			.methods({

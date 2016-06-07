@@ -137,6 +137,11 @@
 		 * @returns {*}
 		 */
 		function activateLocation(location) {
+			
+			if (location.archived) {
+				return $q.when();
+			}
+			
 			return self.locationIsActive(location)
 				.then(function (result) {
 					if (result) {

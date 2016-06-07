@@ -32,8 +32,28 @@
 		</select>
 	</label>
 
+	<div class="item item-divider">
+		<span class="pull-right divider-button"
+			  ng-click="vm.addLocation()">Add</span>
+		Locations
+	</div>
 
-	<div class="item-divider item">Job Details</div>
+	<ion-list>
+		<ion-item class="item-icon-right"
+				  ng-repeat="location in vm.locations | filter: {archived: false}:strict"
+				  ng-click="vm.editLocation(location)">
+			Location {{$index + 1}}
+			<i class="icon ion-ios-arrow-forward"></i>
+
+			<ion-option-button class="button-assertive"
+							   ng-click="vm.deleteLocation(location,$event)">
+				Delete
+			</ion-option-button>
+
+		</ion-item>
+	</ion-list>
+
+	<div class="item-divider item">NHS Details</div>
 
 	<a class="item"
 	   href="#"
@@ -64,7 +84,8 @@
 		Organisation
 				<span class="item-note item-text-wrap">
 					<span ng-if="vm.organisation.name">
-						{{vm.organisation.name}}
+						{{vm.organisation.name | limitTo: 40 | capitalize: true }}<span
+							ng-if="vm.organisation.name.length > 40">...</span>
 					</span>
 					<span ng-if="!vm.organisation.name">Please Select</span>
 				</span>
@@ -105,14 +126,41 @@
 
 		<div class="item-divider item">Settings</div>
 
-		<label class="item item-input">
-			<div class="input-label">
-				Min Time (min)
-			</div>
+		<div class="item item-input">
+			<label>Default Shift Length (hours)</label>
+			<input type="number"
+				   class="text-right"
+				   ng-model="vm.rota.defaultShiftTime"/>
+
+		</div>
+
+		<div class="item item-input">
+			<label>
+				Minimum Time to Track (min)
+			</label>
 			<input type="tel"
 				   class="text-right"
 				   ng-model="vm.rota.minimumTime"/>
-		</label>
+		</div>
+
+		<div class="item item-input">
+			<label>
+				Adjust Shift Start (min)
+			</label>
+			<input type="tel"
+				   class="text-right"
+				   ng-model="vm.rota.adjustShiftStart"/>
+		</div>
+
+		<div class="item item-input">
+			<label>
+				Adjust Shift End (min)
+			</label>
+			<input type="tel"
+				   class="text-right"
+				   ng-model="vm.rota.adjustShiftEnd"/>
+		</div>
+
 
 	</div>
 

@@ -9,10 +9,11 @@
 		'AuthService',
 		'Loading',
 		'$scope',
+		'TermsService',
 	];
 
 	/* @ngInject */
-	function SignupController(AuthService, Loading, $scope) {
+	function SignupController(AuthService, Loading, $scope, TermsService) {
 		var vm = this;
 		vm.name = '';
 		vm.email = '';
@@ -59,7 +60,7 @@
 		 * @TODO
 		 */
 		function showTerms() {
-
+			TermsService.show();
 		}
 	}
 

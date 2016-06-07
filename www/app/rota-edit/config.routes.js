@@ -22,14 +22,18 @@
 				}
 			})
 			.state('app.edit-location', {
-				url: '/edit/:rotaId/location',
-				templateUrl: 'app/rota-edit/location.html',
-				controller: 'EditLocationPickerController',
+				url:          '/edit/:rotaId/:locationId',
+				templateUrl:  'app/rota-edit/location.html',
+				controller:   'EditLocationPickerController',
 				controllerAs: 'vm',
-				resolve: {
+				resolve:      {
 					/* @ngInject */
 					rotaToEdit: function (Rota, $stateParams) {
 						return Rota.$get($stateParams.rotaId);
+					},
+					/* @ngInject */
+					locationToEdit: function (RotaLocation, $stateParams) {
+						return RotaLocation.$get($stateParams.locationId);
 					}
 				}
 			});

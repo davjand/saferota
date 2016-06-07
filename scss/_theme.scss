@@ -11,6 +11,7 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 
 $balanced: #76C103 !default;
 $assertive: #ef473a !default;
+$positive: #387ef5 !default;
 
 $balancedBorder: #498F24;
 
@@ -128,6 +129,14 @@ form {
 		padding-left: 20px;
 		padding-right: 20px;
 	}
+}
+
+.divider-button {
+	font-size: 15px;
+	color: $positive;
+	font-weight: 400;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 

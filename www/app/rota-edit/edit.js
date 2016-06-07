@@ -22,17 +22,19 @@
 		var vm = this;
 
 		vm.save = save;
-		vm.cancel = cancel;
+		vm.close = close;
 
 		vm.rota = rotaToEdit;
 		vm.rota.$register($scope);
 		EditRotaService.startEdit(vm.rota);
 
 		/**
-		 * Save the edit and go to the location
+		 * save
 		 */
 		function save() {
-			$state.go('app.edit-location', {rotaId: vm.rota.getKey()});
+			EditRotaService.completeEdit().then(function () {
+				vm.close();
+			})
 		}
 
 		/**
@@ -40,7 +42,9 @@
 		 *
 		 * Cancel the edit
 		 */
-		function cancel() {
+		function close() {
+			EditRotaService.cancelEdit();
+
 			if ($ionicHistory.backView() === null) {
 				$ionicHistory.nextViewOptions({
 					historyRoot: true

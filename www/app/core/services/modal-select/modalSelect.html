@@ -22,7 +22,7 @@
 			<li class="item item-text-wrap"
 				ng-repeat="item in  (items | filter:search | limitTo: 15 ) as filteredItems"
 				ng-click="callback(item[valueKey]); hide();">
-				{{ item[nameKey ]}}
+				{{ item[nameKey] | capitalize : true}}
 			</li>
 
 			<li class="item"

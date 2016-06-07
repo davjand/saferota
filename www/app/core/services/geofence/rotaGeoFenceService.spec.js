@@ -167,6 +167,21 @@ describe('saferota.core rotaGeoFenceService', function () {
 		});
 		_d();
 	});
+	
+	it('.activateLocation will not actiavte an archived location', function (done) {
+		var l1 = RotaLocation.create({objectId: "10", rota: "1", archived: true});
+		
+		geofence.ready().then(function () {
+			spyOn(geofence.api, 'getWatched').and.returnValue($q.when('[]'));
+			spyOn(geofence.api, 'addOrUpdate').and.returnValue($q.when());
+			return RotaGeoFenceService.activateLocation(l1);
+		}).then(function () {
+			expect(geofence.api.addOrUpdate).not.toHaveBeenCalled();
+			done();
+		});
+		_d();
+	});
+
 
 	//.deactivateLocation
 	it('.deactivateLocation can deactivate a location', function (done) {
