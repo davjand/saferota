@@ -8,6 +8,7 @@
 	App.$inject = [
 		'DataStore',
 		'AuthService',
+		'GoogleMaps',
 		'Session',
 		'RotaLogService',
 		'TourService',
@@ -26,6 +27,7 @@
 	/* @ngInject */
 	function App(DataStore,
 				 AuthService,
+				 GoogleMaps,
 				 Session,
 				 RotaLogService,
 				 TourService,
@@ -48,6 +50,7 @@
 		self.log = RotaLogService;
 		self.cache = Cache;
 		self.tour = TourService;
+		self.maps = GoogleMaps;
 
 		self.ready = function () {
 			return Session.ready();
@@ -61,6 +64,9 @@
 		 */
 		self.start = function () {
 			self.session.start();
+			if (self.session.isLoggedIn) {
+				DataStore.startSync();
+			}
 		};
 		
 		
@@ -101,6 +107,7 @@
 			$rootScope.$on(AUTH_EVENTS.loginSuccess, function () {
 				syncNow(true, true)
 					.then(function () {
+						DataStore.startSync(false);
 							$ionicHistory.nextViewOptions({historyRoot: true, disableAnimate: true});
 							$state
 								.go('app.list');
@@ -142,8 +149,7 @@
 			 */
 			DataStore.interceptor(function (error) {
 				error = error || {};
-				if (
-					error.code === 3064) {
+				if (error.code === 3064) {
 					$rootScope.$emit(AUTH_EVENTS.notAuthenticated);
 				}
 			}, 'error');
@@ -153,17 +159,21 @@
 			 * Check device permissions
 			 */
 			DevicePermissions.checkAndShowError();
+			
+			/*
+			 * Load Google Maps
+			 */
+			GoogleMaps.activate();
 		}
 
 
 		/**
 		 * syncNow
 		 *
-		 *
 		 * Performs a sync. If clear is specified then all data is cleared out first
 		 *
-		 *
 		 * @param clear
+		 * @param isFirstSync
 		 */
 		function syncNow(clear, isFirstSync) {
 			clear = typeof clear !== 'undefined' ? clear : false;

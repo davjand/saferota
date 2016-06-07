@@ -5,7 +5,6 @@
 	angular
 		.module('saferota.core')
 		.constant('moment', moment)
-		.constant('google', window.google || {})
 		.constant('APP_MSG', {
 			SYNC_NOW:       'SYNC_NOW',
 			SYNC_FRESH:     'SYNC_FRESH',

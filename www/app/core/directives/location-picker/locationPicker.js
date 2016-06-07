@@ -7,18 +7,20 @@
 
 	locationPicker.$inject = [
 		'$cordovaGeolocation',
-		'google',
+		'GoogleMaps',
 		'$timeout'];
 
 	/* @ngInject */
 	function locationPicker($cordovaGeolocation,
-							google,
+							GoogleMaps,
 							$timeout) {
+		
+		var google = GoogleMaps.api;
 
 		return {
 			templateUrl: 'app/core/directives/location-picker/locationPicker.html',
 			scope: {
-				location: '=',
+				location: '='
 			},
 			link: function ($scope, element, attrs) {
 

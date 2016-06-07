@@ -1,18 +1,16 @@
 @import "theme";
 
 // Deps
-@import 'www/lib/font-awesome/scss/font-awesome.scss';
+@import '../www/lib/font-awesome/scss/font-awesome.scss';
 
 // Include all of Ionic
-@import "www/lib/ionic/scss/ionic";
+@import "../www/lib/ionic/scss/ionic";
 
 //Modules
-@import "www/app/auth/style";
-@import "www/app/core/style";
-@import "www/app/rota-log/style";
-@import "www/app/tour/style";
-@import "www/app/share/style";
-@import "www/app/stats/style";
-
-
-
+@import "../www/app/auth/style";
+@import "../www/app/core/style";
+@import "../www/app/rota-log/style";
+@import "../www/app/tour/style";
+@import "../www/app/share/style";
+@import "../www/app/stats/style";
+@import "../www/app/rota-new/style";

@@ -12000,8 +12000,7 @@ a.button {
 
 .auth.signup .terms-and-conditions {
   color: #aaaaaa;
-  margin-bottom: 10px;
-}
+  margin-bottom: 10px; }
 
 .auth.signup .signup button {
   margin-top: 0; }
@@ -12284,3 +12283,92 @@ form .form-success {
 
 
 */
+/*
+
+	rota-new module styles
+
+*/
+.rota-new .button-small-text {
+  font-size: 13px;
+  line-height: 16px; }
+
+.rota-new .wizard-form .wizard-title {
+  text-align: center;
+  margin: 12px 20px 28px; }
+  .rota-new .wizard-form .wizard-title h2 {
+    font-size: 24px;
+    line-height: 28px;
+    color: #aaaaaa;
+    font-weight: 400;
+    padding: 0;
+    margin: 0 0 12px; }
+  .rota-new .wizard-form .wizard-title p {
+    color: #444444;
+    padding: 0;
+    margin: 0; }
+
+.rota-new .wizard-form .wizard-item {
+  text-align: center;
+  margin: 12px 20px 28px; }
+  .rota-new .wizard-form .wizard-item label {
+    color: #aaaaaa;
+    font-size: 20px;
+    line-height: 24px;
+    margin-bottom: 0;
+    display: block; }
+    .rota-new .wizard-form .wizard-item label span.sub-label {
+      color: #444444;
+      font-size: 14px;
+      line-height: 14px; }
+  .rota-new .wizard-form .wizard-item input {
+    margin: 16px 0 0;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    color: #777;
+    font-size: 22px;
+    background: none;
+    padding: 0 10px 10px;
+    width: 100%;
+    text-align: center; }
+    .rota-new .wizard-form .wizard-item input::-webkit-input-placeholder {
+      color: #e0e0e0; }
+  .rota-new .wizard-form .wizard-item .select {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0 10px 10px;
+    font-size: 20px;
+    color: #777;
+    margin: 0 0 30px; }
+    .rota-new .wizard-form .wizard-item .select .placeholder {
+      color: #aaaaaa; }
+  .rota-new .wizard-form .wizard-item .with-units {
+    clear: both; }
+    .rota-new .wizard-form .wizard-item .with-units input {
+      float: left;
+      width: 25%;
+      margin-left: 30%;
+      text-align: center; }
+    .rota-new .wizard-form .wizard-item .with-units .units {
+      float: left;
+      width: 30%;
+      text-align: left;
+      font-size: 22px;
+      color: #e0e0e0;
+      margin: 26px 0 0 4%; }
+
+.rota-new .rota-new-complete .no-data-wrapper .icon-top {
+  color: #76C103 !important; }
+
+.rota-new .rota-new-complete .no-data-wrapper .button {
+  margin-top: 70px; }
+
+.popup-help p {
+  font-size: 13px;
+  line-height: 15px;
+  color: #777; }
+  .popup-help p strong {
+    font-size: 14px;
+    line-height: 18px; }
+
+.popup-help div.sep {
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 12px; }

@@ -25,10 +25,6 @@
 	<!-- cordova script (this will be a 404 during development) -->
 	<script src="cordova.js"></script>
 
-	<!-- Maps -->
-	<script src="http://maps.google.com/maps/api/js?key=AIzaSyAaAgNcYgRzVlSVKjH2bFOMeaWqlj_Po_w&sensor=true"></script>
-
-
 	<!-- bower:js -->
 	<script src="lib/spin.js/spin.js"></script>
 	<script src="lib/ladda/dist/ladda.min.js"></script>
@@ -87,15 +83,17 @@
 	<script src="app/core/factories/rotaTimespan.js"></script>
 	<script src="app/core/factories/user.js"></script>
 	<script src="app/core/filters/newLine.js"></script>
-	<script src="app/core/services/authService.js"></script>
+	<script src="app/core/services/auth/authService.js"></script>
+	<script src="app/core/services/auth/session.js"></script>
 	<script src="app/core/services/cache.js"></script>
 	<script src="app/core/services/devicePermissions/devicePermissions.js"></script>
 	<script src="app/core/services/geofence/geofence.js"></script>
 	<script src="app/core/services/geofence/rotaGeoFenceService.js"></script>
+	<script src="app/core/services/googleMaps/googleMaps.js"></script>
 	<script src="app/core/services/loading/loading.js"></script>
 	<script src="app/core/services/log/rotaLogService.js"></script>
 	<script src="app/core/services/modal-select/modalSelect.js"></script>
-	<script src="app/core/services/session.js"></script>
+	<script src="app/core/services/networkConnection/networkConnection.js"></script>
 	<script src="app/data/config.js"></script>
 	<script src="app/data/datastore/datastore.js"></script>
 	<script src="app/data/local/localForage.js"></script>
@@ -122,10 +120,12 @@
 	<script src="app/rota-log/events.js"></script>
 	<script src="app/rota-log/logs.js"></script>
 	<script src="app/rota-log/rotaTimespanFormatterService.js"></script>
+	<script src="app/rota-new/complete/complete.js"></script>
 	<script src="app/rota-new/config.routes.js"></script>
-	<script src="app/rota-new/location.js"></script>
-	<script src="app/rota-new/new.js"></script>
-	<script src="app/rota-new/newRotaService.js"></script>
+	<script src="app/rota-new/location/location.js"></script>
+	<script src="app/rota-new/services/newRotaService.js"></script>
+	<script src="app/rota-new/settings/settings.js"></script>
+	<script src="app/rota-new/start/start.js"></script>
 	<script src="app/rota-view/config.routes.js"></script>
 	<script src="app/rota-view/rota-view.js"></script>
 	<script src="app/rota-view/rotaViewService.js"></script>

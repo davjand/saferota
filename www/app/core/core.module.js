@@ -8,6 +8,7 @@
 			 */
 
 			'ngAnimate',
+			'ngCordova',
 			/*
 			 3rd Party modules
 			 */

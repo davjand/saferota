@@ -4,11 +4,11 @@
 	angular
 		.module('saferota.rota-view')
 		.controller('RotaViewController', RotaViewController);
-
-	RotaViewController.$inject = ['RotaViewService', 'currentRota', '$scope'];
+	
+	RotaViewController.$inject = ['RotaViewService', 'currentRota'];
 
 	/* @ngInject */
-	function RotaViewController(RotaViewService, currentRota, $scope) {
+	function RotaViewController(RotaViewService, currentRota) {
 		var vm = this;
 
 		RotaViewService.start(currentRota);

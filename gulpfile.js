@@ -6,6 +6,7 @@ var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var sh = require('shelljs');
+var wiredep = require('wiredep').stream;
 
 var paths = {
 	sass: [
@@ -15,6 +16,7 @@ var paths = {
 };
 
 gulp.task('default', ['sass']);
+
 
 gulp.task('sass', function (done) {
 	gulp.src('./scss/ionic.app.scss')

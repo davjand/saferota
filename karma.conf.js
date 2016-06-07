@@ -12,7 +12,7 @@ module.exports = function (config) {
 
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: ['wiredep', 'jasmine'],
+		frameworks: ['wiredep', 'jasmine', 'sinon'],
 
 
 		wiredep: {
@@ -24,6 +24,7 @@ module.exports = function (config) {
 
 		plugins: [
 			'karma-wiredep',
+			'karma-sinon',
 			'karma-jasmine',
 			'karma-chrome-launcher',
 			'karma-phantomjs-launcher',
@@ -32,18 +33,10 @@ module.exports = function (config) {
 
 		// list of files / patterns to load in the browser
 		files: [
+			'node_modules/bardjs/dist/bard.js',
+			'www/lib/ngCordova/dist/ng-cordova-mocks.js',
 			'www/lib/ionic/js/ionic.bundle.js',
 			'www/lib/angular-mocks/angular-mocks.js',
-
-
-			/*'www/lib/ngCordova/dist/ng-cordova.js',
-			 'www/lib/ngCordova/dist/ng-cordova-mocks.js',
-			 'www/lib/ladda/dist/spin.min.js',
-			 'www/lib/ladda/dist/ladda.min.js',
-			 'www/lib/angular-ladda/dist/angular-ladda.min.js',
-			 'www/lib/angularbknd-sdk/dist/backand.min.js',
-			 'www/lib/moment/min/moment.min.js',
-			 'www/lib/angular-cache/dist/angular-cache.js',*/
 
 			'www/app/**/*.module.js',
 			'www/app/**/*.js',
@@ -65,7 +58,8 @@ module.exports = function (config) {
 		//Preprocess
 		ngHtml2JsPreprocessor: {
 			// strip this from the file path
-			stripPrefix: 'www/'
+			stripPrefix: 'www/',
+			moduleName:  'allTemplates'
 		},
 
 

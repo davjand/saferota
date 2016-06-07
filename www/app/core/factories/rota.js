@@ -45,14 +45,17 @@
 		var Rota = DataStore.create('Rotas')
 			.key('objectId')
 			.schema({
-				label: '',
-				hours: 40,
-				dateStart: moment().valueOf(),
-				dateEnd: null,
-				banding: 0,
-				ownerId: '',
-				archived: false,
-				minimumTime: 30
+				label:            '',
+				hours:            40,
+				dateStart:        moment().valueOf(),
+				dateEnd:          null,
+				banding:          0,
+				ownerId:          '',
+				archived:         false,
+				minimumTime:      30,
+				adjustShiftStart: 5,
+				adjustShiftEnd:   5,
+				defaultShiftTime: 8
 			})
 			.relationship('hasOne', 'organisation', 'RotaOrganisations')
 			.relationship('hasOne', 'speciality', 'RotaSpecialities')

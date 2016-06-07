@@ -1,11 +1,16 @@
-<ion-view cache-view="false">
+<ion-view hide-back-button="true">
 	<ion-nav-title>Tap to Add Workplace</ion-nav-title>
+
+	<ion-nav-buttons side="primary">
+		<button class="button" ng-click="vm.back()">Back</button>
+	</ion-nav-buttons>
 
 	<ion-nav-buttons side="secondary">
 		<button class="button" ng-click="vm.save()"
 				ng-disabled="vm.location.lat === null">Save
 		</button>
 	</ion-nav-buttons>
+
 
 	<location-picker location="vm.location" style="height: 100%;"></location-picker>
 

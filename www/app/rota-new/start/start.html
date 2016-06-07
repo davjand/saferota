@@ -1,0 +1,71 @@
+<ion-view hide-back-button="true">
+	<ion-nav-title>New Saferota</ion-nav-title>
+	<ion-nav-buttons side="primary">
+		<button class="button"
+				ng-click="vm.cancel()">Cancel
+		</button>
+	</ion-nav-buttons>
+
+	<ion-content class="wizard-form padding">
+		<div class="wizard-item">
+			<label for="name">Enter the name of your current rota</label>
+			<input type="text"
+				   id="name"
+				   ng-model="vm.rota.label"
+				   placeholder="(no name)"
+				   autofocus/>
+		</div>
+		<div class="wizard-item">
+			<label for="hours">How many hours are you<br/>contracted to work per week?</label>
+			<input type="number"
+				   id="hours"
+				   ng-model="vm.rota.hours"/>
+		</div>
+		<div class="wizard-item wizard-item-buttons">
+			<label>Do you work in the NHS?</label>
+			<div class="row" ng-if="vm.$worksInTheNHS !== true">
+				<div class="col">
+					<button class="button button-stable button-block button-outline"
+							ng-click="vm.attemptProceed(false)">No
+					</button>
+				</div>
+				<div class="col">
+					<button class="button button-stable button-outline button-block"
+							ng-click="vm.workInTheNHS()">Yes
+					</button>
+				</div>
+			</div>
+		</div>
+		<div ng-if="vm.$worksInTheNHS === true">
+			<div class="wizard-item">
+				<div class="select"
+					 ng-repeat="(key,field) in vm.fields"
+					 ng-click="vm.selectNHSData(key)">
+					<span class="placeholder"
+						  ng-if="!field.selected">
+						{{field.title}}
+					</span>
+					<span ng-if="field.selected">
+						{{field.selected[field.nameKey] | limitTo: 30}}
+					</span>
+				</div>
+			</div>
+			<div class="wizard-item">
+				<div class="row">
+					<div class="col">
+						<button class="button button-stable button-outline button-small-text button-block"
+								ng-click="vm.attemptProceed(false)">I would rather not give this information
+						</button>
+					</div>
+					<div class="col">
+						<button class="button button-balanced button-block"
+								ng-click="vm.attemptProceed(true)">Done
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</ion-content>
+
+</ion-view>

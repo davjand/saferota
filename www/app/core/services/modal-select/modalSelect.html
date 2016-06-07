@@ -17,7 +17,7 @@
 	<ion-content class="has-subheader"
 				 ng-style="{'margin-bottom': keyboardHeight+'px'}">
 		<ul class="list"
-			style="overflow: auto; margin-bottom:"
+			style="overflow: auto;"
 			ng-if="search || items.length < 20">
 			<li class="item item-text-wrap"
 				ng-repeat="item in  (items | filter:search | limitTo: 15 ) as filteredItems"

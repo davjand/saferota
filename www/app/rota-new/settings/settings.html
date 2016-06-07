@@ -1,0 +1,74 @@
+<ion-view hide-back-button="true">
+	<ion-nav-title>New Saferota</ion-nav-title>
+	<ion-nav-buttons side="primary">
+		<button class="button"
+				ng-click="vm.back()">Back
+		</button>
+	</ion-nav-buttons>
+
+	<ion-nav-buttons side="secondary">
+		<button class="button"
+				ng-click="vm.save()">Save
+		</button>
+	</ion-nav-buttons>
+
+	<ion-content class="wizard-form padding">
+
+		<div class="wizard-title">
+			<h2>Rota Settings</h2>
+			<p>Saferota will use these settings to make the calculations more accurate.</p>
+		</div>
+
+		<div class="wizard-item">
+			<label for="shiftLength">
+				What is you average shift length? <br/>
+				<span class="sub-label">
+					Saferota will default shifts to this length if your phone turns off whilst tracking a shift
+				</span>
+			</label>
+			<div class="with-units clearfix">
+				<input type="number"
+					   id="shiftLength"
+					   ng-model="vm.rota.defaultShiftTime"/>
+
+				<div class="units">Hours</div>
+			</div>
+		</div>
+
+		<div class="wizard-item">
+			<label for="adjustStart">
+				How early do you arrive at your workplace before your shift starts?<br/>
+				<span class="sub-label">
+					Saferota will subtract this time from when you arrive.
+				</span>
+			</label>
+			<div class="with-units clearfix">
+				<input type="number"
+					   id="adjustStart"
+					   ng-model="vm.rota.adjustShiftStart"/>
+				<div class="units">Minutes</div>
+			</div>
+		</div>
+
+		<div class="wizard-item">
+			<label for="adjustEnd">
+				How long does it take from you finishing to leaving the workplace? <br/>
+				<span class="sub-label">
+					Saferota will subtract this time from when you leave.
+				</span>
+			</label>
+			<div class="with-units clearfix">
+				<input type="number"
+					   id="adjustEnd"
+					   ng-model="vm.rota.adjustShiftEnd"/>
+				<div class="units">Minutes</div>
+			</div>
+		</div>
+
+		<button class="button-balanced button button-block"
+				ng-click="vm.save()">Save Settings
+		</button>
+
+	</ion-content>
+
+</ion-view>

@@ -1,0 +1,125 @@
+/*
+
+	rota-new module styles
+
+*/
+.rota-new {
+
+	.button-small-text {
+		font-size: 13px;;
+		line-height: 16px;
+	}
+
+	.wizard-form {
+
+		.wizard-title {
+			text-align: center;
+			margin: 12px 20px 28px;
+
+			h2 {
+				font-size: 24px;
+				line-height: 28px;
+				color: $greyMed;
+				font-weight: 400;
+				padding: 0;
+				margin: 0 0 12px;
+			}
+			p {
+				color: $greyDarkText;
+				padding: 0;
+				margin: 0;
+			}
+		}
+
+		.wizard-item {
+			text-align: center;
+			margin: 12px 20px 28px;
+
+			label {
+				color: $greyMed;
+				font-size: 20px;
+				line-height: 24px;
+				margin-bottom: 0;
+				display: block;
+
+				span.sub-label {
+					color: $greyDarkText;
+					font-size: 14px;
+					line-height: 14px;
+				}
+			}
+			input {
+				margin: 16px 0 0;
+				border: none;
+				border-bottom: 1px solid $greyLight;
+				color: $greyDark;
+				font-size: 22px;
+				background: none;
+				padding: 0 10px 10px;
+				width: 100%;
+				text-align: center;
+
+				&::-webkit-input-placeholder {
+					color: $greyLight;
+				}
+			}
+			.select {
+				border-bottom: 1px solid $greyLight;
+				padding: 0 10px 10px;
+				font-size: 20px;
+				color: $greyDark;
+				margin: 0 0 30px;
+				.placeholder {
+					color: $greyMed;
+				}
+			}
+
+			.with-units {
+				clear: both;
+
+				input {
+					float: left;
+					width: 25%;
+					margin-left: 30%;
+					text-align: center;
+				}
+				.units {
+					float: left;
+					width: 30%;
+					text-align: left;
+					font-size: 22px;
+					color: $greyLight;
+					margin: 26px 0 0 4%;
+
+				}
+			}
+
+		}
+	}
+
+	.rota-new-complete .no-data-wrapper {
+		.icon-top {
+			color: $balanced !important;
+		}
+		.button {
+			margin-top: 70px;
+		}
+	}
+
+}
+
+.popup-help {
+	p {
+		font-size: 13px;
+		line-height: 15px;
+		color: $greyDark;
+		strong {
+			font-size: 14px;
+			line-height: 18px;
+		}
+	}
+	div.sep {
+		border-bottom: 1px solid $greyLight;
+		margin-bottom: 12px;
+	}
+}

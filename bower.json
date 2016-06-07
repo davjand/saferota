@@ -35,9 +35,6 @@
         "dist/ladda-themeless.min.css"
       ]
     },
-    "angular-ui-router": {
-      "main": []
-    },
     "ionic": {
       "main": []
     }
