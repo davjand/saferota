@@ -8,25 +8,35 @@
 	RotaViewLogController.$inject = [
 		'RotaViewService',
 		'$scope',
-		'RotaTimespanFormatterService',
+		'$state',
+		'WeekCollection',
+		'Pager',
 		'RotaTimespan',
 		'moment'];
 
 	/* @ngInject */
 	function RotaViewLogController(RotaViewService,
 								   $scope,
-								   RotaTimespanFormatterService,
+								   $state,
+								   WeekCollection,
+								   Pager,
 								   RotaTimespan,
 								   moment) {
 		var vm = this;
-
+		
+		var collection;
+		vm.pager = {};
+		
 		vm.rota = RotaViewService.rota;
-		vm.logs = {};
 		vm.change = RotaViewService.change;
 		vm.moment = moment;
+		
+		vm.$loaded = false;
 
 		vm.remove = remove;
 		vm.find = find;
+		vm.add = add;
+		vm.reload = reload;
 
 
 		activate();
@@ -40,9 +50,9 @@
 			vm.find();
 
 			//Watch for new items
-			RotaTimespan.on('new', vm.find);
+			RotaTimespan.on('new', vm.reload);
 			$scope.$on('$destroy', function () {
-				RotaTimespan.off('new', vm.find);
+				RotaTimespan.off('new', vm.reload);
 			});
 		}
 
@@ -54,16 +64,23 @@
 		 *
 		 */
 		function find() {
-			vm.logs = {};
-
+			vm.$loaded = false;
 			RotaTimespan.$find({
 				filter: {
 					rota: RotaViewService.rota.getKey(),
 					deleted: false
 				}
 			}, $scope).then(function (timespans) {
-				vm.logs = RotaTimespanFormatterService.groupByWeek(timespans);
+				collection = new WeekCollection();
+				collection.add(timespans);
+				vm.pager = new Pager(collection);
+				vm.$loaded = true;
 			});
+		}
+		
+		function reload() {
+			collection.sort();
+			vm.pager.reload();
 		}
 
 		/**
@@ -75,8 +92,20 @@
 		 */
 		function remove(timespan) {
 			timespan.deleted = true;
+			timespan.$save();
+		}
+		
+		
+		function add() {
+			var timespan = RotaTimespan.create({
+				rota:     vm.rota.getKey(),
+				location: "",
+				enter:    moment().subtract(vm.rota.defaultShiftLength, 'hours').valueOf(),
+				exit:     moment().valueOf()
+			});
+			timespan.calculateDuration();
 			timespan.$save().then(function () {
-				activate();
+				$state.go('app.view.logs-edit', {timespanId: timespan.getKey()});
 			})
 		}
 

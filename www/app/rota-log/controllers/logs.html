@@ -1,11 +1,16 @@
-<ion-view class="rota-timespan-view">
+<ion-view class="rota-timespan-view" cache-view="false">
 	<ion-nav-title>{{vm.rota.label}}</ion-nav-title>
-	<ion-nav-buttons side="secondary">
+	<ion-nav-buttons side="primary">
 		<button class="button" ng-click="vm.change()">Change</button>
 	</ion-nav-buttons>
-	<ion-content>
+	<ion-nav-buttons side="secondary">
+		<button class="button" ng-click="vm.add()">
+			<i class="icon ion-plus"></i>
+		</button>
+	</ion-nav-buttons>
+	<ion-content ng-show="vm.$loaded">
 		<div class="no-data-wrapper"
-			 ng-if="vm.logs.length < 1">
+			 ng-if="vm.pager.data.length < 1">
 			<div class="icon-top ion-ios-clock-outline"></div>
 			<h3>No Logs Generated</h3>
 			<h4>When we've logged your shifts they will appear here.</h4>
@@ -16,16 +21,20 @@
 			</p>
 		</div>
 		<ion-list>
-			<div ng-repeat="week in vm.logs">
+			<div ng-repeat="week in vm.pager.data track by week.start">
 				<ion-item ng-if="week.items.length > 0"
 						  class="item-divider">
+					<div class="pull-right"
+						 ng-bind-html="week.duration | formatHoursMinutes">
+
+					</div>
 					{{vm.moment(week.start).format('ddd Do')}}
 
 					<span> to </span>
 					{{vm.moment(week.end).format('Do MMM YY')}}
 				</ion-item>
 
-				<ion-item ng-repeat="timespan in week.items"
+				<ion-item ng-repeat="timespan in week.items track by timespan.objectId"
 						  class="item-timespan item-icon-right"
 						  ui-sref="app.view.logs-edit({timespanId: timespan.getKey()})">
 
@@ -45,7 +54,7 @@
 					<i class="icon ion-ios-arrow-right"></i>
 
 					<ion-option-button class="button-assertive"
-									   ng-click="vm.remove(timespan)">
+									   ng-click="week.items.splice($index);vm.remove(timespan)">
 						Delete
 					</ion-option-button>
 
@@ -55,6 +64,12 @@
 
 		</ion-list>
 
+		<button class="button button-light button-outline button-block "
+				ng-click="vm.pager.nextPage()"
+				ng-hide="!vm.pager.$more"
+				style="margin-bottom: 40px">
+			Load More
+		</button>
 
 	</ion-content>
 </ion-view>

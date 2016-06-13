@@ -13,8 +13,8 @@
 				url: '/events',
 				views: {
 					'tab-settings': {
-						templateUrl: 'app/rota-log/events.html',
-						controller: 'RotaViewEventController',
+						templateUrl:  'app/rota-log/controllers/events.html',
+						controller:   'RotaViewEventController',
 						controllerAs: 'vm'
 					}
 				}
@@ -24,8 +24,8 @@
 				url: '/logs',
 				views: {
 					'tab-logs': {
-						templateUrl: 'app/rota-log/logs.html',
-						controller: 'RotaViewLogController',
+						templateUrl:  'app/rota-log/controllers/logs.html',
+						controller:   'RotaViewLogController',
 						controllerAs: 'vm'
 					}
 				}
@@ -34,10 +34,10 @@
 				url: '/logs/edit/:timespanId',
 				views: {
 					'tab-logs': {
-						templateUrl: 'app/rota-log/edit.html',
-						controller: 'RotaLogEditController',
+						templateUrl:  'app/rota-log/controllers/edit.html',
+						controller:   'RotaLogEditController',
 						controllerAs: 'vm',
-						resolve: {
+						resolve:      {
 							/* @ngInject */
 							currentTimespan: function (RotaTimespan, $stateParams) {
 								return RotaTimespan.$get($stateParams.timespanId);

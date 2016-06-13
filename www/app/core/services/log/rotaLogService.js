@@ -5,8 +5,8 @@
 		.module('saferota.core')
 		.constant('GEOFENCE_EVENTS', {
 			ENTER: 1,
-			EXIT: 2,
-			BOTH: 3
+			EXIT:  2,
+			BOTH:  3
 		})
 		.service('RotaLogService', RotaLogService);
 
@@ -47,6 +47,9 @@
 		self.createRotaTimespan = createRotaTimespan;
 		self.calculateDuration = calculateDuration;
 		self.getTimeStamp = getTimeStamp;
+		
+		self.createDefaultRotaTimespanWhenNoEnterEvent = createDefaultRotaTimespanWhenNoEnterEvent;
+		self.createDefaultRotaTimespanWhenNoExitEvent = createDefaultRotaTimespanWhenNoExitEvent;
 
 
 		$rootScope.$on('GEO_EVENT', function ($event, data) {
@@ -105,13 +108,33 @@
 
 				var event,
 					rota,
-					toSave = [];
-
+					location,
+					toSave = [],
+					thisEnterEvent;
+				
+				//Prevent progression at this stage
+				if (!fence.id) {
+					return process(i + 1);
+				}
 
 				/*
-				 * Create the event
+				 * Get the location
 				 */
-				return createRotaEvent(fence).then(function (ev) {
+				return RotaLocation.$find({filter: {uniqueIdentifier: fence.id}}).then(function (loc) {
+					location = loc[0];
+					
+					/*
+					 * Get the Rota
+					 */
+					return location.$getRel('rota');
+				}).then(function (foundRota) {
+					rota = foundRota;
+					/*
+					 * Create the event
+					 */
+					return createRotaEvent(fence);
+					
+				}).then(function (ev) {
 					event = ev;
 					toSave.push(event);
 
@@ -126,7 +149,7 @@
 						 * Find and process previous enter event(s)
 						 * Multiple if error
 						 */
-						var thisEnterEvent = null;
+						thisEnterEvent = null;
 
 						return self.findEnterEvents(event).then(function (enterEvents) {
 							if (enterEvents === null || enterEvents.length < 1) {
@@ -135,28 +158,23 @@
 							}
 
 							toSave = toSave.concat(enterEvents);
-
-							return processEnterEvents(enterEvents)
+							
+							return processEnterEvents(enterEvents, rota)
 						}).then(function (enterEvent) {
-
-							if (enterEvent !== null) {
-								thisEnterEvent = enterEvent;
-								return Rota.$get(thisEnterEvent.rota);
+							thisEnterEvent = enterEvent;
+							
+							var timespan;
+							
+							//If null, create intelligent defaults
+							if (thisEnterEvent === null) {
+								timespan = self.createDefaultRotaTimespanWhenNoEnterEvent(event, rota);
 							}
 							else {
-								return $q.when(null);
+								timespan = self.createRotaTimespan(thisEnterEvent, event, rota);
 							}
-
-						}).then(function (rota) {
-
-							/*
-							 * create timespan object
-							 */
-							if (thisEnterEvent !== null) {
-								var timespan = self.createRotaTimespan(thisEnterEvent, event, rota);
-								if (timespan !== null) {
-									toSave.push(timespan);
-								}
+							
+							if (timespan !== null) {
+								toSave.push(timespan);
 							}
 
 							//Save and clear the models
@@ -182,7 +200,60 @@
 
 			return process();
 		}
+		
+		
+		/**
+		 *
+		 * create a timespan when an enter event has been missed
+		 *
+		 * @param event
+		 * @param rota
+		 * @returns {*}
+		 */
+		function createDefaultRotaTimespanWhenNoEnterEvent(event, rota) {
+			
+			var estimatedEnterTime = moment(event.timestamp).subtract(rota.defaultShiftLength || 8, 'h');
+			
+			var timespan = self.createRotaTimespan(
+				RotaEvent.create({timestamp: estimatedEnterTime.valueOf()}),
+				event,
+				rota,
+				false, true
+			);
+			
+			//Flag as Error
+			timespan.unresolvedError = true;
+			timespan.errorCode = RotaTimespan.ERROR_CODES.NO_ENTER_EVENT;
+			
+			return timespan;
+		}
 
+		/**
+		 *
+		 * create a timespan when an exit event has been missed
+		 *
+		 * @param event
+		 * @param rota
+		 * @returns {*}
+		 */
+		function createDefaultRotaTimespanWhenNoExitEvent(event, rota) {
+			var estimatedEnterTime = moment(event.timestamp).add(rota.defaultShiftLength || 8, 'h');
+			
+			var timespan = self.createRotaTimespan(
+				event,
+				RotaEvent.create({timestamp: estimatedEnterTime.valueOf()}),
+				rota,
+				true, false
+			);
+			
+			//Flag as Error
+			timespan.unresolvedError = true;
+			timespan.errorCode = RotaTimespan.ERROR_CODES.NO_EXIT_EVENT;
+			
+			return timespan;
+		}
+		
+		
 		/**
 		 * createRotaEvent
 		 *
@@ -195,10 +266,10 @@
 			return RotaLocation.$find({filter: {uniqueIdentifier: geofence.id}}).then(function (location) {
 				var event = RotaEvent.create({
 					timestamp: self.getTimeStamp(),
-					rota: null,
-					location: null,
-					exited: false,
-					type: geofence.transitionType
+					rota:      null,
+					location:  null,
+					exited:    false,
+					type:      geofence.transitionType
 				}, $s);
 
 				if (location && location.length > 0) {
@@ -227,10 +298,10 @@
 		 */
 		function findEnterEvents(event) {
 			return RotaEvent.$find({
-				filter: {
+				filter:  {
 					location: event.location,
-					type: GEOFENCE_EVENTS.ENTER,
-					exited: false
+					type:     GEOFENCE_EVENTS.ENTER,
+					exited:   false
 				},
 				orderBy: '-timestamp'
 			}, $s);
@@ -247,15 +318,17 @@
 		 *
 		 * @param enterEvents
 		 */
-		function processEnterEvents(enterEvents) {
+		function processEnterEvents(enterEvents, rota) {
 			var event;
 
 			if (enterEvents.length < 1) {
-				return null;
+				return $q.when(null);
 			}
 			else {
 				event = enterEvents.shift();
 				event.exited = true;
+				
+				var pArr = [$q.when()];
 
 				/*
 				 * if any remaining events then flag these as errors
@@ -263,8 +336,14 @@
 				angular.forEach(enterEvents, function (item) {
 					item.exited = true;
 					item.error = 'No Exit Event found, exited at: ' + moment().format();
+					
+					//create a timespan object and flag up to the user
+					var timespan = self.createDefaultRotaTimespanWhenNoExitEvent(item, rota);
+					pArr.push(timespan.$save());
 				});
-				return event;
+				return $q.all(pArr).then(function () {
+					return $q.when(event);
+				});
 			}
 		}
 
@@ -280,23 +359,41 @@
 		 * @param enter
 		 * @param exit
 		 * @param rota
+		 *
+		 * @param adjustStart Optional - Defaults True
+		 * @param adjustEnd Optional - Defaults True
+		 *
 		 * @returns {*}
 		 */
-		function createRotaTimespan(enter, exit, rota) {
-			var duration = self.calculateDuration(enter.timestamp, exit.timestamp);
+		function createRotaTimespan(enter, exit, rota, adjustStart, adjustEnd) {
+			
+			adjustStart = typeof adjustStart !== 'undefined' ? adjustStart : true;
+			adjustEnd = typeof adjustEnd !== 'undefined' ? adjustEnd : true;
+			
+			var enterTime = enter.timestamp,
+				exitTime = exit.timestamp;
+			
+			//adjust enter and exit if needed
+			if (rota.adjustShiftStart && rota.adjustShiftStart > 0 && adjustStart) {
+				enterTime = moment(enterTime).add(parseFloat(rota.adjustShiftStart), 'm').valueOf();
+			}
+			if (rota.adjustShiftEnd && rota.adjustShiftEnd > 0 && adjustEnd) {
+				exitTime = moment(exitTime).subtract(parseFloat(rota.adjustShiftEnd), 'm').valueOf();
+			}
+			
+			var duration = self.calculateDuration(enterTime, exitTime);
 			var min = rota.minimumTime || 0;
 
 			if (duration < min) {
 				exit.error = 'Duration ' + Math.round(duration) + ' mins, less than minimum of ' + min;
 				return null;
 			}
-
-
+			
 			return RotaTimespan.create({
 				location: enter.location,
-				rota: enter.rota,
-				enter: enter.timestamp,
-				exit: exit.timestamp,
+				rota:     enter.rota,
+				enter:    enterTime,
+				exit:     exitTime,
 				duration: duration
 			}, $s);
 		}

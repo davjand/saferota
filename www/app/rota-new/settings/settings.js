@@ -54,8 +54,8 @@
 			if (!vm.rota.adjustShiftStart) {
 				vm.rota.adjustShiftStart = 0;
 			}
-			if (!vm.rota.defaultShiftTime) {
-				vm.rota.defaultShiftTime = 8;
+			if (!vm.rota.defaultShiftLength) {
+				vm.rota.defaultShiftLength = 8;
 			}
 			NewRotaService.next();
 		}

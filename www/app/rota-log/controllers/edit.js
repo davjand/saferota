@@ -59,7 +59,6 @@
 			//deactivate when closed
 			$scope.$on('$destroy', vm.deactivate);
 			//setup keyboard
-			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_SHOW);
 
 			//Register Variables
 			vm.timespan = currentTimespan;
@@ -73,7 +72,6 @@
 		 *
 		 */
 		function deactivate() {
-			$rootScope.$emit(UI_EVENTS.KEYBOARD_ACCESSORY_HIDE);
 		}
 
 
@@ -99,7 +97,7 @@
 		function editDate(key) {
 			ionicDatePicker.openDatePicker({
 				inputDate: new Date(vm.timespan[key]),
-				callback: function (val) {
+				callback:  function (val) {
 
 					//Convert into the correct format
 					val = moment(val).valueOf();
@@ -109,7 +107,6 @@
 					if (validateDates(val, key)) {
 						vm.timespan[key] = val;
 						vm.timespan.calculateDuration();
-						$scope.$apply();
 					}
 				}
 			});
@@ -136,14 +133,13 @@
 			 *
 			 */
 			var adjust = new Date().getTimezoneOffset();
-
 			time += (adjust * 60);
 
 			ionicTimePicker.openTimePicker({
 				inputTime: time,
-				step: 10,
-				format: 24,
-				callback: function (val) {
+				step:      10,
+				format:    24,
+				callback:  function (val) {
 
 					//Convert to correct format
 					val = moment(new Date(val * 1000)).valueOf();
@@ -153,7 +149,7 @@
 					if (validateDates(val, key)) {
 						vm.timespan[key] = val;
 						vm.timespan.calculateDuration();
-						$scope.$apply();
+						//$scope.$apply();
 					}
 				}
 			})
@@ -178,6 +174,7 @@
 			if (type === 'enter') {
 				enter = newDate;
 				exit = vm.timespan['exit'];
+
 			} else {
 				exit = newDate;
 				enter = vm.timespan['enter'];
@@ -187,11 +184,11 @@
 			/*
 			 * See if before
 			 */
-			if (!moment(enter).isBefore(exit)) {
+			if (moment(enter).isAfter(exit)) {
 				$ionicPopup.show({
-					title: 'Error',
+					title:    'Error',
 					subTitle: "You cannot set the in time before the out time",
-					buttons: [
+					buttons:  [
 						{
 							text: 'Ok',
 							type: 'button-balanced'

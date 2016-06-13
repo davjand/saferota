@@ -445,8 +445,8 @@
 				//set each item to either
 				angular.forEach(self._schema, function (val, key) {
 					if (setDefault) {
-						thisModel[key] = d[key] || val;
-					} else if (d[key]) {
+						thisModel[key] = typeof d[key] !== 'undefined' ? d[key] : val;
+					} else if (typeof d[key] !== 'undefined') {
 						thisModel[key] = d[key];
 					}
 				});

@@ -40,7 +40,8 @@ module.exports = function (config) {
 
 			'www/app/**/*.module.js',
 			'www/app/**/*.js',
-			'www/app/**/*.html'
+			'www/app/**/*.html',
+			'tests/tests.helper.js'
 		],
 
 

@@ -12142,6 +12142,9 @@ form .form-success {
 .rota-timespan-view .item-divider span {
   color: #aaaaaa; }
 
+.rota-timespan-view .item-divider .pull-right {
+  color: #aaaaaa; }
+
 .rota-timespan-view .item.item-timespan a.item-content {
   padding: 14px 16px 10px 8px; }
 

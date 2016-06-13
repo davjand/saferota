@@ -40,23 +40,26 @@ describe('saferota.rota-log RotaLogService', function () {
 
 
 		aEnter1 = {
-			id: 'unique1',
+			id:             'unique1',
 			transitionType: 1
 		};
 		aExit1 = {
-			id: 'unique1',
+			id:             'unique1',
 			transitionType: 2
 		};
 
 		aLocation = RotaLocation.create({
-			objectId: 'loc1',
+			objectId:         'loc1',
 			uniqueIdentifier: 'unique1',
-			lat: 1.5,
-			long: 1.5,
-			rota: 'rota1'
+			lat:              1.5,
+			long:             1.5,
+			rota:             'rota1'
 		});
 		aRota = Rota.create({
-			objectId: 'rota1'
+			objectId:           'rota1',
+			adjustShiftStart:   0,
+			adjustShiftEnd:     0,
+			defaultShiftLength: 8
 		});
 
 	}));
@@ -104,38 +107,38 @@ describe('saferota.rota-log RotaLogService', function () {
 	//.findEnterEvents
 	it('.findEnterEvents can retrieve the events that correspond to entering', function (done) {
 		var e1 = RotaEvent.create({ //should find
-				objectId: 'e1',
+				objectId:      'e1',
 				timestamp: 100,
-				location: 'loc1',
-				type: 1,
-				exited: false
+				location:      'loc1',
+				type:          1,
+				exited:        false
 			}),
 			e2 = RotaEvent.create({ //should find
-				objectId: 'e2',
+				objectId:  'e2',
 				timestamp: 500,
-				location: 'loc1',
-				type: 1,
-				exited: false
+				location:  'loc1',
+				type:      1,
+				exited:    false
 			}),
 			e3 = RotaEvent.create({ //should not find
 				location: 'loc1',
-				type: 2,
-				exited: false
+				type:     2,
+				exited:   false
 			}),
 			e4 = RotaEvent.create({ //should not find
 				location: 'loc1',
-				type: 1,
-				exited: true
+				type:     1,
+				exited:   true
 			}),
 			e5 = RotaEvent.create({ //should not find
 				location: 'loc2',
-				type: 1,
-				exited: false
+				type:     1,
+				exited:   false
 			});
 
 		var exitEvent = RotaEvent.create({
 			location: 'loc1',
-			type: 2
+			type:     2
 		});
 
 		_up().then(function () {
@@ -156,37 +159,44 @@ describe('saferota.rota-log RotaLogService', function () {
 
 	//.processEnterEvents
 	it('.processEnterEvents returns the first event', function () {
-		var e = RotaLogService.processEnterEvents([{id: 1}, {id: 2}, {id: 3}]);
+		RotaLogService.processEnterEvents([{id: 1}, {id: 2}, {id: 3}], aRota).then(function (foundEvent) {
+			e = foundEvent;
+		});
+		$rootScope.$apply();
 		expect(e.id).toBe(1);
 	});
 	it('.processEnterEvents returns null if an empty array', function () {
-		var e = RotaLogService.processEnterEvents([]);
+		RotaLogService.processEnterEvents([], aRota).then(function (foundEvent) {
+			e = foundEvent;
+		});
+		$rootScope.$apply();
 		expect(e).toBe(null);
 	});
 	it('.processEnterEvents sets errorflag and exited for previous events', function () {
 		var events = [
 			RotaEvent.create({ //should find
-				objectId: 'e1',
+				objectId:  'e1',
 				timestamp: 100,
-				location: 'loc1',
-				type: 1,
-				exited: false
+				location:  'loc1',
+				type:      1,
+				exited:    false
 			}),
 			RotaEvent.create({ //should find
-				objectId: 'e2',
+				objectId:  'e2',
 				timestamp: 500,
-				location: 'loc1',
-				type: 1,
-				exited: false
+				location:  'loc1',
+				type:      1,
+				exited:    false
 			})
 		];
-
-		RotaLogService.processEnterEvents(events);
-
+		
+		RotaLogService.processEnterEvents(events, aRota);
+		$rootScope.$apply();
 		expect(events[0].exited).toBe(true);
 		expect(events[0].error).not.toBe(null);
 
 	});
+
 
 	//.createRotaTimeSpan
 	it('.createRotaTimespan takes an enter and an exit and creates a timespan object', function () {
@@ -194,19 +204,19 @@ describe('saferota.rota-log RotaLogService', function () {
 		var exit = moment('2013-02-08 14:30:00.000').valueOf();
 
 		var e1 = RotaEvent.create({ //should find
-				objectId: 'e1',
+				objectId:      'e1',
 				timestamp: enter,
-				location: 'loc1',
-				rota: 'rota1',
-				type: 1,
-				exited: false
+				location:      'loc1',
+				rota:          'rota1',
+				type:          1,
+				exited:        false
 			}),
 			e2 = RotaEvent.create({ //should find
-				objectId: 'e2',
+				objectId:  'e2',
 				timestamp: exit,
-				location: 'loc1',
-				type: 2,
-				exited: false
+				location:  'loc1',
+				type:      2,
+				exited:    false
 			});
 
 		var ts = RotaLogService.createRotaTimespan(e1, e2, aRota);
@@ -216,7 +226,6 @@ describe('saferota.rota-log RotaLogService', function () {
 		expect(ts.enter).toBe(enter);
 		expect(ts.exit).toBe(exit);
 		expect(ts.duration).toBe(150);
-
 	});
 	it('.createRotaTimespan returns null if less than min duration', function () {
 		var enter = moment('2013-02-08 12:00:00.000').valueOf();
@@ -225,19 +234,19 @@ describe('saferota.rota-log RotaLogService', function () {
 		aRota.minimumTime = 30;
 
 		var e1 = RotaEvent.create({ //should find
-				objectId: 'e1',
+				objectId:      'e1',
 				timestamp: enter,
-				location: 'loc1',
-				rota: 'rota1',
-				type: 1,
-				exited: false
+				location:      'loc1',
+				rota:          'rota1',
+				type:          1,
+				exited:        false,
 			}),
 			e2 = RotaEvent.create({ //should find
-				objectId: 'e2',
+				objectId:  'e2',
 				timestamp: exit,
-				location: 'loc1',
-				type: 2,
-				exited: false
+				location:  'loc1',
+				type:      2,
+				exited:    false
 			});
 
 		var ts = RotaLogService.createRotaTimespan(e1, e2, aRota);
@@ -246,9 +255,47 @@ describe('saferota.rota-log RotaLogService', function () {
 
 		expect(e2.error).not.toBe(null);
 	});
-
-
-
+	
+	describe('.createRotaTimespan factors in shift adjustments', function () {
+		var enter, exit,
+			e1, e2;
+		beforeEach(function () {
+			enter = moment('2013-02-08 12:00:00.000').valueOf();
+			exit = moment('2013-02-08 14:30:00.000').valueOf();
+			
+			aRota.adjustShiftStart = 10;
+			aRota.adjustShiftEnd = 15;
+			
+			e1 = RotaEvent.create({ //should find
+				objectId:  'e1',
+				timestamp: enter,
+				location:  'loc1',
+				rota:      'rota1',
+				type:      1,
+				exited:    false
+			});
+			e2 = RotaEvent.create({ //should find
+				objectId:  'e2',
+				timestamp: exit,
+				location:  'loc1',
+				type:      2,
+				exited:    false
+			});
+		});
+		
+		it('can adjust the beginning by 10 and the end by 5', function () {
+			var ts = RotaLogService.createRotaTimespan(e1, e2, aRota);
+			
+			expect(ts.enter).toBe(
+				moment('2013-02-08 12:10:00.000').valueOf()
+			);
+			expect(ts.exit).toBe(
+				moment('2013-02-08 14:15:00.000').valueOf()
+			);
+			expect(ts.duration).toBe(125);
+		});
+		
+	});
 
 
 	//.calculateDuration
@@ -260,10 +307,82 @@ describe('saferota.rota-log RotaLogService', function () {
 
 		expect(duration).toBe(140);
 	});
+	
+	
+	describe('createDefaultRotaTimeSpanIfNoEnterEvent', function () {
+		var TIME_1, TIME_2, EXIT_EVENT;
+		
+		beforeEach(function () {
+			TIME_1 = moment('2016-02-08 10:00:00.000').valueOf();
+			TIME_2 = moment('2016-02-08 18:00:00.000').valueOf();
+			EXIT_EVENT = RotaEvent.create({
+				timestamp: TIME_2,
+				type:      2,
+				location:  'loc1'
+			});
+			
+		});
+		
+		it('creates a rota timespan based on the default shift length', function () {
+			aRota.defaultShiftLength = 8;
+			
+			var ts = RotaLogService.createDefaultRotaTimespanWhenNoEnterEvent(EXIT_EVENT, aRota);
+			expect(ts.duration).toBe(8 * 60);
+			expect(ts.enter).toBe(TIME_1);
+			expect(ts.unresolvedError).toBe(true);
+			expect(ts.errorCode).toBe(RotaTimespan.ERROR_CODES.NO_ENTER_EVENT);
+		});
+		
+		it('will adjust the end time but not the start time', function () {
+			aRota.defaultShiftLength = 8;
+			aRota.adjustShiftEnd = 10;
+			aRota.adjustShiftStart = 10;
+			
+			var ts = RotaLogService.createDefaultRotaTimespanWhenNoEnterEvent(EXIT_EVENT, aRota);
+			expect(ts.enter).toBe(TIME_1);
+			expect(ts.duration).toBe((8 * 60) - 10);
+			
+		});
+	});
+	
+	describe('createDefaultRotaTimeSpanIfNoExitEvent', function () {
+		var TIME_1, TIME_2, ENTER_EVENT;
+		
+		beforeEach(function () {
+			TIME_1 = moment('2016-02-08 10:00:00.000').valueOf();
+			TIME_2 = moment('2016-02-08 18:00:00.000').valueOf();
+			ENTER_EVENT = RotaEvent.create({
+				timestamp: TIME_1,
+				type:      2,
+				location:  'loc1'
+			});
+		});
+		
+		it('creates a rota timespan based on the default shift length', function () {
+			aRota.defaultShiftLength = 8;
+			
+			var ts = RotaLogService.createDefaultRotaTimespanWhenNoExitEvent(ENTER_EVENT, aRota);
+			expect(ts.duration).toBe(8 * 60);
+			expect(ts.exit).toBe(TIME_2);
+			expect(ts.unresolvedError).toBe(true);
+			expect(ts.errorCode).toBe(RotaTimespan.ERROR_CODES.NO_EXIT_EVENT);
+		});
+		
+		it('will adjust the start time but not the end time', function () {
+			aRota.defaultShiftLength = 8;
+			aRota.adjustShiftEnd = 10;
+			aRota.adjustShiftStart = 10;
+			
+			var ts = RotaLogService.createDefaultRotaTimespanWhenNoExitEvent(ENTER_EVENT, aRota);
+			expect(ts.exit).toBe(TIME_2);
+			expect(ts.duration).toBe((8 * 60) - 10);
+			
+		});
+	});
 
 
 	//.receiveNotification
-	it('.receiveNotification can recieve an enter and exit and create a timespan', function (done) {
+	it('.receiveNotification can receive an enter and exit and create a timespan', function (done) {
 
 		/*
 		 * Code to fake the times
@@ -281,10 +400,10 @@ describe('saferota.rota-log RotaLogService', function () {
 			 * Send a create event
 			 */
 			return RotaLogService.receiveNotification([{
-				id: 'unique1',
+				id:             'unique1',
 				transitionType: GEOFENCE_EVENTS.ENTER,
-				latitude: 0,
-				longitude: 0
+				latitude:       0,
+				longitude:      0
 			}]);
 		}).then(function () {
 			//check event has been created
@@ -296,7 +415,7 @@ describe('saferota.rota-log RotaLogService', function () {
 			 */
 			FAKE_TIME = TIME_2;
 			return RotaLogService.receiveNotification([{
-				id: 'unique1',
+				id:             'unique1',
 				transitionType: GEOFENCE_EVENTS.EXIT
 			}]);
 		}).then(function () {
@@ -331,21 +450,45 @@ describe('saferota.rota-log RotaLogService', function () {
 	});
 
 	it('.receiveNotification can handle with no found enter event', function (done) {
+		
+		var TIME_1 = moment('2016-02-08 10:00:00.000').valueOf(),
+			TIME_2 = moment('2016-02-08 18:00:00.000').valueOf();
+		
+		spyOn(RotaLogService, 'getTimeStamp').and.callFake(function () {
+			return TIME_2;
+		});
+
 		_up().then(function () {
 			/*
 			 * Send a create event
 			 */
 			return RotaLogService.receiveNotification([{
-				id: 'loc1',
+				id:             'unique1',
 				transitionType: GEOFENCE_EVENTS.EXIT,
-				latitude: 0,
-				longitude: 0
+				latitude:       0,
+				longitude:      0
 			}]);
 		}).then(function () {
 			return RotaEvent.$find();
 		}).then(function (events) {
 			expect(events.length).toBe(1);
 			expect(events.error).not.toBe(null);
+			
+			return RotaTimespan.$find();
+		}).then(function (timespans) {
+			/*
+			 * should have created a timespan
+			 *
+			 * It should have an errorCode flag set on it
+			 * The shift time should use aRota.defaultShiftLength
+			 */
+			expect(timespans.length).toBe(1);
+			var ts = timespans[0];
+			
+			expect(ts.duration).toBe(480); //default of 8 hours
+			expect(ts.enter).toBe(TIME_1);
+			expect(ts.errorCode).toBe(RotaTimespan.ERROR_CODES.NO_ENTER_EVENT);
+			expect(ts.unresolvedError).toBe(true);
 			done();
 		});
 

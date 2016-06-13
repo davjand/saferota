@@ -26,16 +26,24 @@
 
 	/* @ngInject */
 	function factory(DataStore) {
-		return DataStore.create('RotaTimespans', 'moment')
+		
+		var ERROR_CODES = {
+			NO_ENTER_EVENT: 1,
+			NO_EXIT_EVENT:  2
+		};
+		
+		var RotaTimespan = DataStore.create('RotaTimespans', 'moment')
 			.key('objectId')
 			.schema({
-				location: null,
-				enter: null,
-				exit: null,
-				duration: 0,
-				notes: '',
-				deleted: false,
-				ownerId: ''
+				location:        null,
+				enter:           null,
+				exit:            null,
+				duration:        0,
+				notes:           '',
+				deleted:         false,
+				ownerId:         '',
+				errorCode:       null,
+				unresolvedError: false
 			})
 			.relationship('hasOne', 'rota', 'Rotas')
 			.methods({
@@ -52,6 +60,11 @@
 						.as('minutes');
 				}
 			});
+		
+		//Set the static properties
+		RotaTimespan.ERROR_CODES = ERROR_CODES;
+		
+		return RotaTimespan;
 	}
 })();
 
