@@ -2,7 +2,7 @@
 	'use strict';
 	
 	angular
-		.module('saferota.rota-log')
+		.module('saferota.data')
 		.factory('OrderedCollection', OrderedCollectionFactory);
 	
 	OrderedCollectionFactory.$inject = [];
@@ -28,6 +28,10 @@
 		OrderedCollection.prototype.filter = filter;
 		OrderedCollection.prototype.asJSON = asJSON;
 		OrderedCollection.prototype.setComparator = setComparator;
+		OrderedCollection.prototype.clear = clear;
+		
+		OrderedCollection.prototype.ASC = 1;
+		OrderedCollection.prototype.DESC = -1;
 		
 		//Static
 		OrderedCollection.default = function (item) {
@@ -184,6 +188,13 @@
 		 */
 		function asJSON(start, limit) {
 			return this.items(start, limit);
+		}
+		
+		/**
+		 * clear
+		 */
+		function clear() {
+			this._items = [];
 		}
 		
 	}

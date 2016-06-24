@@ -29,11 +29,11 @@
 	};
 
 	var REL_KEY_TYPES = {
-		LOCAL: 'local',
+		LOCAL:   'local',
 		FOREIGN: 'foreign'
 	};
 	var REL_TYPES = {
-		HAS_ONE: 'hasOne',
+		HAS_ONE:  'hasOne',
 		HAS_MANY: 'hasMany'
 	};
 
@@ -55,7 +55,7 @@
 		var CreateModel = function (name, onCreate) {
 			this._config = {
 				name: name,
-				key: 'id'
+				key:  'id'
 			};
 			this._schema = {};
 			this._rel = {};
@@ -201,7 +201,7 @@
 		function relationship(type, key, model) {
 
 			var options = {
-				type: type,
+				type:    type,
 				keyType: REL_KEY_TYPES.LOCAL
 			};
 
@@ -322,6 +322,7 @@
 				stopCallback = typeof stopCallback === 'undefined' ? false : stopCallback;
 
 				model.__existsRemotely = false;
+				model.__savedState = {};
 
 				model.setData(passedData, true);
 
@@ -343,6 +344,7 @@
 				if (angular.isFunction(Model.prototype.initialize)) {
 					Model.prototype.initialize.call(this);
 				}
+
 
 			};
 
@@ -392,6 +394,11 @@
 			Model.prototype.resolveWithRemote = resolveWithRemote;
 			Model.prototype.isEqual = isEqual;
 			Model.prototype.isValid = isValid;
+			Model.prototype.update = update;
+			
+			Model.prototype.cacheCurrentState = cacheCurrentState;
+			Model.prototype.isDirty = isDirty;
+			
 			Model.prototype.config = function () {
 				return this._config;
 			};
@@ -478,6 +485,7 @@
 				 */
 				else if (typeof d[self._config.key] !== 'undefined') {
 					thisModel.setKey(d[self.getPrimaryKey()], true);
+					thisModel.cacheCurrentState();
 				}
 				/*
 				 3) new object, generate new ID (if not set)
@@ -614,12 +622,23 @@
 		 * Sees if the current model is the same as the passed model
 		 *
 		 * @param model
+		 * @param checkClass Defaults true
 		 * returns {Boolean}
 		 */
-		function isEqual(model) {
+		function isEqual(model, checkClass) {
+			checkClass = typeof checkClass !== 'undefined' ? checkClass : true;
+
 			//see if class name the same
 			var self = this;
-			if (self.className() !== model.className()) {
+			if (checkClass) {
+				if (self.className() !== model.className()) {
+					return false;
+				}
+			}
+			
+			//check ids
+			var idKey = this.getPrimaryKey();
+			if (this[idKey] !== model[idKey]) {
 				return false;
 			}
 
@@ -707,7 +726,48 @@
 
 			});
 			return valid;
-
+			
+		}
+		
+		
+		/**
+		 * emit an update event on the model
+		 *
+		 * Only does it if the data differs or forced
+		 *
+		 * @param updatedModel
+		 * @param force
+		 */
+		function update(updatedModel, force) {
+			updatedModel = updatedModel || this;
+			force = typeof force === 'boolean' ? force : false;
+			
+			if (force || !this.isEqual(updatedModel, false)) {
+				this.setData(updatedModel);
+				this.cacheCurrentState();
+			}
+		}
+		
+		/**
+		 * cache the current state
+		 *
+		 * Used for dirty checking
+		 */
+		function cacheCurrentState() {
+			if (this.isDirty()) {
+				this.__savedState = this.toObject();
+				this.emit('update', this);
+			}
+		}
+		
+		
+		/**
+		 * isDirty
+		 *
+		 * @returns {boolean}
+		 */
+		function isDirty() {
+			return !this.isEqual(this.__savedState, false);
 		}
 
 	}

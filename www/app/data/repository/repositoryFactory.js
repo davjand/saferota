@@ -182,16 +182,16 @@
 		 * @param model {Object | Array}
 		 * @param $scope {$scope} (optional scope object to bind the items to if needed). Pass false if not needed
 		 * @param setUpdatedDate {Boolean} - Defaults to true. Sets the model updated date
-		 * @param triggerUpdateEvent {Boolean} - Defaults to false. Triggers an update on the models in memory
 		 * @returns {Promise}
 		 */
-		function save(model, $scope, setUpdatedDate, triggerUpdateEvent) {
+		function save(model, $scope, setUpdatedDate) {
 			setUpdatedDate = typeof setUpdatedDate !== 'undefined' ? setUpdatedDate : true;
-			triggerUpdateEvent = typeof triggerUpdateEvent !== 'undefined' ? triggerUpdateEvent : false;
+
 
 			var self = this,
 				toSave = {},
-				triggerNewEvent = false;
+				triggerNewEvent = false,
+				newModels = [];
 
 			if (!angular.isArray(model)) {
 				model = [model];
@@ -214,6 +214,9 @@
 					item.updatedDate = new Date(Date.now());
 				}
 				modelIndex[item.getKey()] = item;
+				
+				//trigger update and cache
+				item.cacheCurrentState();
 			});
 
 			/*
@@ -230,14 +233,8 @@
 					if ($scope && $scope !== false) {
 						self.registerModel(savedModel, $scope);
 					}
-
-					if (self._inMem(key)) {
+					else if (self._inMem(key)) {
 						self._getMem(key).setData(savedModel);
-
-						//trigger an update if specified
-						if (triggerUpdateEvent) {
-							self._getMem(key).emit('update');
-						}
 					}
 				});
 				return $q.when();
@@ -264,6 +261,7 @@
 						if (!data[modelKey] || data[modelKey] === null) {
 							toSave[modelKey] = modelVal;
 							triggerNewEvent = true;
+							newModels.push(modelVal);
 						}
 						/*
 						 If found then do a diff sync
@@ -307,7 +305,7 @@
 					 * Trigger a new event on the factory
 					 */
 					if (triggerNewEvent) {
-						self._Model.emit('new');
+						self._Model.emit('new', newModels);
 					}
 					return $q.when();
 				})
@@ -377,9 +375,10 @@
 					 Get the model from memory
 					 */
 					var memObj = self.$mem[initialId];
-					memObj.m.setData(model.toObject());
+					
+					memObj.m.update(model);
 					/*
-					 Delete the old key (not the model, exists in m
+					 Delete the old key (not the model, exists in mem)
 					 */
 					delete self.$mem[initialId];
 					/*
@@ -392,7 +391,6 @@
 					}
 					self.$mem[newKey] = memObj;
 
-					memObj.m.emit('update');
 				}
 				return $q.when();
 			})
@@ -411,7 +409,7 @@
 		 */
 		function remove(model) {
 			//trigger event
-			model.emit('delete');
+			model.emit('delete', model);
 			this._delMem(model);
 
 			if (this.offlineEnabled()) {

@@ -1,7 +1,7 @@
-describe('saferota.rota-log OrderedCollection', function () {
+describe('saferota.data OrderedCollection', function () {
 	var collection;
 	beforeEach(function () {
-		bard.appModule('saferota.rota-log');
+		bard.appModule('saferota.data');
 		bard.inject('OrderedCollection');
 		
 		collection = new OrderedCollection(function (item) {

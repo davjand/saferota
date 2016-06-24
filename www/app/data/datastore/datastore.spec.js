@@ -55,39 +55,39 @@ describe('saferota.data DataStore', function () {
 		RequestService.$adapter.$cache = {
 			test1: [
 				{
-					id: 1,
-					name: 'James',
-					city: 'Newcastle',
+					id:          1,
+					name:        'James',
+					city:        'Newcastle',
 					updatedDate: new Date(2015, 5, 5)
 				},
 				{
-					id: 2,
-					name: 'John',
-					city: 'Sheffield',
+					id:          2,
+					name:        'John',
+					city:        'Sheffield',
 					updatedDate: new Date(2015, 5, 5)
 				},
 				{
-					id: 3,
-					name: 'David',
-					city: 'Newcastle',
+					id:          3,
+					name:        'David',
+					city:        'Newcastle',
 					updatedDate: new Date(2015, 5, 5)
 				}
 			],
 			test2: [
 				{
 					objectId: 1,
-					name: 'James',
-					city: 'Newcastle'
+					name:     'James',
+					city:     'Newcastle'
 				},
 				{
 					objectId: 2,
-					name: 'John',
-					city: 'Sheffield'
+					name:     'John',
+					city:     'Sheffield'
 				},
 				{
 					objectId: 3,
-					name: 'David',
-					city: 'London'
+					name:     'David',
+					city:     'London'
 				}
 			]
 		};
@@ -114,68 +114,85 @@ describe('saferota.data DataStore', function () {
 	/*
 	 .save
 	 */
-	it('.save saves locally', function (done) {
-		var model = TestModel1.create({
-			name: 'john',
-			city: 'New York'
-		}, $rootScope);
-		var repo = RepositoryService.get('test1');
-
-		DataStore.save(model, false).then(function () {
-			//the repo returns it
-			return repo.get(model.id);
-		}).then(function (repoModel) {
-			expect(repoModel).toBe(model);
-			return repo.$local.data(model.getKey());
-		}).then(function (data) {
-			//check saved locally
-			expect(data.name).toBe('john');
-			done();
-		});
-		_d();
-	});
-
-	it('.save queues a save event and when executed a model update event is fired', function (done) {
-		var called = false,
+	describe('.save', function () {
+		var model, repo;
+		
+		beforeEach(function () {
 			model = TestModel1.create({
 				name: 'john',
 				city: 'New York'
 			}, $rootScope);
-		var initialId = model.getKey();
-
-		model.on('update', function () {
-			called = true;
+			repo = RepositoryService.get('test1');
+		});
+		
+		it(' saves locally', function (done) {
+			DataStore.save(model, false).then(function () {
+				//the repo returns it
+				return repo.get(model.id);
+			}).then(function (repoModel) {
+				expect(repoModel).toBe(model);
+				return repo.$local.data(model.getKey());
+			}).then(function (data) {
+				//check saved locally
+				expect(data.name).toBe('john');
+				done();
+			});
+			_d();
+		});
+		
+		
+		it('queues a save event and when executed a model update event is fired', function (done) {
+			var called = false,
+				initialId = model.getKey();
+			
+			model.on('update', function () {
+				called = true;
+			});
+			
+			DataStore.save(model, false).then(function () {
+				return RequestService.next();
+			}).then(function () {
+				expect(called).toBe(true);
+				expect(model.__existsRemotely).toBe(true);
+				expect(model.id).not.toBe(initialId);
+				done();
+			});
+			_d();
+		});
+		
+		it('.save can return only when the save event has completed if forced', function (done) {
+			var called = false,
+				initialId = model.getKey();
+			
+			model.on('update', function () {
+				called = true;
+			});
+			
+			DataStore.save(model, true).then(function () {
+				expect(called).toBe(true);
+				expect(model.__existsRemotely).toBe(true);
+				expect(model.id).not.toBe(initialId);
+				done();
+			});
+			_d();
+		});
+		
+		it('.save causes an update event to fire on the model if different', function (done) {
+			var called = false;
+			
+			model.on('update', function () {
+				called = true;
+			});
+			
+			model.name = 'james';
+			
+			DataStore.save(model).then(function () {
+				expect(called).toBe(true);
+				done();
+			});
+			_d();
 		});
 
-		DataStore.save(model, false).then(function () {
-			return RequestService.next();
-		}).then(function () {
-			expect(called).toBe(true);
-			expect(model.__existsRemotely).toBe(true);
-			expect(model.id).not.toBe(initialId);
-			done();
-		});
-		_d();
-	});
-	it('.save can return only when the save event has completed if forced', function (done) {
-		var called = false,
-			model = TestModel1.create({
-				name: 'john',
-				city: 'New York'
-			}, $rootScope);
-		var initialId = model.getKey();
-
-		model.on('update', function () {
-			called = true;
-		});
-
-		DataStore.save(model, true).then(function () {
-			expect(called).toBe(true);
-			expect(model.__existsRemotely).toBe(true);
-			expect(model.id).not.toBe(initialId);
-			done();
-		});
-		_d();
 	});
 
 	/*
@@ -435,9 +452,9 @@ describe('saferota.data DataStore', function () {
 			RequestService.$adapter.$cache.test1[0].name = "James Bond";
 			RequestService.$adapter.$cache.test1[0].updatedDate = new Date(2016, 5, 5);
 			RequestService.$adapter.$cache.test1.push({
-				id: 99,
-				name: 'Spectre',
-				city: 'Paris',
+				id:          99,
+				name:        'Spectre',
+				city:        'Paris',
 				updatedDate: new Date(2016, 3, 3)
 			});
 
@@ -665,7 +682,7 @@ describe('saferota.data DataStore', function () {
 	
 	//startSync
 	it('.startSync starts a regular syncchronisation', function () {
-		spyOn(DataStore,'syncAll').and.returnValue($q.when());
+		spyOn(DataStore, 'syncAll').and.returnValue($q.when());
 
 		DataStore.startSync();
 		$timeout.flush();
@@ -676,7 +693,7 @@ describe('saferota.data DataStore', function () {
 
 	});
 	it('.stopSync stops synchronisation', function () {
-		spyOn(DataStore,'syncAll').and.returnValue($q.when());
+		spyOn(DataStore, 'syncAll').and.returnValue($q.when());
 		DataStore.startSync();
 		DataStore.stopSync();
 
@@ -764,9 +781,22 @@ describe('saferota.data DataStore', function () {
 			expect(m1.id).not.toBe(m1ID);
 			expect(p1.id).not.toBe(p1ID);
 			expect(p1.owner).not.toBe(m1ID);
-
-			//4 callbacks should have been called
-			expect(update).toEqual(11);
+			
+			/*
+			 * 19 callbacks
+			 *
+			 * 5 when saved m1,m2,p1,p2,p3
+			 * 3 when set relationships on p1,p2,ph3
+			 *
+			 * 1 when m1 was saved to server
+			 * 3 on p1,p2,p3 updating them with m1s server id
+			 * 1 when m2 saved to server
+			 * 3 when p1,p2,p3 saved to server
+			 * 3 when p1,p2,p3 relationships are set
+			 *
+			 * = 19
+			 */
+			expect(update).toEqual(19);
 
 			return m1.$getRel('pets');
 		}).then(function (pets) {

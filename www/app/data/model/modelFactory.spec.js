@@ -127,10 +127,10 @@ describe('saferota.data Model', function () {
 	it('Can create a new model instance from the config', function () {
 		var Test = new Model('test');
 		Test.schema({
-				first: 'John',
-				last: 'Doe',
-				category: 'defaultCategory'
-			})
+			first:    'John',
+			last:     'Doe',
+			category: 'defaultCategory'
+		})
 			.key('primaryKey')
 			.relationship('hasOne', 'owner', 'Owner')
 			.methods({
@@ -215,7 +215,7 @@ describe('saferota.data Model', function () {
 			date2 = new Date(2012, 10, 2);
 
 		var m = Test.create({
-			id: 10,
+			id:          10,
 			createdDate: date1,
 			updatedDate: date2
 		});
@@ -263,8 +263,8 @@ describe('saferota.data Model', function () {
 		var date = new Date(2015, 5, 5);
 
 		var m = Test.create({
-			id: 3,
-			name: 'james',
+			id:          3,
+			name:        'james',
 			createdDate: date,
 			updatedDate: date
 		});
@@ -286,10 +286,10 @@ describe('saferota.data Model', function () {
 			.relationship('hasOne', 'owner', 'Owner.test');
 
 		var m = Test.create({
-			id: 1,
-			name: 'james',
+			id:       1,
+			name:     'james',
 			category: 10,
-			owner: 5 //this should be on the other object
+			owner:    5 //this should be on the other object
 		});
 
 		expect(m.category).toBe(10);
@@ -319,9 +319,9 @@ describe('saferota.data Model', function () {
 
 		//scenario where de-serializing from local store
 		var m3 = Test.create({
-			id: 12345,
+			id:               12345,
 			__existsRemotely: false,
-			name: 'David'
+			name:             'David'
 		});
 		expect(m3.__existsRemotely).toBe(false);
 
@@ -370,10 +370,10 @@ describe('saferota.data Model', function () {
 			.relationship('hasOne', 'owner', 'Owner.test');
 
 		var m = Test.create({
-			id: 1,
-			name: 'james',
+			id:       1,
+			name:     'james',
 			category: 10,
-			owner: 5 //this should be on the other object
+			owner:    5 //this should be on the other object
 		});
 
 		var d = m.toObject();
@@ -468,65 +468,149 @@ describe('saferota.data Model', function () {
 	/*
 	 Event emitters
 	 */
-	it('Each model becomes an event emitter', function () {
-		var Test = new Model('test').schema({name: ''});
-
-		var t1 = Test.create();
-
-		expect(t1.on).toBeDefined();
-		expect(t1.off).toBeDefined();
-		expect(t1.emit).toBeDefined();
-
-		var v = 0;
-
-		t1.on('test', function (a) {
-			v = a;
+	describe('Event Emitters', function () {
+		var Test;
+		
+		beforeEach(function () {
+			Test = new Model('test').schema({name: '', city: ''});
 		});
-		t1.emit('test', 5);
+		
+		it('Each model becomes an event emitter', function () {
+			var t1 = Test.create();
+			
+			expect(t1.on).toBeDefined();
+			expect(t1.off).toBeDefined();
+			expect(t1.emit).toBeDefined();
+			
+			var v = 0;
+			
+			t1.on('test', function (a) {
+				v = a;
+			});
+			t1.emit('test', 5);
+			
+			expect(v).toBe(5);
 
-		expect(v).toBe(5);
+		});
+		
+		describe('.update ', function () {
+			var t1, t2, called;
+			
+			beforeEach(function () {
+				t1 = Test.create();
+				t2 = Test.create({name: 'james', city: 'london'});
+				called = false;
+				
+				t1.on('update', function () {
+					called = true;
+				});
+			});
+			
+			it('triggers an event if forced', function () {
+				t1.update(null, true);
+				expect(called).toBe(true);
+			});
+			it('triggers an event if new data is different and sets the data', function () {
+				t1.update(t2);
+				expect(called).toBe(true);
+				expect(t1.name).toBe('james');
+				expect(t1.city).toBe('london');
+				
+			});
+			it('does not trigger an event if the data is the same', function () {
+				t1.name = 'james';
+				t1.city = 'london';
+				t1.id = t2.id;
+				t1.update(t2);
+				expect(called).toBe(false);
+			});
+			
+		});
 
 	});
 
 	/*
 	 Objects the same
 	 */
-	it('.isEqual determines if models are the same or not', function () {
-		var Test = new Model('test')
-			.schema({name: '', city: ''})
-			.relationship('hasOne', 'country', 'Country');
+	describe('.isEqual', function () {
+		var Test, Test2, m1, m2;
+		beforeEach(function () {
+			Test = new Model('test')
+				.schema({name: '', city: ''})
+				.relationship('hasOne', 'country', 'Country');
+			
+			Test2 = new Model('test2').schema({name: '', city: ''});
+			
+			m1 = Test.create({id: 1, name: 'james'});
+			m2 = Test2.create({name: 'james'});
+		});
+		
+		it(' determines if models are the same or not', function () {
+			//different models
+			expect(m1.isEqual(m2)).toBe(false);
+			
+			//parameter differences
+			var m3 = Test.create({id: 1, name: 'james'});
+			expect(m1.isEqual(m3)).toBe(true);
+			
+			m3.city = 'London';
+			expect(m1.isEqual(m3)).toBe(false);
+			
+			m1.city = 'London';
+			expect(m1.isEqual(m3)).toBe(true);
+			
+			//objects
+			m1.name = {first: 'james', last: 'bond'};
+			m3.name = {first: 'james', last: 'bond'};
+			expect(m1.isEqual(m3)).toBe(true);
+			
+			m3.name = {first: 'james', last: 'bone'};
+			expect(m1.isEqual(m3)).toBe(false);
+			
+			//relationships
+			var m4 = Test.create({name: 'james', country: 5});
+			var m5 = Test.create({name: 'james', country: 3});
+			
+			expect(m4.isEqual(m5)).toBe(false);
+		});
+		
+		it('checks ID', function () {
+			m1 = Test.create({id: 2, name: 'james'});
+			m2 = Test.create({id: 3, name: 'james'});
+			
+			expect(m1.isEqual(m2)).toBe(false);
+			
+		});
 
-		var Test2 = new Model('test2').schema({name: '', city: ''});
 
-		var m1 = Test.create({name: 'james'});
-		var m2 = Test2.create({name: 'james'});
-
-		//different models
-		expect(m1.isEqual(m2)).toBe(false);
-
-		//parameter differences
-		var m3 = Test.create({name: 'james'});
-		expect(m1.isEqual(m3)).toBe(true);
-
-		m3.city = 'London';
-		expect(m1.isEqual(m3)).toBe(false);
-
-		m1.city = 'London';
-		expect(m1.isEqual(m3)).toBe(true);
-
-		//objects
-		m1.name = {first: 'james', last: 'bond'};
-		m3.name = {first: 'james', last: 'bond'};
-		expect(m1.isEqual(m3)).toBe(true);
-
-		m3.name = {first: 'james', last: 'bone'};
-		expect(m1.isEqual(m3)).toBe(false);
-
-		//relationships
-		var m4 = Test.create({name: 'james', country: 5});
-		var m5 = Test.create({name: 'james', country: 3});
-
-		expect(m4.isEqual(m5)).toBe(false);
+	});
+	
+	describe('model caching and dirty checking', function () {
+		var Test, localObject, remoteObject;
+		beforeEach(function () {
+			Test = new Model('test').schema({name: '', city: ''});
+			localObject = Test.create({name: 'james', city: 'london'});
+			remoteObject = Test.create({id: 'test1', name: 'james2'});
+		});
+		
+		it('.cacheCurrentState caches the current object', function () {
+			localObject.cacheCurrentState();
+			expect(localObject.__savedState.name).toBe('james');
+			expect(localObject.__savedState.city).toBe('london');
+		});
+		
+		it('.cacheCurrentState should be called for remote objects when constructed', function () {
+			expect(remoteObject.__savedState.id).toBe('test1');
+			expect(remoteObject.__savedState.name).toBe('james2');
+		});
+		
+		it('isDirty should return true for new (non remote) objects', function () {
+			expect(localObject.isDirty()).toBe(true);
+		});
+		it('isDirty should return false for new remote objects', function () {
+			expect(remoteObject.isDirty()).toBe(false);
+		});
+		
 	});
 
 	//Decorating Models
@@ -542,7 +626,6 @@ describe('saferota.data Model', function () {
 		var t = Test2.create({name: 'james'});
 
 		expect(t.$test()).toEqual('test');
-
 	});
 
 });

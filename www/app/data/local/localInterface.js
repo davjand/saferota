@@ -262,8 +262,11 @@
 		 * @returns {Promise}
 		 */
 		function filter(filter, orderBy) {
-
-			var $$OR = 'OR', $$AND = ' AND', applyFilter = true;
+			
+			var $$OR = 'OR',
+				$$AND = ' AND',
+				applyFilter = true,
+				$logic = $$AND;
 
 			if (!filter ||
 				filter === '' ||
@@ -276,8 +279,8 @@
 			if (typeof filter === 'string') {
 				filter = {$this: filter};
 			}
-			if (typeof filter.$logic === 'undefined') {
-				filter.$logic = $$AND;
+			if (typeof filter.$logic !== 'undefined') {
+				$logic = filter.$logic;
 			}
 
 			/*
@@ -294,7 +297,7 @@
 				/*
 				 * Otherwise filter
 				 */
-				var matches = filter.$logic === $$AND; //start as true if an AND, false if OR
+				var matches = $logic === $$AND; //start as true if an AND, false if OR
 				currentKey = currentKey || true;
 
 				if (filter.$this) {
@@ -318,7 +321,7 @@
 								found = false;
 
 							if (typeof objValue === 'undefined') {
-								if (filter.$logic === $$AND) {
+								if ($logic === $$AND) {
 									matches = false;
 								}
 							} else {
@@ -331,7 +334,7 @@
 								});
 
 								//Apply logic type
-								if (filter.$logic === $$OR) {
+								if ($logic === $$OR) {
 									matches = matches || found;
 								} else {
 									matches = matches && found;

@@ -67,7 +67,7 @@
 
 
 		/*
-		 * Initialisation Relationships
+		 * Initialisation of Relationships
 		 */
 		RelationshipService.registerDataStore(this);
 
@@ -515,7 +515,7 @@
 		 * @param model {Model|Array}
 		 * @param $scope
 		 *
-		 * @return {Model\Array} The passed objects
+		 * @return {Model|Array} The passed objects
 		 */
 		function registerScope(model, $scope) {
 			var wasPassedArray = angular.isArray(model);
