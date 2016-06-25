@@ -21,7 +21,8 @@
 		'RotaGeoFenceService',
 		'DevicePermissions',
 		'APP_MSG',
-		'AUTH_EVENTS'
+		'AUTH_EVENTS',
+		'$ionicPopup'
 	];
 
 	/* @ngInject */
@@ -40,7 +41,8 @@
 				 RotaGeoFenceService,
 				 DevicePermissions,
 				 APP_MSG,
-				 AUTH_EVENTS) {
+				 AUTH_EVENTS,
+				 $ionicPopup) {
 
 		var self = this;
 
@@ -198,8 +200,23 @@
 				Loading.hide();
 				return $q.when();
 			}, function (error) {
-				//@TODO Error handling
-				throw(error);
+				Loading.hide();
+				
+				$ionicPopup.confirm({
+					title:      'Sync Error, are you offline?',
+					subTitle:   'Could not connect to server',
+					okText:     "Ok",
+					okType:     "button-assertive",
+					cancelText: "Show Error"
+				}).then(function (notShowError) {
+					if (!notShowError) {
+						$ionicPopup.alert({
+							title:    'Error Details',
+							subTitle: '<pre>' + error + '</pre>',
+							okType:   "button-assertive"
+						});
+					}
+				})
 			});
 		}
 

@@ -4,13 +4,13 @@
 	angular
 		.module('saferota.tour')
 		.controller('TourController', TourController);
-
-	TourController.$inject = ['TourService', '$ionicSlideBoxDelegate'];
+	
+	TourController.$inject = ['TourService', '$scope', '$timeout'];
 
 	/* @ngInject */
-	function TourController(TourService, $ionicSlideBoxDelegate) {
+	function TourController(TourService, $scope, $timeout) {
 		var vm = this;
-
+		vm.slider = {};
 
 		//Interface
 		vm.activate = activate;
@@ -37,6 +37,16 @@
 		function activate() {
 			vm.doneButton = '';
 			vm.slideHasChanged(0);
+			
+			//let the directives init
+			$timeout(function () {
+				vm.slider.on("slideChangeEnd", function (slider) {
+					// note: the indexes are 0-based
+					vm.slideHasChanged(slider.activeIndex);
+					$scope.$apply();
+				});
+			}, 100);
+
 		}
 
 		/**
@@ -46,7 +56,7 @@
 		 *
 		 */
 		function next() {
-			$ionicSlideBoxDelegate.next();
+			vm.slider.slideNext();
 		}
 
 		/**

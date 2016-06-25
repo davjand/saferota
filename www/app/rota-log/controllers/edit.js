@@ -9,24 +9,18 @@
 		'currentTimespan',
 		'$scope',
 		'moment',
-		'ionicTimePicker',
-		'ionicDatePicker',
 		'$ionicPopup',
-		'$state',
-		'$rootScope',
-		'UI_EVENTS'
+		'$cordovaDatePicker',
+		'$ionicHistory'
 	];
 
 	/* @ngInject */
 	function RotaLogEditController(currentTimespan,
 								   $scope,
 								   moment,
-								   ionicTimePicker,
-								   ionicDatePicker,
 								   $ionicPopup,
-								   $state,
-								   $rootScope,
-								   UI_EVENTS) {
+								   $cordovaDatePicker,
+								   $ionicHistory) {
 		var vm = this;
 
 		/*
@@ -34,11 +28,21 @@
 		 */
 
 		vm.save = save;
-		vm.editDate = editDate;
-		vm.editTime = editTime;
+		//vm.editDate = editDate;
+		//vm.editTime = editTime;
+		
+		vm.handleEnterDateChange = handleEnterDateChange;
+		vm.handleExitDateChange = handleExitDateChange;
+		
+		vm.editEnter = editEnter;
+		vm.editEnterDate = editEnterDate;
+		vm.editEnterTime = editEnterTime;
+		
+		vm.editExit = editExit;
+		vm.editExitDate = editExitDate;
+		vm.editExitTime = editExitTime;
 
 		vm.activate = activate;
-		vm.deactivate = deactivate;
 
 		/*
 		 * Helper for date formatting (dateFilter does not support 1st etc)
@@ -56,24 +60,10 @@
 		 *
 		 */
 		function activate() {
-			//deactivate when closed
-			$scope.$on('$destroy', vm.deactivate);
-			//setup keyboard
-
 			//Register Variables
 			vm.timespan = currentTimespan;
 			vm.timespan.$register($scope);
 		}
-
-		/**
-		 * deactivate
-		 *
-		 * rehides the keyboard accessory
-		 *
-		 */
-		function deactivate() {
-		}
-
 
 		/**
 		 * save
@@ -82,13 +72,109 @@
 		 *
 		 */
 		function save() {
+			vm.timespan.unresolvedError = false; //overwrite the error
 			vm.timespan.$save().then(function () {
-				$state.go('app.view.logs');
+				$ionicHistory.goBack();
 			})
 		}
 
+
+		/**
+		 * handleEnterDateChange
+		 *
+		 * @param date
+		 */
+		function handleEnterDateChange(date) {
+			if (date) {
+				if (vm.timespan.afterExit(date)) {
+					vm.timespan.translateByNewEnterDate(date);
+				} else {
+					vm.timespan.enter = date;
+				}
+				vm.timespan.calculateDuration();
+			}
+		}
+		
+		function handleExitDateChange(date) {
+			if (date) {
+				if (vm.timespan.beforeEnter(date)) {
+					vm.timespan.translateByNewExitDate(date);
+				} else {
+					vm.timespan.exit = date;
+				}
+				vm.timespan.calculateDuration();
+			}
+		}
+		
+		/**
+		 * Edit the enter date
+		 */
+		function editEnterDate() {
+			return this.editEnter('date');
+		}
+		
+		/**
+		 *
+		 * trigger a datepicker to edit the enter time
+		 *
+		 */
+		function editEnterTime() {
+			return this.editEnter('time');
+		}
+		
+		/**
+		 * Edit the enter date/time
+		 * @param mode
+		 */
+		function editEnter(mode) {
+			var vm = this;
+			$cordovaDatePicker.show({
+				mode: mode || 'date',
+				date: vm.timespan.enter
+			}).then(function (date) {
+				vm.handleEnterDateChange(date);
+			});
+		}
+		
+		/**
+		 * editExitDate
+		 *
+		 * @returns {*}
+		 */
+		function editExitDate() {
+			return this.editExit('date');
+		}
+		
+		/**
+		 * editExitTime
+		 *
+		 * @returns {*}
+		 */
+		function editExitTime() {
+			return this.editExit('time')
+		}
+		
+		
+		/**
+		 * edit the exit time
+		 * @param mode
+		 */
+		function editExit(mode) {
+			var vm = this;
+			$cordovaDatePicker.show({
+				mode:    mode || 'date',
+				date:    vm.timespan.exit,
+				minDate: vm.timespan.enter,
+			}).then(function (date) {
+				vm.handleExitDateChange(date);
+			});
+		}
+		
+		
 		/**
 		 * editDate
+		 *
+		 * !!!!! DEPRECIATED !!!!!
 		 *
 		 * Open the date picker to edit the date
 		 *
@@ -113,6 +199,8 @@
 		}
 
 		/**
+		 * !!!!! DEPRECIATED !!!!!
+		 *
 		 * editTime
 		 *
 		 * Open a time picker to edit the time
@@ -149,13 +237,14 @@
 					if (validateDates(val, key)) {
 						vm.timespan[key] = val;
 						vm.timespan.calculateDuration();
-						//$scope.$apply();
 					}
 				}
 			})
 		}
 
 		/**
+		 *  !!!!! DEPRECIATED !!!!!
+		 *
 		 * validateDates
 		 *
 		 * Ensures enter is before exit
@@ -203,6 +292,8 @@
 
 
 		/**
+		 *  !!!!! DEPRECIATED !!!!!
+		 *
 		 * mergeDateTime
 		 *
 		 * creates a date with the passed date and time

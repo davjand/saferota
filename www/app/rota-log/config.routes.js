@@ -10,7 +10,7 @@
 
 		$stateProvider
 			.state('app.view.events', {
-				url: '/events',
+				url:   '/events',
 				views: {
 					'tab-settings': {
 						templateUrl:  'app/rota-log/controllers/events.html',
@@ -21,7 +21,7 @@
 
 			})
 			.state('app.view.logs', {
-				url: '/logs',
+				url:   '/logs',
 				views: {
 					'tab-logs': {
 						templateUrl:  'app/rota-log/controllers/logs.html',
@@ -31,7 +31,7 @@
 				}
 			})
 			.state('app.view.logs-edit', {
-				url: '/logs/edit/:timespanId',
+				url:   '/logs/edit/:timespanId',
 				views: {
 					'tab-logs': {
 						templateUrl:  'app/rota-log/controllers/edit.html',
@@ -43,6 +43,16 @@
 								return RotaTimespan.$get($stateParams.timespanId);
 							}
 						}
+					}
+				}
+			})
+			.state('app.view.issues', {
+				url:   '/issues',
+				views: {
+					'tab-logs': {
+						templateUrl:  'app/rota-log/controllers/issues.html',
+						controller:   'RotaIssuesController',
+						controllerAs: 'vm'
 					}
 				}
 			})

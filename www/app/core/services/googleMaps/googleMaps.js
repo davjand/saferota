@@ -10,7 +10,8 @@
 		'$window',
 		'$rootScope',
 		'NETWORK_MSG',
-		'$ionicPopup'
+		'$ionicPopup',
+		'$ionicPlatform'
 	];
 	
 	/* @ngInject */
@@ -18,7 +19,8 @@
 						$window,
 						$rootScope,
 						NETWORK_MSG,
-						$ionicPopup) {
+						$ionicPopup,
+						$ionicPlatform) {
 		var self = this;
 		
 		self.$$prompt = null;
@@ -52,15 +54,17 @@
 		 * activate the service
 		 */
 		function activate() {
-			if (NetworkConnection.isOnline()) {
-				self.loadGoogleMapsAPI();
-			} else {
-				//Listen to rootScope for online event
-				var deregisterOnlineListener = $rootScope.$on(NETWORK_MSG.ONLINE, function () {
+			$ionicPlatform.ready(function () {
+				if (NetworkConnection.isOnline()) {
 					self.loadGoogleMapsAPI();
-					deregisterOnlineListener();
-				});
-			}
+				} else {
+					//Listen to rootScope for online event
+					var deregisterOnlineListener = $rootScope.$on(NETWORK_MSG.ONLINE, function () {
+						self.loadGoogleMapsAPI();
+						deregisterOnlineListener();
+					});
+				}
+			});
 		}
 		
 		/**

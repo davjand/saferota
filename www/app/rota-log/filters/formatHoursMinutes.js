@@ -32,7 +32,7 @@
 				str = "";
 			
 			if (hours > 0) {
-				str = hours + "<span>h</span>";
+				str = hours + "<span>h</span> ";
 			}
 			
 			if (hours > 0 && mins > 0) {

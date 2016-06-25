@@ -1,0 +1,85 @@
+<ion-view class="rota-timespan-issues">
+	<ion-nav-title>Issues</ion-nav-title>
+	<ion-content>
+
+		<div class="no-data-wrapper"
+			 ng-if="vm.service.count() < 1"
+			 ng-click="vm.goBack()">
+			<div class="icon-top ion-checkmark-circled"></div>
+			<h3>No Issues</h3>
+			<h4>Tap here to go back to the logs</h4>
+		</div>
+
+		<div ng-repeat="item in vm.service.issues.items._items track by item.objectId"
+			 class="card">
+			<div class="item item-divider">
+				#{{$index + 1}}:
+				{{item.enter | date : 'EEEE dd MMMM yyyy'}}
+			</div>
+			<div class="item text-center">
+				<div ng-switch="item.errorCode">
+					<div ng-switch-when="1">
+						<h2><strong>We missed you EXITING work.</strong></h2>
+					</div>
+					<div ng-switch-when="2">
+						<h2><strong>We missed you ENTERING work.</strong></h2>
+					</div>
+					<div ng-switch-default>
+						<h2><strong>An unknown error occurred.</strong></h2>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col text-right">
+						Enter:
+					</div>
+					<div class="col text-left">
+						<strong>{{item.enter | date : 'HH:mm'}}</strong>
+						<span ng-if="item.errorCode === 2">(Estimated)</span>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col text-right">
+						Exit:
+					</div>
+					<div class="col text-left">
+						<strong>{{item.exit | date : 'HH:mm'}}</strong>
+						<span ng-if="item.errorCode === 1">(Estimated)</span>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col text-right">
+						Duration:
+					</div>
+					<div class="col text-left">
+						<strong ng-bind-html="item.duration | formatHoursMinutes"></strong>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col">
+						<button class="button button-assertive button-block"
+								ng-click="vm.service.remove(item)">
+							Delete
+						</button>
+					</div>
+					<div class="col">
+						<button class="button button-energized button-block"
+								ng-click="vm.service.amend(item)">
+							Edit
+						</button>
+					</div>
+					<div class="col">
+						<button class="button button-balanced button-block"
+								ng-click="vm.service.approve(item)">
+							Approve
+						</button>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+
+	</ion-content>
+</ion-view>

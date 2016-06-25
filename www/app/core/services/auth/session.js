@@ -215,7 +215,7 @@
 						})
 				)
 			} else {
-				p.resolve(false);
+				p.resolve({result: false, error: {}});
 			}
 			return p.promise;
 		}

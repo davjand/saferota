@@ -1,8 +1,9 @@
 <ion-view class="rota-share">
-	<ion-nav-title>{{vm.rota.label}}</ion-nav-title>
-	<ion-nav-buttons side="secondary">
-		<button class="button" ng-click="vm.change()">Change</button>
-	</ion-nav-buttons>
+	<ion-nav-title ng-click="vm.change()">
+		{{vm.rota.label}}
+		<i class="icon ion-arrow-down-b"></i>
+	</ion-nav-title>
+
 	<ion-content class="text-center padding">
 		<div class="icon-top ion-ios-people"></div>
 		<h3>Team Rotas Coming Soon</h3>

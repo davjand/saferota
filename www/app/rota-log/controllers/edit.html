@@ -14,11 +14,11 @@
 				<div class="date-item">
 					<div class="header">IN</div>
 					<div class="time"
-						 ng-click="vm.editTime('enter')">
+						 ng-click="vm.editEnterTime()">
 						{{vm.timespan.enter | date:"HH:mm"}}
 					</div>
 					<div class="date"
-						 ng-click="vm.editDate('enter')">
+						 ng-click="vm.editEnterDate()">
 						{{vm.moment(vm.timespan.enter).format('dddd Do')}}<br/>
 						{{vm.timespan.enter | date : 'MMM yyyy'}}
 					</div>
@@ -28,12 +28,12 @@
 				<div class="date-item">
 					<div class="header">OUT</div>
 					<div class="time"
-						 ng-click="vm.editTime('exit')">
+						 ng-click="vm.editExitTime()">
 						{{vm.timespan.exit | date:"HH:mm"}}
 
 					</div>
 					<div class="date"
-						 ng-click="vm.editDate('exit')">
+						 ng-click="vm.editExitDate()">
 						{{vm.moment(vm.timespan.exit).format('dddd Do')}}<br/>
 						{{vm.timespan.exit | date : 'MMM yyyy'}}
 					</div>

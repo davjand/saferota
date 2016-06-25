@@ -74,9 +74,12 @@
 		 *
 		 */
 		function destroy() {
+
 			this._Model.off('new', this._callbacks.new);
 			this._Model.off('remove', this._callbacks.remove);
 			
+			this._scope.$destroy();
+
 			angular.forEach(this.items.items(), function (item) {
 				this.removeModel(item);
 			}, this);

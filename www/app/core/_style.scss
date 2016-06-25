@@ -20,5 +20,19 @@
 	.search-prompt {
 		color: #ccc;
 	}
+}
 
+.rota-alert {
+	background: $energized;
+	color: #fff;
+	text-align: center;
+	padding: 25px 20px;
+	div.top {
+		font-size: 18px;
+	}
+	div.bottom {
+		opacity: 0.7;
+		font-size: 24px;
+		padding: 20px 0 0;
+	}
 }

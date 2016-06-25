@@ -1,14 +1,18 @@
 <ion-view class="rota-timespan-view" cache-view="false">
-	<ion-nav-title>{{vm.rota.label}}</ion-nav-title>
-	<ion-nav-buttons side="primary">
-		<button class="button" ng-click="vm.change()">Change</button>
-	</ion-nav-buttons>
+	<ion-nav-title ng-click="vm.change()">
+		{{vm.rota.label}}
+		<i class="icon ion-arrow-down-b"></i>
+	</ion-nav-title>
 	<ion-nav-buttons side="secondary">
 		<button class="button" ng-click="vm.add()">
 			<i class="icon ion-plus"></i>
 		</button>
 	</ion-nav-buttons>
+
 	<ion-content ng-show="vm.$loaded">
+
+		<rota-issue-alert></rota-issue-alert>
+
 		<div class="no-data-wrapper"
 			 ng-if="vm.pager.data.length < 1">
 			<div class="icon-top ion-ios-clock-outline"></div>

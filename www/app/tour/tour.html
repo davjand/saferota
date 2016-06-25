@@ -6,9 +6,9 @@
 			{{vm.doneButton}}
 		</button>
 	</ion-header-bar>
-	<ion-content>
-		<ion-slide-box on-slide-changed="vm.slideHasChanged($index)">
-			<ion-slide>
+	<ion-content scroll="false">
+		<ion-slides options="{}" slider="vm.slider">
+			<ion-slide-page>
 				<div class="box tour-item one">
 					<div class="image">
 						<div>
@@ -26,8 +26,8 @@
 						</div>
 					</div>
 				</div>
-			</ion-slide>
-			<ion-slide>
+			</ion-slide-page>
+			<ion-slide-page>
 				<div class="box tour-item two">
 					<div class="image">
 						<img src="img/tour/Tour-Map@2x.png" alt="Geolocation on a Map"/>
@@ -40,8 +40,8 @@
 						</p>
 					</div>
 				</div>
-			</ion-slide>
-			<ion-slide>
+			</ion-slide-page>
+			<ion-slide-page>
 				<div class="box tour-item three">
 					<div class="image">
 						<img src="img/tour/Tour-Stats@2x.png" alt="Statistics Panel"/>
@@ -53,8 +53,8 @@
 
 					</div>
 				</div>
-			</ion-slide>
-			<ion-slide>
+			</ion-slide-page>
+			<ion-slide-page>
 				<div class="box tour-item four">
 					<div class="image">
 						<img src="img/tour/Tour-Table@2x.png" alt="League Table of Hospitals"/>
@@ -74,7 +74,7 @@
 					</div>
 
 				</div>
-			</ion-slide>
-		</ion-slide-box>
+			</ion-slide-page>
+		</ion-slides>
 	</ion-content>
 </ion-modal-view>

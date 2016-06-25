@@ -12,17 +12,12 @@
 		return {
 			controller: RotaEditController,
 			controllerAs: 'vm',
-			link: link,
 			templateUrl: 'app/core/directives/rota-edit/rotaEdit.html',
 			scope: {
 				rota: '=',
 				edit: '@' //whether an edit form or not
 			}
 		};
-
-		function link(scope, element, attrs) {
-
-		}
 	}
 
 	RotaEditController.$inject = [

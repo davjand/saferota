@@ -20,6 +20,9 @@
 					currentRota: function (Rota, $stateParams) {
 						return Rota.$get($stateParams.rotaId);
 					}
+				},
+				onEnter: function (currentRota, TimespanIssuesService) {
+					TimespanIssuesService.setRota(currentRota);
 				}
 			})
 			.state('app.view.settings', {

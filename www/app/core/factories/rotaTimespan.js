@@ -55,9 +55,46 @@
 				 *
 				 */
 				calculateDuration: function () {
-					this.duration = moment
+					this.duration = Math.round(moment
 						.duration(moment(this.exit).diff(this.enter))
-						.as('minutes');
+						.as('minutes'));
+				},
+				
+				/**
+				 * returns true if after the exit
+				 * @param date
+				 * @returns {boolean}
+				 */
+				afterExit: function (date) {
+					return !moment(date).isBefore(this.exit)
+				},
+				
+				/**
+				 * returns true if before the enter time
+				 * @param date
+				 * @returns {boolean}
+				 */
+				beforeEnter: function (date) {
+					return !moment(date).isAfter(this.enter)
+				},
+				
+				/**
+				 * set a new start date but keep the duration constant
+				 * @param date
+				 */
+				translateByNewEnterDate: function (date) {
+					this.calculateDuration();
+					this.exit = moment(date).add(this.duration, 'minutes').valueOf();
+					this.enter = date;
+				},
+				/**
+				 * set a new start date but keep the duration constant
+				 * @param date
+				 */
+				translateByNewExitDate:  function (date) {
+					this.calculateDuration();
+					this.enter = moment(date).subtract(this.duration, 'minutes').valueOf();
+					this.exit = date;
 				}
 			});
 		

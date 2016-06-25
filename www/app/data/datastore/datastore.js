@@ -283,7 +283,7 @@
 					self.$syncInProgress = false;
 					$rootScope.$emit(DATA_EVENTS.SYNC_ERROR);
 					$log.log(error);
-					$syncPromise.reject('SyncAll Error: ' + error);
+					$syncPromise.reject('SyncAll Error: ' + JSON.stringify(error || {}));
 					return self.$syncComplete;
 				});
 			} else {
