@@ -8,6 +8,10 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 
 
 */
+ion-nav-view {
+	background-color: transparent !important;
+}
+
 
 $balanced: #76C103 !default;
 $assertive: #ef473a !default;

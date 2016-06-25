@@ -65,10 +65,14 @@
 		 *
 		 */
 		self.start = function () {
-			self.session.start();
-			if (self.session.isLoggedIn) {
-				DataStore.startSync();
-			}
+			self.session.start().then(function () {
+				if (self.session.isLoggedIn) {
+					DataStore.startSync();
+				} else {
+					$state.go('auth.signup');
+				}
+			})
+			
 		};
 		
 		

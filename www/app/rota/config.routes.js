@@ -13,17 +13,6 @@
 					abstract: true,
 					url: '/app',
 					templateUrl: 'app/rota/app.html',
-					resolve: {
-						/* @ngInject */
-						isReady: function (App, $q, $state) {
-							return App.ready().then(function () {
-								if (!App.session.isLoggedIn) {
-									$state.go('auth.signup');
-								}
-								return $q.when();
-							});
-						}
-					}
 				}
 			)
 			.state('app.list', {

@@ -1,8 +1,10 @@
-<ion-view hide-back-button="true">
+<ion-view class="rota-new" hide-back-button="true">
 	<ion-nav-title>New Saferota</ion-nav-title>
 	<ion-nav-buttons side="primary">
 		<button class="button"
-				ng-click="vm.cancel()">Cancel
+				ng-click="vm.cancel()">
+			<i class="icon ion-chevron-left"></i>
+			Cancel
 		</button>
 	</ion-nav-buttons>
 
@@ -13,7 +15,8 @@
 				   id="name"
 				   ng-model="vm.rota.label"
 				   placeholder="(no name)"
-				   autofocus/>
+				   focus-input
+			/>
 		</div>
 		<div class="wizard-item">
 			<label for="hours">How many hours are you<br/>contracted to work per week?</label>

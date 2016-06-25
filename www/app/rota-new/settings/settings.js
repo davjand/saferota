@@ -31,7 +31,7 @@
 			vm.rota = NewRotaService.rota;
 			if (!vm.rota) {
 				$ionicHistory.nextViewOptions({historyRoot: true});
-				$state.go('app.new.start');
+				$state.go('app.new');
 			} else {
 				vm.rota.$register($scope);
 			}

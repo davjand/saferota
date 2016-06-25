@@ -92,7 +92,7 @@ describe('saferota.rota-new NewRotaService', function () {
 		});
 		it('creates a new location if one doesnot exist and redirects', function () {
 			NewRotaService.next();
-			expect($state.go).toHaveBeenCalledWith('app.new.location', {
+			expect($state.go).toHaveBeenCalledWith('app.new-location', {
 				locationId: NewRotaService.locations[0].getKey()
 			});
 		});
@@ -111,7 +111,7 @@ describe('saferota.rota-new NewRotaService', function () {
 			NewRotaService.next();
 			expect(NewRotaService.state).toBe(NewRotaService.STATES.SETTINGS);
 			expect(NewRotaService.currentLocationState).toBe(null);
-			expect($state.go).toHaveBeenCalledWith('app.new.settings');
+			expect($state.go).toHaveBeenCalledWith('app.new-settings');
 			
 		});
 		it('goes to the next location if more than one', function () {
@@ -119,7 +119,7 @@ describe('saferota.rota-new NewRotaService', function () {
 			NewRotaService.next();
 			expect(NewRotaService.state).toBe(NewRotaService.STATES.LOCATION);
 			expect(NewRotaService.currentLocationState).toBe(1);
-			expect($state.go).toHaveBeenCalledWith('app.new.location', {
+			expect($state.go).toHaveBeenCalledWith('app.new-location', {
 				locationId: NewRotaService.locations[1].getKey()
 			});
 		});
@@ -135,7 +135,7 @@ describe('saferota.rota-new NewRotaService', function () {
 			NewRotaService.next();
 			$rootScope.$apply();
 			expect(NewRotaService.state).toBe(NewRotaService.STATES.COMPLETE);
-			expect($state.go).toHaveBeenCalledWith('app.new.complete');
+			expect($state.go).toHaveBeenCalledWith('app.new-complete');
 			
 		});
 	});

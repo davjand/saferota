@@ -139,7 +139,12 @@
 		 */
 		function cancel() {
 			NewRotaService.clear();
-			$ionicHistory.goBack();
+			if ($ionicHistory.backView() === null) {
+				$ionicHistory.nextViewOptions({historyRoot: true});
+				$state.go('app.list');
+			} else {
+				$ionicHistory.goBack();
+			}
 		}
 		
 		/**

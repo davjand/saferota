@@ -228,7 +228,7 @@
 		function changeLocationState(locationIndex) {
 			self.currentLocationState = locationIndex;
 			self.state = STATES.LOCATION;
-			$state.go('app.new.location', {
+			$state.go('app.new-location', {
 				locationId: self.locations[locationIndex].getKey()
 			});
 		}
@@ -256,7 +256,7 @@
 					} else {
 						self.state = STATES.SETTINGS;
 						self.currentLocationState = null;
-						$state.go('app.new.settings');
+						$state.go('app.new-settings');
 					}
 					break;
 				case STATES.SETTINGS:
@@ -264,7 +264,7 @@
 					self.saveAndActivate().then(function () {
 						$ionicLoading.hide();
 						self.state = STATES.COMPLETE;
-						$state.go('app.new.complete');
+						$state.go('app.new-complete');
 					});
 					break;
 			}

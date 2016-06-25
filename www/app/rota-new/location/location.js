@@ -47,7 +47,7 @@
 			if (!vm.location) {
 				//error, redirect back
 				$ionicHistory.nextViewOptions({historyRoot: true});
-				$state.go('app.new.start');
+				$state.go('app.new');
 			} else {
 				vm.location.$register($scope);
 				NewRotaService.showLocationHelp();

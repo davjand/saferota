@@ -10,30 +10,25 @@
 
 		$stateProvider
 			.state('app.new', {
-				url:      '/new',
-				abstract: true,
-				template: '<ion-nav-view class="rota-new"></ion-nav-view>'
-			})
-			.state('app.new.start', {
-				url:          '',
+				url:          '/new/start',
 				templateUrl:  'app/rota-new/start/start.html',
 				controller:   'NewRotaStartController',
 				controllerAs: 'vm'
 			})
-			.state('app.new.location', {
-				url:          'location/:locationId',
+			.state('app.new-location', {
+				url:          '/new/location/:locationId',
 				templateUrl:  'app/rota-new/location/location.html',
 				controller:   'NewLocationController',
 				controllerAs: 'vm'
 			})
-			.state('app.new.settings', {
-				url:          '/settings',
+			.state('app.new-settings', {
+				url:          '/new/settings',
 				templateUrl:  'app/rota-new/settings/settings.html',
 				controller:   'NewRotaSettingsController',
 				controllerAs: 'vm'
 			})
-			.state('app.new.complete', {
-				url:          '/complete',
+			.state('app.new-complete', {
+				url:          '/new/complete',
 				templateUrl:  'app/rota-new/complete/complete.html',
 				controller:   'NewRotaCompleteController',
 				controllerAs: 'vm'
