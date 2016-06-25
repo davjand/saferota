@@ -63,9 +63,7 @@
 			.relationship('hasMany', 'locations', 'RotaLocations.rota')
 			.relationship('hasOne', 'user', 'Users')
 			.validators({
-				label: true,
-				speciality: true,
-				role: true
+				label: true
 			})
 			.config({
 				sync: function () {

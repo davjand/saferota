@@ -10,13 +10,13 @@
 		'$scope',
 		'$rootScope',
 		'DATA_EVENTS',
-		'$ionicModal',
 		'$ionicPopup',
 		'Rota',
 		'$ionicListDelegate',
 		'RotaGeoFenceService',
 		'$ionicLoading',
-		'APP_MSG'
+		'APP_MSG',
+		'SettingsService'
 	];
 
 	/* @ngInject */
@@ -24,13 +24,13 @@
 								$scope,
 								$rootScope,
 								DATA_EVENTS,
-								$ionicModal,
 								$ionicPopup,
 								Rota,
 								$ionicListDelegate,
 								RotaGeoFenceService,
 								$ionicLoading,
-								APP_MSG) {
+								APP_MSG,
+								SettingsService) {
 		var vm = this;
 
 
@@ -84,7 +84,6 @@
 			 */
 			vm.rotas = [];
 			vm.activeRotas = [];
-			vm.$settingsModal = null;
 
 
 			/*
@@ -129,11 +128,6 @@
 			angular.forEach(_listeners, function (l) {
 				l();
 			});
-
-			//Unload the settings modal;
-			if (vm.$settingsModal) {
-				vm.$settingsModal.remove();
-			}
 		}
 
 
@@ -220,18 +214,7 @@
 		 *
 		 */
 		function settings() {
-			var $settingsScope = $rootScope.$new(true);
-
-			$settingsScope.hide = function () {
-				vm.$settingsModal.hide();
-			};
-
-			$ionicModal.fromTemplateUrl('app/rota/settings.html', {
-				scope: $settingsScope
-			}).then(function (modal) {
-				vm.$settingsModal = modal;
-				vm.$settingsModal.show();
-			})
+			SettingsService.show();
 		}
 
 		/**

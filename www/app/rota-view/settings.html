@@ -1,7 +1,7 @@
 <ion-view>
 	<ion-nav-title ng-click="vm.change()">
-		{{vm.rota.label}}
 		<i class="icon ion-arrow-swap"></i>
+		{{vm.rota.label}}
 	</ion-nav-title>
 
 	<ion-content>
@@ -11,29 +11,35 @@
 				{{vm.rota.label}} Rota Settings
 			</div>
 			<div class="item">
-				<a class="button button-stable button-outline"
-				   ui-sref="app.edit({rotaId: vm.rota.getKey()})">
-					Edit Settings
-				</a>
-				<a class="button button-subtle pull-right button-outline"
-				   ui-sref="app.view.events({rotaId: vm.rota.getKey()})">
-					View Event Log
-				</a>
+				<div class="row">
+					<div class="col">
+						<a class="button button-stable button-block button-outline"
+						   ui-sref="app.edit({rotaId: vm.rota.getKey()})">
+							Edit Settings
+						</a>
+					</div>
+					<div class="col">
+						<a class="button button-subtle button-block button-outline"
+						   ui-sref="app.view.events({rotaId: vm.rota.getKey()})">
+							View Event Log
+						</a>
+					</div>
+				</div>
+
+
 			</div>
 		</div>
 
 		<!-- Account Settings -->
 		<div class="card">
 			<div class="item item-divider">
-				Your Account
+				App Settings
 			</div>
 			<div class="item text-wrap">
-				<p>Email: {{vm.user.email}} </p>
-			</div>
-			<div class="item">
-				<a class="button button-stable button-outline">Edit Password</a>
-				<a class="button button-assertive button-outline pull-right"
-				   ng-click="vm.logout()">Logout</a>
+				<a class="button button-stable button-block button-outline"
+				   ng-click="vm.settings()">
+					Open App Settings
+				</a>
 			</div>
 		</div>
 
