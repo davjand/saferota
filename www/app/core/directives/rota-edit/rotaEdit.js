@@ -98,7 +98,7 @@
 				$ionicScrollDelegate.resize(); //update scrollview after adding in text
 			});
 			
-			vm.rota.$getRel('locations').then(function (locations) {
+			vm.rota.$getRel('locations', $scope).then(function (locations) {
 				vm.locations = locations;
 			});
 		}
