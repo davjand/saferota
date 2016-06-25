@@ -49,7 +49,7 @@
 						{{field.title}}
 					</span>
 					<span ng-if="field.selected">
-						{{field.selected[field.nameKey] | limitTo: 30}}
+						{{field.selected[field.nameKey] | limitTo: 50}}
 					</span>
 				</div>
 			</div>
@@ -57,7 +57,7 @@
 				<div class="row">
 					<div class="col">
 						<button class="button button-stable button-outline button-small-text button-block"
-								ng-click="vm.attemptProceed(false)">I would rather not give this information
+								ng-click="vm.attemptProceed(false)">I would rather not give this info
 						</button>
 					</div>
 					<div class="col">

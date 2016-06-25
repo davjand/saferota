@@ -16,14 +16,11 @@
 				wait: '='
 			}
 		};
-		
 		function link(scope, element, attrs) {
 			$timeout(function () {
 				element[0].focus();
 			}, scope.wait || 500)
 		}
 	}
-	
-	
 })();
 
