@@ -86,6 +86,7 @@
 		 */
 		function handleEnterDateChange(date) {
 			if (date) {
+				date = moment(date).valueOf();
 				if (vm.timespan.afterExit(date)) {
 					vm.timespan.translateByNewEnterDate(date);
 				} else {
@@ -95,8 +96,14 @@
 			}
 		}
 		
+		/**
+		 * handle an exit date change
+		 *
+		 * @param date
+		 */
 		function handleExitDateChange(date) {
 			if (date) {
+				date = moment(date).valueOf();
 				if (vm.timespan.beforeEnter(date)) {
 					vm.timespan.translateByNewExitDate(date);
 				} else {

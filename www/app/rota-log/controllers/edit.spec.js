@@ -62,7 +62,7 @@ describe('saferota.rota-log RotaLogEditController', function () {
 		});
 		it('should set the enter time based on the result', function () {
 			$rootScope.$apply();
-			expect(controller.timespan.enter).toBe(returnedByDatePicker);
+			expect(controller.timespan.enter).toBe(returnedByDatePicker.valueOf());
 		});
 		it('should calculate the duration', function () {
 			$rootScope.$apply();
@@ -81,6 +81,14 @@ describe('saferota.rota-log RotaLogEditController', function () {
 			expect(moment(controller.timespan.exit).valueOf())
 				.toEqual(moment(date).add(6, 'hours').valueOf());
 		});
+		
+		it('should ensure is saved as an integer', function () {
+			var date = moment(timespan.exit).add(1, 'days');
+			controller.handleEnterDateChange(date);
+			expect(angular.isNumber(controller.timespan.enter)).toBe(true);
+		});
+
+
 	});
 	
 	describe('editEnterTime', function () {
@@ -159,6 +167,14 @@ describe('saferota.rota-log RotaLogEditController', function () {
 			
 			expect(moment(controller.timespan.enter).valueOf())
 				.toEqual(moment(date).subtract(6, 'hours').valueOf());
+		});
+		
+		it('should ensure is saved as an integer', function () {
+			var date = moment(timespan.exit).subtract(1, 'hour');
+			controller.handleExitDateChange(date);
+			
+			
+			expect(angular.isNumber(controller.timespan.exit)).toBe(true);
 		});
 	});
 	

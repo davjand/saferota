@@ -88,9 +88,16 @@
 		 *
 		 * Marks a timespan as deleted
 		 *
+		 * @param week
+		 * @param $index
 		 * @param timespan
 		 */
-		function remove(timespan) {
+		function remove(week, $index, timespan) {
+			//update the ui
+			week.items.splice($index, 1);
+			week.duration -= timespan.duration;
+			
+			//mark as deleted
 			timespan.deleted = true;
 			timespan.$save();
 		}
