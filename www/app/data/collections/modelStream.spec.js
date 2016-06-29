@@ -168,12 +168,6 @@ describe('saferota.data ModelStream', function () {
 			expect(stream.items.add).toHaveBeenCalled();
 			
 		});
-		//it('registers an event listener for update event', function () {
-		//	spyOn(stream, 'handleUpdateEvent');
-		//	stream.addModel(model);
-		//	model.emit('update', model);
-		//	expect(stream.handleUpdateEvent).toHaveBeenCalled();
-		//});
 		
 		it('accepts an array', function () {
 			stream.addModel([
@@ -207,14 +201,6 @@ describe('saferota.data ModelStream', function () {
 		it('removes a model from the collection', function () {
 			stream.removeModel(m1);
 			expect(stream.items.length()).toBe(1);
-		});
-		it('unregisters update callback', function () {
-			spyOn(m1, 'off');
-			stream.removeModel(m1);
-			expect(m1.off).toHaveBeenCalledWith(
-				'update',
-				stream._callbacks.update
-			);
 		});
 		it('should deregister the scope', function () {
 			spyOn(m1, '$deregister');

@@ -29,6 +29,7 @@
 		OrderedCollection.prototype.asJSON = asJSON;
 		OrderedCollection.prototype.setComparator = setComparator;
 		OrderedCollection.prototype.clear = clear;
+		OrderedCollection.prototype.indexOf = indexOf;
 		
 		OrderedCollection.prototype.ASC = 1;
 		OrderedCollection.prototype.DESC = -1;
@@ -197,6 +198,9 @@
 			this._items = [];
 		}
 		
+		function indexOf(item) {
+			return this._items.indexOf(item);
+		}
 	}
 	
 })();

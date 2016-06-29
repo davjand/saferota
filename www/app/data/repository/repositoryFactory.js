@@ -179,137 +179,116 @@
 		 * Persist these to memory
 		 * Then review the current cache and issue updates for whatever is needed
 		 *
-		 * @param model {Object | Array}
+		 * @param modelsToSave {Object | Array}
 		 * @param $scope {$scope} (optional scope object to bind the items to if needed). Pass false if not needed
 		 * @param setUpdatedDate {Boolean} - Defaults to true. Sets the model updated date
 		 * @returns {Promise}
 		 */
-		function save(model, $scope, setUpdatedDate) {
+		function save(modelsToSave, $scope, setUpdatedDate) {
 			setUpdatedDate = typeof setUpdatedDate !== 'undefined' ? setUpdatedDate : true;
 
 
 			var self = this,
-				toSave = {},
-				triggerNewEvent = false,
-				newModels = [];
-
-			if (!angular.isArray(model)) {
-				model = [model];
+				offlineStorageEnabled = self.offlineEnabled(),
+				modelsThatAreNew = [];
+			
+			if (!angular.isArray(modelsToSave)) {
+				modelsToSave = [modelsToSave];
 			}
-
-			//get a list of keys of the models
-			var modelIndex = {};
-			angular.forEach(model, function (item) {
+			
+			/*
+			 * get a list of keys of the models
+			 */
+			var indexedModelsToSave = {};
+			
+			angular.forEach(modelsToSave, function (model) {
 
 				//type check
-				if (item.className() !== self._Model.className()) {
+				if (model.className() !== self._Model.className()) {
 					throw(    'RepositoryFactory.save TypeError: Cannot save model of type: "' +
-					item.className() +
+					model.className() +
 					'" into repository of type: "' +
 					self._Model.className() + '"');
 				}
 
 				// Add a timestamp to each model
 				if (setUpdatedDate) {
-					item.updatedDate = new Date(Date.now());
+					model.updatedDate = new Date(Date.now());
 				}
-				modelIndex[item.getKey()] = item;
+				
+				indexedModelsToSave[model.getKey()] = model;
 			});
-
-			/*
-			 *
-			 * Helper function to save to memory
-			 *
-			 * Returns a promise to allow promise chaining
-			 */
-			function saveMemory(modelsToSave) {
+			
+			return $q.when().then(function () {
 				/*
-				 Now review all the models in memory
+				 * Get items from local storage
+				 * Or Null if disabled
 				 */
-				angular.forEach(modelsToSave, function (savedModel, key) {
-					if ($scope && $scope !== false) {
-						self.registerModel(savedModel, $scope);
+				return offlineStorageEnabled ?
+					self.$local.data(Object.keys(indexedModelsToSave)) :
+					$q.when(null);
+				
+			}).then(function (indexedModelsFromDatastore) {
+				/*
+				 *
+				 * See if the models exist as this will mean we need to trigger a new Event
+				 * Either in memory in local storage depending on the config mode
+				 *
+				 */
+				angular.forEach(indexedModelsToSave, function (model, modelKey) {
+					if (offlineStorageEnabled) {
+						if (!indexedModelsFromDatastore[modelKey] ||
+							indexedModelsFromDatastore[modelKey] === null) {
+							
+							modelsThatAreNew.push(model);
+						} else {
+							model.cacheCurrentState(false);
+						}
+					} else {
+						if (!self._inMem(modelKey)) {
+							modelsThatAreNew.push(model);
+						} else {
+							model.cacheCurrentState(false);
+						}
 					}
-					//doesn't need to update as the model should be the same
-					else if (self._inMem(key)) {
-						self._getMem(key).setData(savedModel);
+				});
+				
+				return offlineStorageEnabled ?
+					self.$local.data(indexedModelsToSave) :
+					$q.when(null);
+				
+			}).then(function () {
+				/*
+				 *
+				 * Now update the models in memory
+				 * If
+				 *
+				 */
+				angular.forEach(indexedModelsToSave, function (model, key) {
+					if ($scope && $scope !== false) {
+						self.registerModel(model, $scope);
+					}
+					/*
+					 * Integrity check
+					 */
+					if (self._inMem(key) && self._getMem(key) !== model) {
+						throw "RepositoryFactory.save: duplicate model instance exists for key: " + key;
 					}
 					//trigger update and cache
-					savedModel.cacheCurrentState(false);
+					
 				});
+				
+				/*
+				 *
+				 * Trigger a new event on the factory
+				 *
+				 */
+				if (modelsThatAreNew.length > 0) {
+					self._Model.emit('new', modelsThatAreNew);
+				}
+				
 				return $q.when();
-			}
-
-
-			/*
-			 * See if offline is disabled, defaults to true
-			 */
-			if (!self.offlineEnabled()) {
-				/*
-				 * If offline is set to false, then just save to memory
-				 */
-				return saveMemory(modelIndex)
-			} else {
-				/*
-				 * Otherwise save to local storage first
-				 */
-				return self.$local.data(Object.keys(modelIndex)).then(function (data) {
-					angular.forEach(modelIndex, function (modelVal, modelKey) {
-						/*
-						 if not found, we'll save the new one
-						 */
-						if (!data[modelKey] || data[modelKey] === null) {
-							toSave[modelKey] = modelVal;
-							triggerNewEvent = true;
-							newModels.push(modelVal);
-						}
-						/*
-						 If found then do a diff sync
-						 */
-						else {
-							var localModel = self._Model.create(data[modelKey], false, true);
-							if (!localModel.isEqual(modelVal)) {
-
-								//ensure in correct format
-								if (typeof modelVal.updatedDate === 'string') {
-									modelVal.updatedDate = new Date(modelVal.updatedDate);
-								}
-								if (typeof localModel.updatedDate === 'string') {
-									localModel.updatedDate = new Date(localModel.updatedDate);
-								}
-
-								/*
-								 * Compare
-								 *
-								 * If no local dates for whatever reason, use the passed object
-								 *
-								 * Otherwise Diff sync
-								 */
-								if (modelVal.updatedDate === null || localModel.updatedDate === null) {
-									localModel.setData(modelVal.toObject(), true);
-								}
-								else if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
-									localModel.setData(modelVal.toObject(), true);
-								}
-							}
-							toSave[modelKey] = localModel;
-						}
-
-					});
-					//save into the database
-					return self.$local.data(toSave);
-				}).then(function () {
-					return saveMemory(modelIndex);
-				}).then(function () {
-					/*
-					 * Trigger a new event on the factory
-					 */
-					if (triggerNewEvent) {
-						self._Model.emit('new', newModels);
-					}
-					return $q.when();
-				})
-			}
+			});
 		}
 
 		/**

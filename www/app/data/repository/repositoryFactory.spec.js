@@ -19,27 +19,27 @@ describe('saferota.data Repository', function () {
 		repo = RepositoryService.create(TestModel);
 
 		m1 = TestModel.create({
-			id: 1,
-			name: 'James',
-			town: 'sheffield',
+			id:          1,
+			name:        'James',
+			town:        'sheffield',
 			updatedDate: new Date(2015, 1, 1)
 		});
 		m2 = TestModel.create({
-			id: 2,
-			name: 'John',
-			town: 'newcastle',
+			id:          2,
+			name:        'John',
+			town:        'newcastle',
 			updatedDate: new Date(2015, 1, 1)
 		});
 		m3 = TestModel.create({
-			id: 3,
-			name: 'Jack',
-			town: 'newcastle',
+			id:          3,
+			name:        'Jack',
+			town:        'newcastle',
 			updatedDate: new Date(2016, 1, 1)
 		});
 		m4 = TestModel.create({
-			id: 4,
-			name: 'Jane',
-			town: 'sheffield',
+			id:          4,
+			name:        'Jane',
+			town:        'sheffield',
 			updatedDate: new Date(2016, 1, 1)
 		});
 		m5 = TestModel.create({
@@ -256,106 +256,144 @@ describe('saferota.data Repository', function () {
 	/*
 	 save
 	 */
-	it('.save throws an error if incorrect models passed to it', function () {
-		var flag = false;
-		try {
-			var M2 = ModelService.create('Model2').schema({name: ''});
-			var m = M2.create({name: 'james'});
+	describe('.save', function () {
+		
+		
+		it('throws an error if incorrect models passed to it', function () {
+			var flag = false;
+			try {
+				var M2 = ModelService.create('Model2').schema({name: ''});
+				var m = M2.create({name: 'james'});
+				
+				repo.save(m);
+				
+				expect(false).toBe(true);
+			}
+			catch (error) {
+				console.log(error);
+				expect(error).not.toBeUndefined();
+				flag = true;
+			}
+			expect(flag).toBe(true);
 
-			repo.save(m);
-
-			expect(false).toBe(true);
-		}
-		catch (error) {
-			console.log(error);
-			expect(error).not.toBeUndefined();
-			flag = true;
-		}
-		expect(flag).toBe(true);
-
-	});
-	it('.save can save a model into the repository, if not registered, will register them', function (done) {
-		var $s = $rootScope.$new(true);
-
-		//save
-		repo.save(m1, $s).then(function () {
-			expect(repo._inMem(m1.id)).toBe(true); //should be in memory
-
-			return repo.$local.data(m1.id); //should be stored
-		}).then(function (object) {
-			//should be stored
-			expect(object.name).toBe(m1.name);
-			done();
 		});
-
-		_d();
-	});
-	it('.save can take an array', function (done) {
-		repo.save([m1, m2, m3], $rootScope).then(function () {
-			expect(Object.keys(repo.$mem).length).toBe(3);
-
-			return repo.$local.length();
-		}).then(function (len) {
-			expect(len).toBe(3);
-
-			done();
+		it('can save a model into the repository, if not registered, will register them', function (done) {
+			var $s = $rootScope.$new(true);
+			
+			//save
+			repo.save(m1, $s).then(function () {
+				expect(repo._inMem(m1.id)).toBe(true); //should be in memory
+				
+				return repo.$local.data(m1.id); //should be stored
+			}).then(function (object) {
+				//should be stored
+				expect(object.name).toBe(m1.name);
+				done();
+			});
+			
+			_d();
 		});
-		_d();
+		it('can take an array', function (done) {
+			repo.save([m1, m2, m3], $rootScope).then(function () {
+				expect(Object.keys(repo.$mem).length).toBe(3);
+				
+				return repo.$local.length();
+			}).then(function (len) {
+				expect(len).toBe(3);
+				
+				done();
+			});
+			_d();
 
-	});
-	it('.save will use the object with the latest update date if an object already exists', function (done) {
-		var called = false;
-
-		//trigger update
-		m1.on('update', function () {
-			called = true;
 		});
+		
+		describe('update events', function () {
+			var modelCalled, factoryCalled;
+			
+			beforeEach(function () {
+				modelCalled = 0;
+				factoryCalled = 0;
+				
+				m1.on('update', function () {
+					modelCalled++;
+				});
+				TestModel.on('update', function () {
+					factoryCalled++;
+				});
+			});
+			afterEach(function () {
+				m1.off('update');
+				TestModel.off('update');
+			});
+			
+			it('.save will not trigger an update event for new models', function (done) {
+				repo.save(m1, $rootScope).then(function () {
+					expect(modelCalled).toBe(0);
+					expect(modelCalled).toBe(0);
+					done();
+				});
+				_d();
+			});
+			it('.save will not trigger an update event for clean existing models', function (done) {
+				repo.save(m1, $rootScope).then(function () {
+					return repo.save(m1, $rootScope);
+				}).then(function () {
+					expect(modelCalled).toBe(0);
+					expect(modelCalled).toBe(0);
+					done();
+				});
+				_d();
+			});
+			it('.save will  trigger an update event for dirty existing models', function (done) {
+				repo.save(m1, $rootScope).then(function () {
+					m1.name = "Paula Jones";
+					return repo.save(m1, $rootScope);
+				}).then(function () {
+					expect(modelCalled).toBe(1);
+					expect(modelCalled).toBe(1);
+					done();
+				});
+				_d();
+			});
 
-		repo.save([m1, m2, m3], $rootScope).then(function () {
-			//create some new objects but tweak them
-			var m12 = TestModel.create(m1.toObject(), false, true);
-			var m22 = TestModel.create(m2.toObject(), false, true);
 
-			m12.updatedDate = new Date(2017, 1, 1);
-			m12.name = 'James Bond';
-
-			m22.updatedDate = new Date(2014, 1, 1);
-			m22.name = 'John 2nd';
-
-			return repo.save([m12, m22], false, false);
-		}).then(function () {
-			expect(m1.name).toBe('James Bond');
-			expect(m2.name).toBe('John');
-
-			//callback should not have been triggered
-			//expect(called).toBe(true);
-
-			//changes should have been saved
-			return repo.$local.data([m1.id, m2.id]);
-		}).then(function (data) {
-			expect(data[m1.id].name).toBe('James Bond');
-			expect(data[m2.id].name).toBe('John');
-			done();
 		});
-		_d();
-	});
-	it('.save will not save into the localStorage if a model config.offline is set to false', function (done) {
-		var NoSyncModel = ModelService.create('noSync').schema({
-			name: ''
-		}).config({offline: false});
-
-		var noSyncRepo = RepositoryService.create(NoSyncModel);
-
-		var ns1 = NoSyncModel.create({name: 'test'}),
-			ns2 = NoSyncModel.create({name: 'test2'});
-
-		spyOn(noSyncRepo.$local, 'data');
-
-		noSyncRepo.save([ns1, ns2]).then(function () {
-			expect(noSyncRepo.$local.data).not.toHaveBeenCalled();
-			done();
+		
+		it('will not save into the localStorage if a model config.offline is set to false', function (done) {
+			var NoSyncModel = ModelService.create('noSync').schema({
+				name: ''
+			}).config({offline: false});
+			
+			var noSyncRepo = RepositoryService.create(NoSyncModel);
+			
+			var ns1 = NoSyncModel.create({name: 'test'}),
+				ns2 = NoSyncModel.create({name: 'test2'});
+			
+			spyOn(noSyncRepo.$local, 'data');
+			
+			noSyncRepo.save([ns1, ns2]).then(function () {
+				expect(noSyncRepo.$local.data).not.toHaveBeenCalled();
+				done();
+			});
+			_d();
 		});
-		_d();
+		
+		it('will throw an error if attempt to save a new model with an existing ID', function (done) {
+			
+			try {
+				repo.save(m1, $rootScope).then(function () {
+					var m12 = TestModel.create(m1.toObject(), false, true);
+					return repo.save(m12, $rootScope);
+				}).then(function () {
+					expect(true).toBe(false);
+				});
+				_d();
+			} catch (error) {
+				expect(true).toBe(true);
+				done();
+			}
+			
+		});
 	});
 
 	/*
@@ -536,9 +574,9 @@ describe('saferota.data Repository', function () {
 			flag = false,
 			date = new Date(2015, 1, 1),
 			tx = new Transaction({
-				type: Transaction.TYPES.CREATE,
+				type:  Transaction.TYPES.CREATE,
 				model: m5,
-				time: 0
+				time:  0
 			});
 
 		//callback
@@ -566,9 +604,9 @@ describe('saferota.data Repository', function () {
 	it('.notify updates the local storage items', function (done) {
 		var date = new Date(2015, 1, 1);
 		var tx = new Transaction({
-			type: Transaction.TYPES.CREATE,
+			type:  Transaction.TYPES.CREATE,
 			model: m5,
-			time: 0
+			time:  0
 		});
 		tx.resolve({id: '999-999', name: 'updated', updatedDate: date});
 
@@ -658,7 +696,6 @@ describe('saferota.data Repository', function () {
 		});
 		_d();
 	});
-
 
 
 });

@@ -55,11 +55,20 @@ describe('saferota.data OrderedCollection', function () {
 		expect(collection.get(0)).toBe("test");
 	});
 	it('.remove deletes the item at the passed index', function () {
-		collection.add("test", "index");
+		collection.add(["test", "index"]);
+		expect(collection.length()).toBe(2);
 		collection.remove(0);
-		expect(collection.length()).toBe(0);
+		expect(collection.length()).toBe(1);
 	});
 	
+	it('.remove can delete the second place', function () {
+		collection.add(["test", "test2", 'test3']);
+		collection.remove(1);
+		expect(collection.length()).toBe(2);
+		expect(collection._items[0]).toBe("test");
+		expect(collection._items[1]).toBe("test3");
+	});
+
 	
 	describe('items can paginate', function () {
 		beforeEach(function () {
@@ -81,15 +90,17 @@ describe('saferota.data OrderedCollection', function () {
 	});
 	
 	
-	describe('finding and filter', function () {
+	describe('accessing data', function () {
+		var item1, item2, item3, item4, item5;
 		beforeEach(function () {
-			collection.add([
-				{name: 'james', age: 10},
-				{name: 'john', age: 50},
-				{name: 'paul', age: 30},
-				{name: 'steven', age: 40},
-				{name: 'james', age: 50}
-			]);
+			
+			item1 = {name: 'james', age: 10};
+			item2 = {name: 'john', age: 50};
+			item3 = {name: 'paul', age: 30};
+			item4 = {name: 'steven', age: 40};
+			item5 = {name: 'james', age: 50};
+			
+			collection.add([item1, item2, item3, item4, item5]);
 		});
 		
 		it('.find returns a single item matched by the callback', function () {
@@ -120,6 +131,14 @@ describe('saferota.data OrderedCollection', function () {
 			});
 			expect(item).toEqual([]);
 		});
+		
+		it('getIndex returns -1 if not found', function () {
+			expect(collection.indexOf({test: 'item'})).toBe(-1);
+		});
+		it('getIndex returns the index of the item', function () {
+			expect(collection.indexOf(item3)).toBe(2);
+		});
+
 	});
 	
 });

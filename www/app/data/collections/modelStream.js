@@ -80,6 +80,7 @@
 
 			this._Model.off('new', this._callbacks.new);
 			this._Model.off('remove', this._callbacks.remove);
+			this._Model.off('update', this._callbacks.remove);
 			
 			this._scope.$destroy();
 
@@ -116,7 +117,6 @@
 			angular.forEach(model, function (item) {
 				if (force || !self.in(item)) {
 					item.$register(self._scope);
-					//item.on('update', self._callbacks.update);
 					self.items.add(item);
 				}
 			});
@@ -128,8 +128,7 @@
 		 * @param model
 		 */
 		function removeModel(model) {
-			this.items.remove(model);
-			model.off('update', this._callbacks.update);
+			this.items.remove(this.items.indexOf(model));
 			model.$deregister(this._scope);
 			this.emit('update');
 		}

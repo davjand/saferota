@@ -140,15 +140,15 @@ describe('saferota.data DataStore', function () {
 			_d();
 		});
 		
-		
+
 		it('queues a save event and when executed a model update event is fired', function (done) {
 			var called = false,
 				initialId = model.getKey();
-			
+
 			model.on('update', function () {
 				called = true;
 			});
-			
+
 			DataStore.save(model, false).then(function () {
 				return RequestService.next();
 			}).then(function () {
@@ -187,6 +187,10 @@ describe('saferota.data DataStore', function () {
 			model.name = 'james';
 			
 			DataStore.save(model).then(function () {
+				expect(called).toBe(false);
+				model.name = "paul";
+				return DataStore.save(model);
+			}).then(function () {
 				expect(called).toBe(true);
 				done();
 			});
@@ -783,9 +787,8 @@ describe('saferota.data DataStore', function () {
 			expect(p1.owner).not.toBe(m1ID);
 			
 			/*
-			 * 19 callbacks
+			 * 14 callbacks
 			 *
-			 * 5 when saved m1,m2,p1,p2,p3
 			 * 3 when set relationships on p1,p2,ph3
 			 *
 			 * 1 when m1 was saved to server
@@ -794,9 +797,9 @@ describe('saferota.data DataStore', function () {
 			 * 3 when p1,p2,p3 saved to server
 			 * 3 when p1,p2,p3 relationships are set
 			 *
-			 * = 19
+			 * = 14
 			 */
-			expect(update).toEqual(19);
+			expect(update).toEqual(14);
 
 			return m1.$getRel('pets');
 		}).then(function (pets) {
