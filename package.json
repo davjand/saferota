@@ -45,7 +45,8 @@
       "id": "cordova-plugin-x-socialsharing"
     },
     "cordova.plugins.diagnostic",
-    "cordova-plugin-network-information"
+    "cordova-plugin-network-information",
+    "cordova-plugin-email-composer@0.8.3"
   ],
   "cordovaPlatforms": [
     "android",

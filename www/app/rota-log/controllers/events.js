@@ -5,10 +5,10 @@
 		.module('saferota.rota-log')
 		.controller('RotaViewEventController', RotaViewEventController);
 
-	RotaViewEventController.$inject = ['RotaEvent', '$scope', '$q', 'RotaViewService'];
+	RotaViewEventController.$inject = ['RotaEvent', '$scope', '$q', 'RotaViewService','$ionicScrollDelegate'];
 
 	/* @ngInject */
-	function RotaViewEventController(RotaEvent, $scope, $q, RotaViewService) {
+	function RotaViewEventController(RotaEvent, $scope, $q, RotaViewService, $ionicScrollDelegate) {
 		var vm = this;
 
 		var LIMIT = 10,
@@ -56,6 +56,7 @@
 				}
 			}, $scope).then(function (events) {
 				eventsCache = events || [];
+				vm.$more = true;
 				vm.events = [];
 				vm.nextPage();
 				return $q.when();
@@ -86,6 +87,9 @@
 				vm.events = vm.events.concat(eventsCache.splice(0, LIMIT));
 			}
 			vm.$loading = false;
+			$scope.$broadcast('scroll.infiniteScrollComplete');
+			//$scope.$apply();
+			$ionicScrollDelegate.resize();
 		}
 
 

@@ -94,6 +94,22 @@ describe('saferota.data ModelStream', function () {
 			})
 		});
 	});
+
+	describe('in', function () {
+		var stream;
+		beforeEach(function (done) {
+			stream = new ModelStream(Model, {name: 'james'});
+			_d().then(function(){
+				done();
+			})
+		});
+		it('returns true if the model is in the stream', function () {
+			expect(stream.in(m1)).toBe(true);
+		});
+		it('returns false if the model is not in the stream', function () {
+			expect(stream.in(m2)).toBe(false);
+		});
+	});
 	
 	describe('.handleNewEvent', function () {
 		var stream;
@@ -152,18 +168,29 @@ describe('saferota.data ModelStream', function () {
 			expect(stream.items.add).toHaveBeenCalled();
 			
 		});
-		it('registers an event listener for update event', function () {
-			spyOn(stream, 'handleUpdateEvent');
-			stream.addModel(model);
-			model.emit('update', model);
-			expect(stream.handleUpdateEvent).toHaveBeenCalled();
-		});
+		//it('registers an event listener for update event', function () {
+		//	spyOn(stream, 'handleUpdateEvent');
+		//	stream.addModel(model);
+		//	model.emit('update', model);
+		//	expect(stream.handleUpdateEvent).toHaveBeenCalled();
+		//});
 		
 		it('accepts an array', function () {
 			stream.addModel([
 				model,
 				Model.create({name: 'jjj'})
 			]);
+			expect(stream.items.length()).toBe(4);
+		});
+
+		it('will not add a model that is already in the array', function () {
+			stream.addModel(model);
+			stream.addModel(model);
+			expect(stream.items.length()).toBe(3);
+		});
+		it('can force add a model', function () {
+			stream.addModel(model);
+			stream.addModel(model, true);
 			expect(stream.items.length()).toBe(4);
 		});
 	});
@@ -239,6 +266,28 @@ describe('saferota.data ModelStream', function () {
 			
 			m1.city = 'paul';
 			m1.$save().then(function () {
+				expect(stream.handleUpdateEvent).toHaveBeenCalled();
+				expect(stream.items.length()).toBe(2);
+				done();
+			});
+			_d();
+		});
+		it('adds an item if it doesnot exist in the array', function (done) {
+			spyOn(stream, 'handleUpdateEvent').and.callThrough();
+
+			m3.name = 'james';
+			m3.$save().then(function () {
+				expect(stream.handleUpdateEvent).toHaveBeenCalled();
+				expect(stream.items.length()).toBe(3);
+				done();
+			});
+			_d();
+		});
+		it('does not add an item if doesnot exist and doesnot match', function (done) {
+			spyOn(stream, 'handleUpdateEvent').and.callThrough();
+
+			m3.name = 'phillip';
+			m3.$save().then(function () {
 				expect(stream.handleUpdateEvent).toHaveBeenCalled();
 				expect(stream.items.length()).toBe(2);
 				done();

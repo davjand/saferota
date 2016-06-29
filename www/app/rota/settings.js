@@ -16,7 +16,8 @@
 		'TourService',
 		'RotaGeoFenceService',
 		'APP_MSG',
-		'$state'
+		'$state',
+		'$cordovaEmailComposer'
 	];
 
 	/* @ngInject */
@@ -30,7 +31,8 @@
 								TourService,
 								RotaGeoFenceService,
 								APP_MSG,
-								$state) {
+								$state,
+								$cordovaEmailComposer) {
 		var vm = this;
 
 		vm.user = Session.user;
@@ -39,6 +41,7 @@
 		vm.refresh = refresh;
 		vm.logout = logout;
 		vm.playTour = playTour;
+		vm.support = support;
 		vm.deactivateAll = deactivateAll;
 
 		/**
@@ -112,6 +115,23 @@
 		 */
 		function playTour() {
 			TourService.show();
+		}
+
+		/**
+		 * support
+		 */
+		function support(){
+			$cordovaEmailComposer.isAvailable().then(function() {
+				$cordovaEmailComposer.open({
+					to: 'info@saferota.com',
+					subject: 'SafeRota Support Request',
+					body: "Please help me, the issues I'm having are: \n\n"
+				});
+			},function(){
+				$ionicPopup.alert({
+					title: 'Please email info@saferota.com'
+				});
+			});
 		}
 
 		/**

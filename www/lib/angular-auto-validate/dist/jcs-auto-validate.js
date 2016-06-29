@@ -1,7 +1,7 @@
 /*
- * angular-auto-validate - v1.19.3 - 2015-11-30
+ * angular-auto-validate - v1.19.6 - 2016-06-17
  * https://github.com/jonsamwell/angular-auto-validate
- * Copyright (c) 2015 Jon Samwell (http://www.jonsamwell.com)
+ * Copyright (c) 2016 Jon Samwell (http://www.jonsamwell.com)
  */
 (function (String, angular) {
     'use strict';
@@ -14,6 +14,7 @@ function ValidatorFn() {
     enableInvalidElementStyling = true,
     enableFirstInvalidElementScrollingOnSubmit = false,
     validationEnabled = true,
+    enableFocusInputError = true,
 
     toBoolean = function (value) {
       var v;
@@ -265,6 +266,25 @@ function ValidatorFn() {
     return enableFirstInvalidElementScrollingOnSubmit;
   };
 
+  /**
+   * @ngdoc function
+   * @name validator#setFocusInputError
+   * @methodOf validator
+   *
+   * @description
+   * Globally enables focused input error. This is enabled by default.
+   *
+   * @param enabled {Boolean} enabled false to disabled focus otherwise false.
+   */
+
+  this.setFocusInputError = function (enabled) {
+    enableFocusInputError = enabled;
+  };
+
+  this.enableFocusInputError = function () {
+    return enableFocusInputError;
+  };
+
 
   this.getDomModifier = function (el) {
     var modifierKey = (el !== undefined ? el.attr('element-modifier') : this.defaultElementModifier) ||
@@ -335,38 +355,42 @@ function ValidatorFn() {
 angular.module('jcs-autoValidate').provider('validator', ValidatorFn);
 
 function Bootstrap3ElementModifierFn($log) {
-  var customCss = [
-    '<style>' +
-    '.glyphicon-spin-jcs {' +
-    '-webkit-animation: spin 1000ms infinite linear;' +
-    'animation: spin 1000ms infinite linear;' +
-    '}' +
-    '@-webkit-keyframes spin {' +
-    '0% {' +
-    '-webkit-transform: rotate(0deg);' +
-    'transform: rotate(0deg);' +
-    '}' +
-    '100% {' +
-    '-webkit-transform: rotate(359deg);' +
-    'transform: rotate(359deg);' +
-    '}' +
-    '}' +
-    '@keyframes spin {' +
-    '0% {' +
-    '-webkit-transform: rotate(0deg);' +
-    'transform: rotate(0deg);' +
-    '}' +
-    '100% {' +
-    '-webkit-transform: rotate(359deg);' +
-    'transform: rotate(359deg);' +
-    '}' +
-    '}' +
-    '</style>'
-  ].join('');
-
-  angular.element(document.body).append(angular.element(customCss));
+  var addedCustomCss = false,
+    customCss = [
+      '<style>' +
+      '.glyphicon-spin-jcs {' +
+      '-webkit-animation: spin 1000ms infinite linear;' +
+      'animation: spin 1000ms infinite linear;' +
+      '}' +
+      '@-webkit-keyframes spin {' +
+      '0% {' +
+      '-webkit-transform: rotate(0deg);' +
+      'transform: rotate(0deg);' +
+      '}' +
+      '100% {' +
+      '-webkit-transform: rotate(359deg);' +
+      'transform: rotate(359deg);' +
+      '}' +
+      '}' +
+      '@keyframes spin {' +
+      '0% {' +
+      '-webkit-transform: rotate(0deg);' +
+      'transform: rotate(0deg);' +
+      '}' +
+      '100% {' +
+      '-webkit-transform: rotate(359deg);' +
+      'transform: rotate(359deg);' +
+      '}' +
+      '}' +
+      '</style>'
+    ].join('');
 
   var reset = function (el) {
+      if (addedCustomCss === false) {
+        angular.element(document.body).append(angular.element(customCss));
+        addedCustomCss = true;
+      }
+
       angular.forEach(el.find('span'), function (spanEl) {
         spanEl = angular.element(spanEl);
         if (spanEl.hasClass('error-msg') || spanEl.hasClass('form-control-feedback') || spanEl.hasClass('control-feedback')) {
@@ -467,7 +491,7 @@ function Bootstrap3ElementModifierFn($log) {
           var iconElText = '<span class="glyphicon glyphicon-ok form-control-feedback"></span>';
           if (inputGroupEl.length > 0) {
             iconElText = iconElText.replace('form-', '');
-            iconElText = '<span class="input-group-addon control-feedback">' + iconElText + '</span';
+            iconElText = '<span class="input-group-addon control-feedback">' + iconElText + '</span>';
           }
 
           insertAfter(el, angular.element(iconElText));
@@ -620,13 +644,10 @@ angular.module('jcs-autoValidate').factory('jcs-debounce', JCSDebounceFn);
 /**
  * Replaces string placeholders with corresponding template string
  */
-if (!('format' in String.prototype)) {
-  String.prototype.format = function () {
-    var args = arguments;
-    return this.replace(/{(\d+)}/g, function (match, number) {
-      return typeof args[number] !== undefined ? args[number] : match;
-    });
-  };
+function formatString(string, params) {
+  return string.replace(/{(\d+)}/g, function (match, number) {
+    return typeof params[number] !== undefined ? params[number] : match;
+  });
 }
 
 angular.autoValidate = angular.autoValidate || {
@@ -655,7 +676,7 @@ function DefaultErrorMessageResolverFn($q, $http) {
     cultureRetrievalPromise,
 
     loadRemoteCulture = function (culture) {
-      cultureRetrievalPromise = $http.get('{0}/jcs-auto-validate_{1}.json'.format(i18nFileRootPath, culture.toLowerCase()));
+      cultureRetrievalPromise = $http.get(formatString('{0}/jcs-auto-validate_{1}.json', [i18nFileRootPath, culture.toLowerCase()]));
       return cultureRetrievalPromise;
     },
 
@@ -781,9 +802,9 @@ function DefaultErrorMessageResolverFn($q, $http) {
         }
 
         if (errMsg === undefined && messageTypeOverride !== undefined) {
-          errMsg = angular.autoValidate.errorMessages[currentCulture].defaultMsg.format(messageTypeOverride);
+          errMsg = formatString(angular.autoValidate.errorMessages[currentCulture].defaultMsg, [messageTypeOverride]);
         } else if (errMsg === undefined) {
-          errMsg = angular.autoValidate.errorMessages[currentCulture].defaultMsg.format(errorType);
+          errMsg = formatString(angular.autoValidate.errorMessages[currentCulture].defaultMsg, [errorType]);
         }
 
         if (el && el.attr) {
@@ -795,7 +816,7 @@ function DefaultErrorMessageResolverFn($q, $http) {
 
             parameters.push(parameter || '');
 
-            errMsg = errMsg.format(parameters);
+            errMsg = formatString(errMsg, parameters);
           } catch (e) {}
         }
 
@@ -904,6 +925,91 @@ function Foundation5ElementModifierFn() {
 }
 
 angular.module('jcs-autoValidate').factory('foundation5ElementModifier', Foundation5ElementModifierFn);
+
+function foundation6ElementModifierFn() {
+  var reset = function (el, inputEl) {
+      angular.forEach(el.find('small'), function (smallEl) {
+        if (angular.element(smallEl).hasClass('form-error is-visible')) {
+          angular.element(smallEl).remove();
+        }
+      });
+
+      inputEl.removeClass('alert callout');
+    },
+    findParentColumn = function (el) {
+      var parent = el;
+      for (var i = 0; i <= 3; i += 1) {
+        if (parent !== undefined && (parent.hasClass('columns') || parent.hasClass('column'))) {
+          break;
+        } else if (parent !== undefined) {
+          parent = parent.parent();
+        }
+      }
+
+      return parent;
+    },
+
+    /**
+     * @ngdoc function
+     * @name foundation6ElementModifier#makeValid
+     * @methodOf foundation6ElementModifier
+     *
+     * @description
+     * Makes an element appear valid by apply Foundation 6 specific styles and child elements.
+     * See: http://foundation.zurb.com/sites/docs/forms.html
+     *
+     * @param {Element} el - The input control element that is the target of the validation.
+     */
+    makeValid = function (el) {
+      var parentColumn = findParentColumn(el);
+      reset(parentColumn && parentColumn.length > 0 ? parentColumn : el, el);
+    },
+
+    /**
+     * @ngdoc function
+     * @name foundation6ElementModifier#makeInvalid
+     * @methodOf foundation6ElementModifier
+     *
+     * @description
+     * Makes an element appear invalid by apply Foundation 6 specific styles and child elements.
+     * See: http://foundation.zurb.com/sites/docs/forms.html
+     *
+     * @param {Element} el - The input control element that is the target of the validation.
+     */
+    makeInvalid = function (el, errorMsg) {
+      var parentColumn = findParentColumn(el),
+        helpTextEl;
+      reset(parentColumn || el, el);
+      el.addClass('alert callout');
+      if (parentColumn) {
+        helpTextEl = angular.element('<small class="form-error is-visible">' + errorMsg + '</small>');
+        parentColumn.append(helpTextEl);
+      }
+    },
+
+    /**
+     * @ngdoc function
+     * @name foundation6ElementModifier#makeDefault
+     * @methodOf foundation6ElementModifier
+     *
+     * @description
+     * Makes an element appear in its default visual state by apply Foundation 6 specific styles and child elements.
+     *
+     * @param {Element} el - The input control element that is the target of the validation.
+     */
+    makeDefault = function (el) {
+      makeValid(el);
+    };
+
+  return {
+    makeValid: makeValid,
+    makeInvalid: makeInvalid,
+    makeDefault: makeDefault,
+    key: 'foundation6'
+  };
+}
+
+angular.module('jcs-autoValidate').factory('foundation6ElementModifier', foundation6ElementModifierFn);
 
 function ElementUtilsFn() {
   var isElementVisible = function (el) {
@@ -1055,6 +1161,7 @@ function ValidationManagerFn(validator, elementUtils, $anchorScroll) {
 
     validateForm = function (frmElement) {
       var frmValid = true,
+        firstElementError = null,
         frmCtrl = frmElement ? angular.element(frmElement).controller('form') : undefined,
         processElement = function (ctrlElement, force, formOptions) {
           var controller, isValid, ctrlFormOptions, originalForceValue;
@@ -1074,6 +1181,12 @@ function ValidationManagerFn(validator, elementUtils, $anchorScroll) {
               ctrlFormOptions.forceValidation = force;
               try {
                 isValid = validateElement(controller, ctrlElement, ctrlFormOptions);
+                if (validator.enableFocusInputError() && !isValid && frmValid) {
+                  if (!firstElementError) {
+                    firstElementError = ctrlElement[0];
+                    firstElementError.focus();
+                  }
+                }
                 if (validator.firstInvalidElementScrollingOnSubmitEnabled() && !isValid && frmValid) {
                   var ctrlElementId = ctrlElement.attr('id');
                   if (ctrlElementId) {
@@ -1121,12 +1234,12 @@ function ValidationManagerFn(validator, elementUtils, $anchorScroll) {
     },
 
     setElementValidationError = function (element, errorMsgKey, errorMsg) {
-      if (errorMsgKey) {
+      if (errorMsg) {
+        validator.makeInvalid(element, errorMsg);
+      } else {
         validator.getErrorMessage(errorMsgKey, element).then(function (msg) {
           validator.makeInvalid(element, msg);
         });
-      } else {
-        validator.makeInvalid(element, errorMsg);
       }
     };
 
@@ -1185,7 +1298,6 @@ angular.module('jcs-autoValidate').directive('form', [
     return {
       restrict: 'E',
       require: 'form',
-      priority: 9999,
       compile: function () {
         return {
           pre: function (scope, element, attrs, ctrl) {
@@ -1423,8 +1535,7 @@ angular.module('jcs-autoValidate').config(['$provide',
 
               ngModelCtrl.setExternalValidation = function (errorMsgKey, errorMessage, addToModelErrors) {
                 if (addToModelErrors) {
-                  var collection = ngModelCtrl.$error || ngModelCtrl.$errors;
-                  collection[errorMsgKey] = false;
+                  ngModelCtrl.$setValidity(errorMsgKey, false);
                 }
 
                 ngModelCtrl.externalErrors = ngModelCtrl.externalErrors || {};
@@ -1434,6 +1545,7 @@ angular.module('jcs-autoValidate').config(['$provide',
 
               ngModelCtrl.removeExternalValidation = function (errorMsgKey, addToModelErrors) {
                 if (addToModelErrors) {
+                  ngModelCtrl.$setValidity(errorMsgKey, true);
                   var collection = ngModelCtrl.$error || ngModelCtrl.$errors;
                   delete collection[errorMsgKey];
                 }
@@ -1449,11 +1561,11 @@ angular.module('jcs-autoValidate').config(['$provide',
                 if (ngModelCtrl.externalErrors) {
                   var errorCollection = ngModelCtrl.$error || ngModelCtrl.$errors;
                   angular.forEach(ngModelCtrl.externalErrors, function (value, key) {
+                    ngModelCtrl.$setValidity(key, true);
                     delete errorCollection[key];
                   });
 
                   ngModelCtrl.externalErrors = {};
-
                   validationManager.resetElement(element);
                 }
               };
@@ -1498,10 +1610,11 @@ angular.module('jcs-autoValidate').config(['$provide',
   }
 ]);
 
-function AutoValidateRunFn(validator, defaultErrorMessageResolver, bootstrap3ElementModifier, foundation5ElementModifier) {
+function AutoValidateRunFn(validator, defaultErrorMessageResolver, bootstrap3ElementModifier, foundation5ElementModifier, foundation6ElementModifier) {
   validator.setErrorMessageResolver(defaultErrorMessageResolver.resolve);
   validator.registerDomModifier(bootstrap3ElementModifier.key, bootstrap3ElementModifier);
   validator.registerDomModifier(foundation5ElementModifier.key, foundation5ElementModifier);
+  validator.registerDomModifier(foundation6ElementModifier.key, foundation6ElementModifier);
   validator.setDefaultElementModifier(bootstrap3ElementModifier.key);
 }
 
@@ -1509,7 +1622,8 @@ AutoValidateRunFn.$inject = [
   'validator',
   'defaultErrorMessageResolver',
   'bootstrap3ElementModifier',
-  'foundation5ElementModifier'
+  'foundation5ElementModifier',
+  'foundation6ElementModifier'
 ];
 
 angular.module('jcs-autoValidate').run(AutoValidateRunFn);

@@ -317,6 +317,7 @@
 		 *
 		 *
 		 * @param enterEvents
+		 * @param rota
 		 */
 		function processEnterEvents(enterEvents, rota) {
 			var event;
@@ -339,6 +340,8 @@
 					
 					//create a timespan object and flag up to the user
 					var timespan = self.createDefaultRotaTimespanWhenNoExitEvent(item, rota);
+
+					//save the items
 					pArr.push(timespan.$save());
 				});
 				return $q.all(pArr).then(function () {
@@ -385,6 +388,11 @@
 			var min = rota.minimumTime || 0;
 
 			if (duration < min) {
+
+				//if subtraction has occurred, tidy up for output formatting.
+				if(duration < 0){
+					duration = 0;
+				}
 				exit.error = 'Duration ' + Math.round(duration) + ' mins, less than minimum of ' + min;
 				return null;
 			}

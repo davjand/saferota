@@ -4,7 +4,7 @@
 		{{vm.rota.label}}
 	</ion-nav-title>
 	<ion-nav-buttons side="secondary">
-		<button class="button" ng-click="vm.add()">
+		<button class="button button-clear" ng-click="vm.add()">
 			Add Log
 		</button>
 	</ion-nav-buttons>
@@ -25,7 +25,8 @@
 			</p>
 		</div>
 		<ion-list>
-			<div ng-repeat="week in vm.pager.data track by week.start">
+			<div ng-repeat="week in vm.pager.data track by week.start"
+				 ng-animate-children>
 				<ion-item ng-if="week.items.length > 0"
 						  class="item-divider">
 					<div class="pull-right"
@@ -39,9 +40,9 @@
 				</ion-item>
 
 				<ion-item ng-repeat="timespan in week.items track by timespan.objectId"
-						  class="item-timespan item-icon-right"
-						  ui-sref="app.view.logs-edit({timespanId: timespan.getKey()})">
-
+						  class="item-timespan item-icon-right list-animate"
+						  ui-sref="app.view.logs-edit({timespanId: timespan.getKey()})"
+				>
 					<div class="duration">
 						<span ng-bind-html="timespan.duration | formatHoursMinutes"></span>
 					</div>

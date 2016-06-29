@@ -31,6 +31,12 @@
 			</div>
 		</div>
 
+		<ion-infinite-scroll
+				on-infinite="vm.nextPage()"
+				ng-if="vm.$more"
+				distance="1%">
+		</ion-infinite-scroll>
+		<!--
 		<button class="button button-light button-outline button-block "
 				ng-click="vm.nextPage()"
 				ng-hide="!vm.$more"
@@ -38,6 +44,7 @@
 				style="margin-bottom: 40px">
 			Load More
 		</button>
+		-->
 
 	</ion-content>
 </ion-view>

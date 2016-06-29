@@ -148,6 +148,7 @@ function ValidationManagerFn(validator, elementUtils, $anchorScroll) {
 
     validateForm = function (frmElement) {
       var frmValid = true,
+        firstElementError = null,
         frmCtrl = frmElement ? angular.element(frmElement).controller('form') : undefined,
         processElement = function (ctrlElement, force, formOptions) {
           var controller, isValid, ctrlFormOptions, originalForceValue;
@@ -167,6 +168,12 @@ function ValidationManagerFn(validator, elementUtils, $anchorScroll) {
               ctrlFormOptions.forceValidation = force;
               try {
                 isValid = validateElement(controller, ctrlElement, ctrlFormOptions);
+                if (validator.enableFocusInputError() && !isValid && frmValid) {
+                  if (!firstElementError) {
+                    firstElementError = ctrlElement[0];
+                    firstElementError.focus();
+                  }
+                }
                 if (validator.firstInvalidElementScrollingOnSubmitEnabled() && !isValid && frmValid) {
                   var ctrlElementId = ctrlElement.attr('id');
                   if (ctrlElementId) {
@@ -214,12 +221,12 @@ function ValidationManagerFn(validator, elementUtils, $anchorScroll) {
     },
 
     setElementValidationError = function (element, errorMsgKey, errorMsg) {
-      if (errorMsgKey) {
+      if (errorMsg) {
+        validator.makeInvalid(element, errorMsg);
+      } else {
         validator.getErrorMessage(errorMsgKey, element).then(function (msg) {
           validator.makeInvalid(element, msg);
         });
-      } else {
-        validator.makeInvalid(element, errorMsg);
       }
     };
 

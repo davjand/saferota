@@ -2,16 +2,8 @@
 	<ion-nav-title>Issues</ion-nav-title>
 	<ion-content>
 
-		<div class="no-data-wrapper"
-			 ng-if="vm.service.count() < 1"
-			 ng-click="vm.goBack()">
-			<div class="icon-top ion-checkmark-circled"></div>
-			<h3>No Issues</h3>
-			<h4>Tap here to go back to the logs</h4>
-		</div>
-
 		<div ng-repeat="item in vm.service.issues.items._items track by item.objectId"
-			 class="card">
+			 class="card card-animate">
 			<div class="item item-divider">
 				#{{$index + 1}}:
 				{{item.enter | date : 'EEEE dd MMMM yyyy'}}
@@ -78,7 +70,14 @@
 
 				</div>
 			</div>
+		</div>
 
+		<div class="no-data-wrapper"
+			 ng-if="vm.service.count() < 1"
+			 ng-click="vm.goBack()">
+			<div class="icon-top ion-checkmark-circled"></div>
+			<h3>No Issues</h3>
+			<h4>Tap here to go back to the logs</h4>
 		</div>
 
 	</ion-content>

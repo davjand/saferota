@@ -4,16 +4,16 @@
 	<ion-nav-title>My SafeRotas</ion-nav-title>
 
 	<ion-nav-buttons side="primary">
-		<button class="button"
+		<button class="button button-clear"
 				ng-click="vm.settings()">
 			<i class="icon ion-ios-gear"></i>
 		</button>
 	</ion-nav-buttons>
 
 	<ion-nav-buttons side="secondary">
-		<button class="button"
+		<button class="button button-clear"
 				ui-sref="app.new">
-			Add
+			New Rota
 		</button>
 	</ion-nav-buttons>
 	<ion-content>
@@ -29,7 +29,7 @@
 		<ion-list>
 			<ion-item ng-repeat="rota in vm.rotas"
 					  ng-click="vm.selectRota(rota)"
-					  class="item-icon-left">
+					  class="item-icon-left list-animate">
 
 				<i ng-if="vm.isActive(rota)"
 				   class="icon ion-ios-navigate"></i>

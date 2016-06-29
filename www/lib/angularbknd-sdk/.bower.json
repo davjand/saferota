@@ -1,7 +1,7 @@
 {
   "name": "angularbknd-sdk",
   "description": "Backand SDK for Angular",
-  "version": "1.8.2",
+  "version": "1.8.6",
   "main": [
     "dist/backand.min.js"
   ],
@@ -20,13 +20,13 @@
   "dependencies": {
     "angular": "latest"
   },
-  "_release": "1.8.2",
+  "_release": "1.8.6",
   "_resolution": {
     "type": "version",
-    "tag": "1.8.2",
-    "commit": "e4986226d6ae3ca1364e5f38f7cb18ce56f549cc"
+    "tag": "1.8.6",
+    "commit": "4ee70e87713a23454cd129e214ed56b724a1d9b9"
   },
-  "_source": "git://github.com/backand/angularbknd-sdk.git",
+  "_source": "https://github.com/backand/angularbknd-sdk.git",
   "_target": "^1.8.2",
   "_originalSource": "angularbknd-sdk"
 }

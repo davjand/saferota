@@ -50,7 +50,7 @@
 		 * @returns {*}
 		 */
 		function setData(key, val) {
-			this.$cache[key] = val;
+			this.$cache[key] = angular.isObject(val) ? angular.copy(val,{}) : val;
 			return _wrapInPromise();
 		}
 

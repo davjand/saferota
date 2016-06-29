@@ -324,7 +324,10 @@
 				model.__existsRemotely = false;
 				model.__savedState = {};
 
-				model.setData(passedData, true);
+				model.setData(passedData, true, true);
+				if(model.__existsRemotely){
+					model.cacheCurrentState(true);
+				}
 
 				//Set created and updated dates
 				if (model.createdDate === null) {
@@ -457,6 +460,7 @@
 						thisModel[key] = d[key];
 					}
 				});
+				
 				//set for relationships
 				angular.forEach(self._rel, function (relationship) {
 					if (relationship.keyType === 'local') {
@@ -485,7 +489,7 @@
 				 */
 				else if (typeof d[self._config.key] !== 'undefined') {
 					thisModel.setKey(d[self.getPrimaryKey()], true);
-					thisModel.cacheCurrentState();
+					thisModel.__existsRemotely = true;
 				}
 				/*
 				 3) new object, generate new ID (if not set)
@@ -744,19 +748,26 @@
 			
 			if (force || !this.isEqual(updatedModel, false)) {
 				this.setData(updatedModel);
-				this.cacheCurrentState();
+				this.cacheCurrentState(false);
 			}
 		}
 		
 		/**
 		 * cache the current state
 		 *
+		 * @param suppressEvents {Boolean}
+		 *
 		 * Used for dirty checking
 		 */
-		function cacheCurrentState() {
+		function cacheCurrentState(suppressEvents) {
+			suppressEvents = typeof suppressEvents !== 'undefined' ? suppressEvents : true;
+			
 			if (this.isDirty()) {
 				this.__savedState = this.toObject();
-				this.emit('update', this);
+				if(!suppressEvents) {
+					this.emit('update', this);
+					this.factory.emit('update', this);
+				}
 			}
 		}
 		

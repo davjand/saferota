@@ -35,6 +35,8 @@
 		
 		Stream.prototype.addModel = addModel;
 		Stream.prototype.removeModel = removeModel;
+		Stream.prototype.in = inStream;
+		Stream.prototype.matchesQuery = matchesQuery;
 		
 		eventEmitter.inject(Stream);
 		
@@ -66,6 +68,7 @@
 			//Register the listeners
 			this._Model.on('new', this._callbacks.new);
 			this._Model.on('delete', this._callbacks.remove);
+			this._Model.on('update', this._callbacks.update);
 		}
 		
 		/**
@@ -103,24 +106,44 @@
 		 * add a model
 		 *
 		 * @param model
+		 * @param force {Boolean} - do not check if in array
 		 */
-		function addModel(model) {
+		function addModel(model, force) {
 			var self = this;
+			force = typeof force !== 'undefined' ? force : false;
 			model = angular.isArray(model) ? model : [model];
 			
 			angular.forEach(model, function (item) {
-				item.$register(self._scope);
-				item.on('update', self._callbacks.update);
-				self.items.add(item);
+				if (force || !self.in(item)) {
+					item.$register(self._scope);
+					//item.on('update', self._callbacks.update);
+					self.items.add(item);
+				}
 			});
 			self.emit('update', model);
 		}
 		
+		/**
+		 * add model
+		 * @param model
+		 */
 		function removeModel(model) {
 			this.items.remove(model);
 			model.off('update', this._callbacks.update);
 			model.$deregister(this._scope);
 			this.emit('update');
+		}
+		
+		/**
+		 * in function
+		 * @param model
+		 * @returns {boolean}
+		 */
+		function inStream(model) {
+			var result = this.items.find(function (item) {
+				return item.getKey() === model.getKey();
+			});
+			return result !== null;
 		}
 		
 		/**
@@ -138,11 +161,30 @@
 		}
 		
 		/**
+		 * matchesQuery
+		 *
+		 * @param model
+		 * @returns {boolean}
+		 */
+		function matchesQuery(model) {
+			return $filter('filter')([model], this._query, true).length > 0;
+		}
+		
+		/**
+		 * handleUpdateEvent
+		 *
+		 * if any item in the collection, removes it if no longer matches
+		 * If not in the collection, adds if matches ther query
 		 *
 		 * @param model
 		 */
 		function handleUpdateEvent(model) {
-			if ($filter('filter')([model], this._query, true).length < 1) {
+			var matches = this.matchesQuery(model);
+			var existsInCollection = this.in(model);
+
+			if (!existsInCollection && matches) {
+				this.addModel(model, true);
+			} else if (existsInCollection && !matches) {
 				this.removeModel(model);
 			}
 		}

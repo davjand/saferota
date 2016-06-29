@@ -214,9 +214,6 @@
 					item.updatedDate = new Date(Date.now());
 				}
 				modelIndex[item.getKey()] = item;
-				
-				//trigger update and cache
-				item.cacheCurrentState();
 			});
 
 			/*
@@ -227,15 +224,18 @@
 			 */
 			function saveMemory(modelsToSave) {
 				/*
-				 Now review all the models in memory and updated if needed
+				 Now review all the models in memory
 				 */
 				angular.forEach(modelsToSave, function (savedModel, key) {
 					if ($scope && $scope !== false) {
 						self.registerModel(savedModel, $scope);
 					}
+					//doesn't need to update as the model should be the same
 					else if (self._inMem(key)) {
 						self._getMem(key).setData(savedModel);
 					}
+					//trigger update and cache
+					savedModel.cacheCurrentState(false);
 				});
 				return $q.when();
 			}
@@ -286,10 +286,10 @@
 								 * Otherwise Diff sync
 								 */
 								if (modelVal.updatedDate === null || localModel.updatedDate === null) {
-									localModel.setData(modelVal.toObject());
+									localModel.setData(modelVal.toObject(), true);
 								}
 								else if (modelVal.updatedDate.getTime() > localModel.updatedDate.getTime()) {
-									localModel.setData(modelVal.toObject());
+									localModel.setData(modelVal.toObject(), true);
 								}
 							}
 							toSave[modelKey] = localModel;
@@ -299,7 +299,7 @@
 					//save into the database
 					return self.$local.data(toSave);
 				}).then(function () {
-					return saveMemory(toSave);
+					return saveMemory(modelIndex);
 				}).then(function () {
 					/*
 					 * Trigger a new event on the factory
@@ -359,7 +359,8 @@
 				/*
 				 Apply the data
 				 */
-				model.setData(transaction.resolveData);
+				model.setData(transaction.resolveData, false);
+				
 				/*
 				 Remove the old model
 				 */

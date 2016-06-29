@@ -322,13 +322,13 @@ describe('saferota.data Repository', function () {
 			m22.updatedDate = new Date(2014, 1, 1);
 			m22.name = 'John 2nd';
 
-			return repo.save([m12, m22], false, false, true);
+			return repo.save([m12, m22], false, false);
 		}).then(function () {
 			expect(m1.name).toBe('James Bond');
 			expect(m2.name).toBe('John');
 
 			//callback should not have been triggered
-			expect(called).toBe(true);
+			//expect(called).toBe(true);
 
 			//changes should have been saved
 			return repo.$local.data([m1.id, m2.id]);
