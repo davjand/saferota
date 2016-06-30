@@ -5,10 +5,26 @@
 		.module('saferota.core')
 		.service('DevicePermissions', DevicePermissions);
 	
-	DevicePermissions.$inject = ['$ionicModal', '$window', '$q', '$log', '$rootScope', '$ionicPopup'];
+	DevicePermissions.$inject = [
+		'$ionicModal',
+		'$window',
+		'$q',
+		'$log',
+		'$rootScope',
+		'$ionicPopup',
+		'$ionicPlatform',
+		'$timeout'
+	];
 	
 	/* @ngInject */
-	function DevicePermissions($ionicModal, $window, $q, $log, $rootScope, $ionicPopup) {
+	function DevicePermissions($ionicModal,
+							   $window,
+							   $q,
+							   $log,
+							   $rootScope,
+							   $ionicPopup,
+							   $ionicPlatform,
+							   $timeout) {
 		
 		var self = this,
 			$api = null,
@@ -20,11 +36,16 @@
 		self.displayPermissionErrorModal = displayPermissionErrorModal;
 		self.apiIsEnabled = apiIsEnabled;
 		self.api = api;
+		self.openSettings = openSettings;
 		self.activate = activate;
 		
 		
 		////////////////
 		
+		$ionicPlatform.ready(function () {
+			self.activate();
+		});
+
 		
 		/**
 		 * activate
@@ -60,6 +81,17 @@
 			return $api || {};
 		}
 		
+		/**
+		 * openSettings
+		 */
+		function openSettings() {
+			if ($window.cordova &&
+				$window.cordova.plugins &&
+				$window.cordova.plugins.settings) {
+				$window.cordova.plugins.settings.open();
+			}
+		}
+		
 		
 		/**
 		 * checkAndShowError
@@ -81,13 +113,19 @@
 		 */
 		function displayPermissionErrorModal() {
 			var scope = $rootScope.$new(true),
-				modal = null;
+				modal = null,
+				recheckPermissionsScheduled = false;
 			
-			scope.recheckPermissions = function () {
+			scope.openSettings = self.openSettings;
+			scope.recheckPermissions = function (hideAlert) {
 				self.getLocationPermissions().then(function (result) {
 					if (result) {
-						modal.remove();
-					} else {
+						if (modal) {
+							modal.remove();
+							modal = null;
+							recheckPermissionsScheduled = false;
+						}
+					} else if (hideAlert !== true) {
 						$ionicPopup.alert({
 							title:    'Permissions not Granted',
 							subTitle: 'SafeRota still does not location permissions, please enable in your device settings',
@@ -95,16 +133,31 @@
 							okType:   'button-energized'
 						});
 					}
+					if (!result && !recheckPermissionsScheduled) {
+						//recheck in 3 seconds time
+						recheckPermissionsScheduled = $timeout(function () {
+							recheckPermissionsScheduled = false;
+							scope.recheckPermissions(true)
+						}, 3000);
+					}
+
 				})
 			};
 			
-			modal = $ionicModal.fromTemplateUrl('app/core/services/devicePermissions/permissionError.html', {
-				scope:                   scope,
-				hardwareBackButtonClose: false
-			}).then(function (result) {
-				modal = result;
-				modal.show();
-			});
+			if (!modal) {
+				modal = $ionicModal.fromTemplateUrl('app/core/services/devicePermissions/permissionError.html', {
+					scope:                   scope,
+					hardwareBackButtonClose: false
+				}).then(function (result) {
+					modal = result;
+					modal.show();
+					
+					//recheck in 3 seconds time
+					$timeout(function () {
+						scope.recheckPermissions(true)
+					}, 3000);
+				});
+			}
 			
 		}
 		

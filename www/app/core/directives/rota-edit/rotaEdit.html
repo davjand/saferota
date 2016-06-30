@@ -21,6 +21,7 @@
 			   ng-model="vm.rota.hours"/>
 	</label>
 
+	<!--
 	<label class="item item-input item-select">
 		<div class="input-label">
 			Banding
@@ -30,6 +31,7 @@
 				convert-to-number>
 		</select>
 	</label>
+	-->
 
 	<div class="item item-divider">
 		<span class="pull-right divider-button"
@@ -38,7 +40,7 @@
 	</div>
 
 	<ion-list>
-		<ion-item class="item-icon-right"
+		<ion-item class="item-icon-right list-animate"
 				  ng-repeat="location in vm.locations | filter: {archived: false}:strict"
 				  ng-click="vm.editLocation(location)">
 			Location {{$index + 1}}
@@ -58,36 +60,36 @@
 	   href="#"
 	   ng-click="vm.selectSpeciality($event)">
 		Speciality
-				<span class="item-note">
-					<span ng-if="vm.speciality.title">
-						{{vm.speciality.title}}
-					</span>
-					<span ng-if="!vm.speciality.title">Please Select</span>
-				</span>
+		<span class="item-note">
+			<span ng-if="vm.speciality.title">
+				{{vm.speciality.title}}
+			</span>
+			<span ng-if="!vm.speciality.title">Please Select</span>
+		</span>
 	</a>
 	<a class="item"
 	   href="#"
 	   ng-click="vm.selectRole($event)">
 		Role
-				<span class="item-note">
-					<span ng-if="vm.role.title">
-						{{vm.role.title}}
-					</span>
-					<span ng-if="!vm.role.title">Please Select</span>
-				</span>
+		<span class="item-note">
+			<span ng-if="vm.role.title">
+				{{vm.role.title}}
+			</span>
+			<span ng-if="!vm.role.title">Please Select</span>
+		</span>
 	</a>
 
 	<a class="item"
 	   href="#"
 	   ng-click="vm.selectOrganisation($event)">
 		Organisation
-				<span class="item-note item-text-wrap">
-					<span ng-if="vm.organisation.name">
-						{{vm.organisation.name | limitTo: 40 | capitalize: true }}<span
-							ng-if="vm.organisation.name.length > 40">...</span>
-					</span>
-					<span ng-if="!vm.organisation.name">Please Select</span>
-				</span>
+		<span class="item-note item-text-wrap">
+			<span ng-if="vm.organisation.name">
+				{{vm.organisation.name | limitTo: 28 | capitalize: true }}<span
+					ng-if="vm.organisation.name.length > 40">...</span>
+			</span>
+			<span ng-if="!vm.organisation.name">Please Select</span>
+		</span>
 	</a>
 
 	<!--
@@ -107,6 +109,8 @@
 				{{ vm.rota.dateStart | date : "dd MMM yy"}}
 			</span>
 		</a>
+
+		<!--
 		<a class="item"
 		   ng-class="{'item-icon-right': vm.rota.dateEnd}"
 		   href="#"
@@ -119,8 +123,8 @@
 				<span class="item-note">
 					{{(vm.rota.dateEnd | date : 'dd MMM yy' ) || 'Indefinite'}}
 				</span>
-
 		</a>
+		-->
 
 
 		<div class="item-divider item">Settings</div>

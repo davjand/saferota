@@ -269,12 +269,11 @@
 						self.registerModel(model, $scope);
 					}
 					/*
-					 * Integrity check
+					 * If already in memory then update this version
 					 */
 					if (self._inMem(key) && self._getMem(key) !== model) {
-						throw "RepositoryFactory.save: duplicate model instance exists for key: " + key;
+						self._getMem(key).update(model);
 					}
-					//trigger update and cache
 					
 				});
 				

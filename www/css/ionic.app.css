@@ -12155,8 +12155,12 @@ Events
 
 
 */
+.card-animate {
+  max-height: 300px; }
+
 .card-animate.ng-enter,
-.card-animate.ng-leave {
+.card-animate.ng-leave,
+.card-animate.ng-animate {
   -webkit-transition: 400ms cubic-bezier(0.25, 0.25, 0.75, 0.75) all;
   -moz-transition: 400ms cubic-bezier(0.25, 0.25, 0.75, 0.75) all;
   -ms-transition: 400ms cubic-bezier(0.25, 0.25, 0.75, 0.75) all;
@@ -12167,7 +12171,8 @@ Events
 
 .card-animate.ng-leave {
   opacity: 1;
-  max-height: 300px; }
+  max-height: 300px;
+  overflow: hidden; }
 
 .card-animate.ng-leave.ng-leave-active {
   opacity: 0;
@@ -12200,6 +12205,10 @@ Events
     opacity: 0.7;
     font-size: 24px;
     padding: 20px 0 0; }
+
+.terms-and-conditions h1 {
+  color: #76C103;
+  font-weight: 400; }
 
 /*
  *

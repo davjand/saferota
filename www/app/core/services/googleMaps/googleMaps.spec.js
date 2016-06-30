@@ -1,5 +1,5 @@
 describe('saferota.core GoogleMaps', function () {
-	var isOnline = false;
+	var isOnline = true;
 	
 	beforeEach(function () {
 		bard.appModule('saferota.core');
@@ -64,7 +64,7 @@ describe('saferota.core GoogleMaps', function () {
 		var confirmResult;
 		
 		beforeEach(function () {
-			isOnline = false;
+			isOnline = true;
 			confirmResult = true;
 			
 			bard.inject('GoogleMaps');

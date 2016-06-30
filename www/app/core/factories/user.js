@@ -34,7 +34,7 @@
 				email: ''
 			})
 			.config({
-				sync: true
+				sync: false
 			});
 	}
 })();

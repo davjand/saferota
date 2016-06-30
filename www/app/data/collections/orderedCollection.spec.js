@@ -100,6 +100,9 @@ describe('saferota.data OrderedCollection', function () {
 			item4 = {name: 'steven', age: 40};
 			item5 = {name: 'james', age: 50};
 			
+			collection.setComparator(function (item) {
+				return item.name;
+			});
 			collection.add([item1, item2, item3, item4, item5]);
 		});
 		
@@ -136,7 +139,7 @@ describe('saferota.data OrderedCollection', function () {
 			expect(collection.indexOf({test: 'item'})).toBe(-1);
 		});
 		it('getIndex returns the index of the item', function () {
-			expect(collection.indexOf(item3)).toBe(2);
+			expect(collection.indexOf(item3)).toBe(3); //has been ordered
 		});
 
 	});

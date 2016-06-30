@@ -23,10 +23,13 @@
 
 		vm.save = save;
 		vm.close = close;
-
 		vm.rota = rotaToEdit;
 		vm.rota.$register($scope);
-		EditRotaService.startEdit(vm.rota);
+		
+		$scope.$on('$ionicView.enter', function () {
+			EditRotaService.startEdit(vm.rota);
+		});
+
 
 		/**
 		 * save

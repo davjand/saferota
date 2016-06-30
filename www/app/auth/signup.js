@@ -57,7 +57,6 @@
 		/**
 		 * showTerms
 		 *
-		 * @TODO
 		 */
 		function showTerms() {
 			TermsService.show();

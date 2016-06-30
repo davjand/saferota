@@ -5,13 +5,27 @@
 		.module('saferota.core')
 		.service('TimespanIssuesService', TimespanIssuesService);
 	
-	TimespanIssuesService.$inject = ['RotaTimespan', 'ModelStream', '$q', '$state', '$ionicPopup'];
+	TimespanIssuesService.$inject = [
+		'RotaTimespan',
+		'ModelStream',
+		'$q',
+		'$state',
+		'$ionicPopup',
+		'$rootScope',
+		'DATA_EVENTS'];
 	
 	/* @ngInject */
-	function TimespanIssuesService(RotaTimespan, ModelStream, $q, $state, $ionicPopup) {
+	function TimespanIssuesService(RotaTimespan,
+								   ModelStream,
+								   $q,
+								   $state,
+								   $ionicPopup,
+								   $rootScope,
+								   DATA_EVENTS) {
 		var self = this;
 		
 		self.activate = activate;
+		self.resetDataStream = resetDataStream;
 		self.setRota = setRota;
 		self.areIssues = areIssues;
 		self.count = count;
@@ -34,8 +48,27 @@
 		 *
 		 */
 		function activate() {
+			$rootScope.$on(DATA_EVENTS.SYNC_FINISH, function () {
+				self.resetDataStream();
+			});
+			
+			self.resetDataStream();
+		}
+		
+		/**
+		 *
+		 * reset the datastream
+		 *
+		 */
+		function resetDataStream() {
 			self.issues = [];
-			self.issues = new ModelStream(RotaTimespan, {unresolvedError: true}, function (item) {
+			
+			var query = {unresolvedError: true};
+			if (self._rotaKey) {
+				query.rota = self._rotaKey;
+			}
+			
+			self.issues = new ModelStream(RotaTimespan, query, function (item) {
 				return item.enter
 			}, -1);
 		}
@@ -49,12 +82,8 @@
 			if (self.issues) {
 				self.issues.destroy();
 			}
-			self.issues = new ModelStream(RotaTimespan, {
-				unresolvedError: true,
-				rota:            rota.getKey()
-			}, function (item) {
-				return item.enter
-			}, -1)
+			self._rotaKey = rota.getKey();
+			self.resetDataStream();
 		}
 		
 		/**

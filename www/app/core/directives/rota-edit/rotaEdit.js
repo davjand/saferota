@@ -129,6 +129,7 @@
 		 */
 		function addLocation() {
 			var newLocation = RotaLocation.create({rota: vm.rota.getKey()}, $scope);
+			newLocation.generateUID();
 			vm.locations.push(newLocation);
 			vm.editLocation(newLocation);
 		}
@@ -164,6 +165,7 @@
 			}
 			
 			$event.stopPropagation();
+			
 			return RotaGeoFenceService.deactivateLocation(location).then(function () {
 				location.archived = true;
 				

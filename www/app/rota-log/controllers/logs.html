@@ -9,7 +9,7 @@
 		</button>
 	</ion-nav-buttons>
 
-	<ion-content ng-show="vm.$loaded">
+	<ion-content ng-show="vm.$loaded" ng-cloak>
 
 		<rota-issue-alert></rota-issue-alert>
 
@@ -71,7 +71,8 @@
 
 		<button class="button button-light button-outline button-block "
 				ng-click="vm.pager.nextPage()"
-				ng-hide="!vm.pager.$more"
+				ng-cloak
+				ng-show="vm.pager.$more === true"
 				style="margin-bottom: 40px">
 			Load More
 		</button>

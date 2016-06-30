@@ -265,7 +265,7 @@
 		function createRotaEvent(geofence) {
 			return RotaLocation.$find({filter: {uniqueIdentifier: geofence.id}}).then(function (location) {
 				var event = RotaEvent.create({
-					timestamp: self.getTimeStamp(),
+					timestamp: geofence.date || self.getTimeStamp(),
 					rota:      null,
 					location:  null,
 					exited:    false,

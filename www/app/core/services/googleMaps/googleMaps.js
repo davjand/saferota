@@ -87,7 +87,7 @@
 		function continueIfLoadedOrPrompt(continueCallback, cancelCallback, title) {
 			title = title || "You must be online to perform this action";
 			
-			if (self.$isLoaded) {
+			if (self.$isLoaded && NetworkConnection.isOnline()) {
 				continueCallback();
 				self.resetPromptAndCallback();
 			} else {

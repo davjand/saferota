@@ -137,7 +137,7 @@
 		 * @private
 		 */
 		function loadRotas() {
-			return Rota.$find({filter: {archived: false}}, $scope).then(function (rotas) {
+			return Rota.$find({filter: {archived: false}, orderBy: 'label'}, $scope).then(function (rotas) {
 				vm.loading = false;
 				if (rotas.length !== vm.rotas.length) {
 					vm.rotas = rotas;

@@ -46,7 +46,11 @@
     },
     "cordova.plugins.diagnostic",
     "cordova-plugin-network-information",
-    "cordova-plugin-email-composer@0.8.3"
+    "cordova-plugin-email-composer@0.8.3",
+    {
+      "locator": "https://github.com/selahssea/Cordova-open-native-settings.git",
+      "id": "com.phonegap.plugins.nativesettingsopener"
+    }
   ],
   "cordovaPlatforms": [
     "android",

@@ -141,6 +141,9 @@
 			if (location.archived) {
 				return $q.when();
 			}
+			if (!location.uniqueIdentifier) {
+				location.generateUID();
+			}
 			
 			return self.locationIsActive(location)
 				.then(function (result) {

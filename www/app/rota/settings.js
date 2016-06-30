@@ -8,7 +8,6 @@
 	SettingsController.$inject = [
 		'Session',
 		'$rootScope',
-		'$scope',
 		'AuthService',
 		'Loading',
 		'$ionicHistory',
@@ -17,13 +16,13 @@
 		'RotaGeoFenceService',
 		'APP_MSG',
 		'$state',
-		'$cordovaEmailComposer'
+		'$cordovaEmailComposer',
+		'TermsService'
 	];
 
 	/* @ngInject */
 	function SettingsController(Session,
 								$rootScope,
-								$scope,
 								AuthService,
 								Loading,
 								$ionicHistory,
@@ -32,7 +31,8 @@
 								RotaGeoFenceService,
 								APP_MSG,
 								$state,
-								$cordovaEmailComposer) {
+								$cordovaEmailComposer,
+								TermsService) {
 		var vm = this;
 
 		vm.user = Session.user;
@@ -42,6 +42,7 @@
 		vm.logout = logout;
 		vm.playTour = playTour;
 		vm.support = support;
+		vm.showTerms = showTerms;
 		vm.deactivateAll = deactivateAll;
 
 		/**
@@ -99,7 +100,7 @@
 		 */
 		function _createConfirm(title, callback) {
 			$ionicPopup.confirm({
-				title: title,
+				title:  title,
 				okType: 'button-assertive button-outline'
 			}).then(function (ok) {
 				if (ok) {
@@ -120,18 +121,26 @@
 		/**
 		 * support
 		 */
-		function support(){
-			$cordovaEmailComposer.isAvailable().then(function() {
+		function support() {
+			$cordovaEmailComposer.isAvailable().then(function () {
 				$cordovaEmailComposer.open({
-					to: 'info@saferota.com',
+					to:      'info@saferota.com',
 					subject: 'SafeRota Support Request',
-					body: "Please help me, the issues I'm having are: \n\n"
+					body:    "Please help me, the issues I'm having are: \n\n"
 				});
-			},function(){
+			}, function () {
 				$ionicPopup.alert({
 					title: 'Please email info@saferota.com'
 				});
 			});
+		}
+		
+		/**
+		 * show the terms and conditions
+		 *
+		 */
+		function showTerms() {
+			TermsService.show();
 		}
 
 		/**

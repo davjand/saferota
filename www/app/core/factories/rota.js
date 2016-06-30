@@ -46,7 +46,7 @@
 			.key('objectId')
 			.schema({
 				label:              '',
-				hours:              40,
+				hours:              48,
 				dateStart:          moment().valueOf(),
 				dateEnd:            null,
 				banding:            0,

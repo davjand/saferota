@@ -27,6 +27,9 @@
 		 * @param rota
 		 */
 		function startEdit(rota) {
+			if (self.rota !== null && self.rota.getKey() === rota.getKey()) {
+				return;
+			}
 			self.rota = rota;
 			self.rota.$register(self.$scope);
 		}

@@ -378,20 +378,25 @@ describe('saferota.data Repository', function () {
 			_d();
 		});
 		
-		it('will throw an error if attempt to save a new model with an existing ID', function (done) {
+		it('will update the model in memory if not the same', function (done) {
 			
-			try {
-				repo.save(m1, $rootScope).then(function () {
-					var m12 = TestModel.create(m1.toObject(), false, true);
-					return repo.save(m12, $rootScope);
-				}).then(function () {
-					expect(true).toBe(false);
-				});
-				_d();
-			} catch (error) {
-				expect(true).toBe(true);
+			var called = 0,
+				m12;
+			
+			m1.on('update', function () {
+				called++;
+			});
+			
+			repo.save(m1, $rootScope).then(function () {
+				m12 = TestModel.create(m1.toObject(), false, true);
+				m12.name = 'new name';
+				return repo.save(m12, $rootScope);
+			}).then(function () {
+				expect(called).toBe(1);
+				expect(m1.name).toBe(m12.name);
 				done();
-			}
+			});
+			_d();
 			
 		});
 	});

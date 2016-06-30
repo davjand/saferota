@@ -22,7 +22,8 @@
 		'DevicePermissions',
 		'APP_MSG',
 		'AUTH_EVENTS',
-		'$ionicPopup'
+		'$ionicPopup',
+		'$ionicPlatform'
 	];
 
 	/* @ngInject */
@@ -42,7 +43,8 @@
 				 DevicePermissions,
 				 APP_MSG,
 				 AUTH_EVENTS,
-				 $ionicPopup) {
+				 $ionicPopup,
+				 $ionicPlatform) {
 
 		var self = this;
 
@@ -75,8 +77,10 @@
 			
 		};
 		
-		
-		activate();
+		self.activate = activate;
+		$ionicPlatform.ready(function () {
+			self.activate();
+		});
 
 
 		/*
@@ -162,8 +166,11 @@
 			
 			
 			/*
-			 * Check device permissions
+			 * Check device permissions whenever resumes
 			 */
+			document.addEventListener("resume", function () {
+				DevicePermissions.checkAndShowError();
+			}, false);
 			DevicePermissions.checkAndShowError();
 			
 			/*
