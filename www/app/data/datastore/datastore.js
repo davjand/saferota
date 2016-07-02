@@ -410,8 +410,8 @@
 
 
 			var repo = RepositoryService.get(Model);
-
-			return self.$syncComplete.then(function () {
+			
+			return $q.when().then(function () {
 				return repo.updatedAt()
 			}).then(function (date) {
 				if ((date === null || forceRemote) && !self.$alwaysSearchLocal) {
@@ -470,7 +470,7 @@
 			var repo = RepositoryService.get(Model);
 
 			//ensure current sync is complete
-			return self.$syncComplete.then(function () {
+			return $q.when().then(function () {
 				return repo.updatedAt()
 			}).then(function (date) {
 				if ((date === null || forceRemote ) && !self.$alwaysSearchLocal) {

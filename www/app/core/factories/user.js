@@ -15,17 +15,17 @@
 	 *
 	 */
 	
-	run.$inject = ['User'];
+	run.$inject = ['User',];
 
 	/* @ngInject */
 	function run(User) {
 		//ensure initialized
 	}
-
-	factory.$inject = ['DataStore'];
+	
+	factory.$inject = ['DataStore', 'Session'];
 
 	/* @ngInject */
-	function factory(DataStore) {
+	function factory(DataStore, Session) {
 		return DataStore.create('Users')
 			.key('objectId')
 			.schema({
@@ -34,7 +34,11 @@
 				email: ''
 			})
 			.config({
-				sync: false
+				sync: function () {
+					return {
+						objectId: Session.userId || null
+					}
+				}
 			});
 	}
 })();
