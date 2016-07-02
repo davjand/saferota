@@ -72,7 +72,7 @@
 		 *
 		 */
 		function save() {
-			//vm.timespan.unresolvedError = false; //overwrite the error
+			vm.timespan.unresolvedError = false; //overwrite the error
 			vm.timespan.$save().then(function () {
 				$ionicHistory.goBack();
 			})
