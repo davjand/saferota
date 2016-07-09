@@ -10,15 +10,20 @@
 
 		$stateProvider
 			.state('app', {
-					abstract: true,
-					url: '/app',
+				abstract:        true,
+				url:             '/app',
 					templateUrl: 'app/rota/app.html',
+				onEnter:         function (App, $state) {
+					if (!App.session.isLoggedIn) {
+						$state.go('auth.signup');
+					}
+				}
 				}
 			)
 			.state('app.list', {
-				url: '/list',
-				templateUrl: 'app/rota/list.html',
-				controller: 'RotaListController',
+				url:          '/list',
+				templateUrl:  'app/rota/list.html',
+				controller:   'RotaListController',
 				controllerAs: 'vm',
 			});
 

@@ -14,12 +14,6 @@
 				url: '/auth',
 				templateUrl: 'app/auth/auth.html',
 				/* @ngInject */
-				resolve: {
-					app: function (Session) {
-						return Session.ready()
-					}
-				},
-				/* @ngInject */
 				onEnter: function (App, $state) {
 					if (App.session.isLoggedIn) {
 						$state.go('app.list');
