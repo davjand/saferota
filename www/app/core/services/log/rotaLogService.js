@@ -1,6 +1,6 @@
 (function () {
 	'use strict';
-
+	
 	angular
 		.module('saferota.core')
 		.constant('GEOFENCE_EVENTS', {
@@ -9,7 +9,7 @@
 			BOTH:  3
 		})
 		.service('RotaLogService', RotaLogService);
-
+	
 	RotaLogService.$inject = [
 		'RotaLocation',
 		'Rota',
@@ -21,7 +21,7 @@
 		'moment',
 		'GEOFENCE_EVENTS'
 	];
-
+	
 	/* @ngInject */
 	function RotaLogService(RotaLocation,
 							Rota,
@@ -33,30 +33,39 @@
 							moment,
 							GEOFENCE_EVENTS) {
 		var self = this;
-
-		var $s;
-
+		
+		var $s = $rootScope.$new();
+		
 		/*
 		 * Module Definition
 		 */
 		self.receiveNotification = receiveNotification;
-
+		
 		self.createRotaEvent = createRotaEvent;
+		
 		self.findEnterEvents = findEnterEvents;
-		self.processEnterEvents = processEnterEvents;
+		self.findExitEvents = findExitEvents;
+		self.findTimespans = findTimespans;
+		
 		self.createRotaTimespan = createRotaTimespan;
 		self.calculateDuration = calculateDuration;
 		self.getTimeStamp = getTimeStamp;
 		
 		self.createDefaultRotaTimespanWhenNoEnterEvent = createDefaultRotaTimespanWhenNoEnterEvent;
 		self.createDefaultRotaTimespanWhenNoExitEvent = createDefaultRotaTimespanWhenNoExitEvent;
-
-
+		
+		/*
+		 * Private Functions
+		 */
+		self._findLocationFromUniqueId = _findLocationFromUniqueId;
+		self._findRotaFromLocation = _findRotaFromLocation;
+		
+		
 		$rootScope.$on('GEO_EVENT', function ($event, data) {
 			self.receiveNotification(data);
 		});
-
-
+		
+		
 		/*
 		 *
 		 *
@@ -65,8 +74,35 @@
 		 *
 		 *
 		 */
-
-
+		
+		
+		/**
+		 * Lookup the location from the geofence id
+		 *
+		 * @param uniqueId
+		 * @returns {*}
+		 * @private
+		 */
+		function _findLocationFromUniqueId(uniqueId) {
+			return RotaLocation.$find({filter: {uniqueIdentifier: uniqueId}}).then(function (locations) {
+				if (locations.length < 1) {
+					return null;
+				}
+				return locations[0];
+			})
+		}
+		
+		/**
+		 * get the rota from the location
+		 *
+		 * @param location
+		 * @private
+		 */
+		function _findRotaFromLocation(location) {
+			return location.$getRel('rota');
+		}
+		
+		
 		/**
 		 * recieveNotification
 		 *
@@ -90,114 +126,204 @@
 		 * @returns {*}
 		 */
 		function receiveNotification(geofences) {
-
-			$s = $rootScope.$new();
-
+			
 			geofences = geofences || [];
 			if (!angular.isArray(geofences)) {
 				geofences = [geofences];
 			}
-
+			
+			/*
+			 * Process sequentially
+			 */
 			function process(i) {
 				i = i || 0;
-
+				
+				
+				function processNext() {
+					$s.$destroy();
+					$s = $rootScope.$new();
+					return process(i + 1);
+				}
+				
+				
 				if (i >= geofences.length) {
+					//reset the scope
+					$s.$destroy();
+					$s = $rootScope.$new();
 					return $q.when();
 				}
 				var fence = geofences[i];
-
+				
 				var event,
 					rota,
 					location,
 					toSave = [],
-					thisEnterEvent;
+					enterEvents;
 				
 				//Prevent progression at this stage
 				if (!fence.id) {
-					return process(i + 1);
+					return processNext();
 				}
-
+				
 				/*
 				 * Get the location
 				 */
-				return RotaLocation.$find({filter: {uniqueIdentifier: fence.id}}).then(function (loc) {
-					location = loc[0];
+				return self._findLocationFromUniqueId(fence.id).then(function (loc) {
+					
+					location = loc;
+					event = self.createRotaEvent(fence, location);
 					
 					/*
-					 * Get the Rota
+					 * If no location, log the error then throw error via reject
 					 */
-					return location.$getRel('rota');
-				}).then(function (foundRota) {
-					rota = foundRota;
-					/*
-					 * Create the event
-					 */
-					return createRotaEvent(fence);
-					
-				}).then(function (ev) {
-					event = ev;
-					toSave.push(event);
-
-
-					/*
-					 * If Exit Event
-					 *  - Process Previous
-					 *  - Create timespan
-					 */
-					if (event.type === GEOFENCE_EVENTS.EXIT) {
-						/*
-						 * Find and process previous enter event(s)
-						 * Multiple if error
-						 */
-						thisEnterEvent = null;
-
-						return self.findEnterEvents(event).then(function (enterEvents) {
-							if (enterEvents === null || enterEvents.length < 1) {
-								event.error = 'Cannot find matching enter event';
-								return $q.when(null);
-							}
-
-							toSave = toSave.concat(enterEvents);
-							
-							return processEnterEvents(enterEvents, rota)
-						}).then(function (enterEvent) {
-							thisEnterEvent = enterEvent;
-							
-							var timespan;
-							
-							//If null, create intelligent defaults
-							if (thisEnterEvent === null) {
-								timespan = self.createDefaultRotaTimespanWhenNoEnterEvent(event, rota);
-							}
-							else {
-								timespan = self.createRotaTimespan(thisEnterEvent, event, rota);
-							}
-							
-							if (timespan !== null) {
-								toSave.push(timespan);
-							}
-
-							//Save and clear the models
-							return DataStore.save(toSave).then(function () {
-								$s.$destroy();
-								$s = $rootScope.$new();
-								return $q.when();
-							});
-						}).then(function () {
-							return process(i + 1);
-						})
-					} else {
-						//Save and clear the models
-						return DataStore.save(toSave).then(function () {
-							$s.$destroy();
-							$s = $rootScope.$new();
-							return $q.when();
+					if (loc === null) {
+						return event.$save().then(function () {
+							return $q.reject();
 						});
 					}
-
+					
+					return self._findRotaFromLocation(location);
+				}).then(function (foundRota) {
+					rota = foundRota;
+					
+					/*
+					 * find any previous enter events for processing
+					 */
+					return self.findEnterEvents(event);
+				}).then(function (ee) {
+					enterEvents = ee;
+					
+					/*
+					 * Queue everything for saving
+					 */
+					toSave.push(event);
+					toSave = toSave.concat(enterEvents);
+					
+					
+					if (event.type === GEOFENCE_EVENTS.EXIT) {
+						
+						
+						if (enterEvents !== null && enterEvents.length > 0) {
+							
+							/*
+							 * Create the timespan form the last enter event
+							 */
+							var lastEnterEvent = enterEvents.shift();
+							lastEnterEvent.exited = true;
+							toSave.push(
+								self.createRotaTimespan(lastEnterEvent, event, rota)
+							);
+							
+							/*
+							 * if any remaining events then flag these as errors
+							 *
+							 * LEGACY CODE - this should not occur as they should be picked up
+							 * by the new processing code below for enter events
+							 */
+							angular.forEach(enterEvents, function (processEvent) {
+								processEvent.exited = true;
+								processEvent.error = 'No Exit Event found, exited at: ' + moment().format();
+								
+								//create a timespan object and flag up to the user
+								toSave.push(
+									self.createDefaultRotaTimespanWhenNoExitEvent(processEvent, rota)
+								);
+								
+							});
+						} else {
+							
+							
+							/*
+							 *
+							 * No Enter Event Found, create default and flag up error
+							 *
+							 */
+							return self.findTimespans(event).then(function (timespans) {
+								if (timespans.length < 1) {
+									toSave.push(
+										self.createDefaultRotaTimespanWhenNoEnterEvent(event, rota)
+									);
+									event.error = 'No Enter Event: default created';
+								} else {
+									var lastTimespan = timespans.shift();
+									var durationSince = moment(event.timestamp).diff(lastTimespan.exit, 'minutes');
+									
+									if (durationSince > rota.defaultShiftLength * 60) {
+										toSave.push(
+											self.createDefaultRotaTimespanWhenNoEnterEvent(event, rota)
+										);
+										event.error = 'No Enter Event: Default Created';
+									} else {
+										event.error = 'No Enter Event: Timespan < ' + rota.defaultShiftLength + ' mins ago';
+									}
+									
+									return $q.when(null);
+								}
+								
+								
+							});
+							
+							
+						}
+						
+					} else if (event.type === GEOFENCE_EVENTS.ENTER) {
+						/*
+						 * Enter event processing
+						 */
+						
+						//find any previous enter events
+						if (enterEvents.length === 0) {
+							return $q.when();
+						}
+						
+						/*
+						 * ProcessErrors
+						 */
+						var lastEvent = enterEvents.shift();
+						
+						/*
+						 * If any have slipped through the net, remove them
+						 */
+						angular.forEach(enterEvents, function (item) {
+							item.exited = true;
+							item.error = 'No Exit Event: Deactivated at: ' + moment().format();
+						});
+						
+						//see what the difference between the last event and current event was
+						var duration = moment(event.timestamp).diff(lastEvent.timestamp, 'minutes');
+						
+						if (duration < rota.defaultShiftLength * 60) {
+							event.exited = true;
+							event.error = "No Exit Event: Entered within last: " + rota.minimumTime + " mins";
+						} else {
+							toSave.push(
+								self.createDefaultRotaTimespanWhenNoExitEvent(lastEvent, rota)
+							);
+							lastEvent.exited = true;
+							event.error = "No Exit Event: Not Entered within last: " + rota.minimumTime + " mins (default created)";
+						}
+						
+						return $q.when();
+					}
+					
+				}).then(function () {
+					/*
+					 * Save the models
+					 */
+					return DataStore.save(toSave);
+				}).then(function () {
+					/*
+					 * Process Next
+					 */
+					return processNext();
+				}, function () {
+					/*
+					 * Catch errors and process next
+					 */
+					return processNext();
 				});
 			}
-
+			
 			return process();
 		}
 		
@@ -227,7 +353,7 @@
 			
 			return timespan;
 		}
-
+		
 		/**
 		 *
 		 * create a timespan when an exit event has been missed
@@ -260,30 +386,38 @@
 		 * Creates a rotaevent from a passed geofence object
 		 *
 		 * @param geofence
+		 * @param location
 		 * @returns {*}
 		 */
-		function createRotaEvent(geofence) {
-			return RotaLocation.$find({filter: {uniqueIdentifier: geofence.id}}).then(function (location) {
-				var event = RotaEvent.create({
-					timestamp: geofence.date || self.getTimeStamp(),
-					rota:      null,
-					location:  null,
-					exited:    false,
-					type:      geofence.transitionType
-				}, $s);
-
-				if (location && location.length > 0) {
-					location = location [0];
-					event.location = location.getKey();
-					event.rota = location.rota;
-				} else {
-					event.error = 'Could not find location with identifier: ' + geofence.id;
-				}
-				return $q.when(event);
-			});
+		function createRotaEvent(geofence, location) {
+			location = typeof location !== 'undefined' ? location : null;
+			
+			/*
+			 * Apply the current timestamp if not already set by the system
+			 */
+			var date = typeof geofence.date !== 'undefined' ?
+				moment(geofence.date).valueOf() :
+				self.getTimeStamp();
+			
+			
+			var event = RotaEvent.create({
+				timestamp: date,
+				rota:      null,
+				location:  null,
+				exited:    false,
+				type:      geofence.transitionType
+			}, $s);
+			
+			if (location !== null) {
+				event.location = location.getKey();
+				event.rota = location.rota;
+			} else {
+				event.error = 'Could not find location with identifier: ' + geofence.id;
+			}
+			return event;
 		}
-
-
+		
+		
 		/**
 		 * findEnterEvents
 		 *
@@ -306,51 +440,32 @@
 				orderBy: '-timestamp'
 			}, $s);
 		}
-
-		/**
-		 * processEnterEvents
-		 *
-		 * Takes the found enter events and processes them
-		 * Returns the correct event
-		 *
-		 * If > 1 then records errors in all the proceeding events
-		 *
-		 *
-		 * @param enterEvents
-		 * @param rota
-		 */
-		function processEnterEvents(enterEvents, rota) {
-			var event;
-
-			if (enterEvents.length < 1) {
-				return $q.when(null);
-			}
-			else {
-				event = enterEvents.shift();
-				event.exited = true;
-				
-				var pArr = [$q.when()];
-
-				/*
-				 * if any remaining events then flag these as errors
-				 */
-				angular.forEach(enterEvents, function (item) {
-					item.exited = true;
-					item.error = 'No Exit Event found, exited at: ' + moment().format();
-					
-					//create a timespan object and flag up to the user
-					var timespan = self.createDefaultRotaTimespanWhenNoExitEvent(item, rota);
-
-					//save the items
-					pArr.push(timespan.$save());
-				});
-				return $q.all(pArr).then(function () {
-					return $q.when(event);
-				});
-			}
+		
+		
+		function findExitEvents(event) {
+			return RotaEvent.$find({
+				filter:  {
+					location: event.location,
+					type:     GEOFENCE_EVENTS.EXIT
+				},
+				orderBy: '-timestamp'
+			}, $s);
 		}
-
-
+		
+		/**
+		 * findTimespans
+		 * @param event
+		 */
+		function findTimespans(event) {
+			return RotaTimespan.$find({
+				filter:  {
+					location: event.location,
+				},
+				orderBy: '-enter'
+			}, $s);
+		}
+		
+		
 		/**
 		 * createRotaTimespan
 		 *
@@ -386,11 +501,11 @@
 			
 			var duration = self.calculateDuration(enterTime, exitTime);
 			var min = rota.minimumTime || 0;
-
+			
 			if (duration < min) {
-
+				
 				//if subtraction has occurred, tidy up for output formatting.
-				if(duration < 0){
+				if (duration < 0) {
 					duration = 0;
 				}
 				exit.error = 'Duration ' + Math.round(duration) + ' mins, less than minimum of ' + min;
@@ -405,7 +520,7 @@
 				duration: duration
 			}, $s);
 		}
-
+		
 		/**
 		 * calculateDuration
 		 *
@@ -420,7 +535,7 @@
 				.duration(moment(exit).diff(enter))
 				.as('minutes');
 		}
-
+		
 		/**
 		 * getTimeStamp
 		 *
@@ -431,9 +546,9 @@
 		function getTimeStamp() {
 			return Date.now();
 		}
-
-
+		
+		
 	}
-
+	
 })();
 

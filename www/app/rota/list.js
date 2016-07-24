@@ -16,7 +16,8 @@
 		'RotaGeoFenceService',
 		'$ionicLoading',
 		'APP_MSG',
-		'SettingsService'
+		'SettingsService',
+		'$log'
 	];
 
 	/* @ngInject */
@@ -30,7 +31,8 @@
 								RotaGeoFenceService,
 								$ionicLoading,
 								APP_MSG,
-								SettingsService) {
+								SettingsService,
+								$log) {
 		var vm = this;
 
 
@@ -56,6 +58,9 @@
 		vm.deactivate = deactivate;
 		vm.selectRota = selectRota;
 		vm.settings = settings;
+		
+		//Test
+		vm._testGeofenceService = _testGeofenceService;
 
 
 		//Internal
@@ -249,6 +254,8 @@
 					//noinspection JSUnresolvedFunction
 					$ionicListDelegate.closeOptionButtons();
 					$ionicLoading.hide();
+				}, function (error) {
+					handleError(error, 'Cannot deactivate rota')
 				});
 		}
 
@@ -268,6 +275,8 @@
 					//noinspection JSUnresolvedFunction
 					$ionicListDelegate.closeOptionButtons();
 					$ionicLoading.hide();
+				}, function (error) {
+					handleError(error, 'Cannot deactivate rota')
 				});
 		}
 
@@ -280,6 +289,31 @@
 		 */
 		function selectRota(rota) {
 			$state.go('app.view.logs', {rotaId: rota.getKey()});
+		}
+		
+		/**
+		 * handleError
+		 *
+		 * @param error
+		 * @param msg
+		 */
+		function handleError(error, msg) {
+			$ionicLoading.hide();
+			$log.error(JSON.stringify(error));
+			$ionicPopup.alert({
+				title:    'Error',
+				subTitle: msg,
+				okType:   'button-energized'
+			});
+		}
+		
+		
+		/**
+		 * Testing functionality
+		 * @private
+		 */
+		function _testGeofenceService() {
+			RotaGeoFenceService._callTest();
 		}
 
 	}

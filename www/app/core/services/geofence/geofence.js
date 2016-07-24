@@ -76,6 +76,9 @@
 							id: id,
 							event: event
 						});
+					},
+					__test: function () {
+						alert('test');
 					}
 				};
 				ready.resolve();

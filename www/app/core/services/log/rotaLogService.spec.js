@@ -1,15 +1,15 @@
 describe('saferota.rota-log RotaLogService', function () {
 	beforeEach(module('saferota.core'));
-
+	
 	var RotaLogService,
 		Rota, RotaEvent, RotaTimespan, RotaLocation, DataStore, RequestService,
 		$q, $rootScope, moment, GEOFENCE_EVENTS;
-
+	
 	var aLocation,
 		aRota,
 		aEnter1,
 		aExit1;
-
+	
 	beforeEach(inject(function (_RotaLogService_,
 								_Rota_,
 								_RotaLocation_,
@@ -21,7 +21,7 @@ describe('saferota.rota-log RotaLogService', function () {
 								_RequestService_,
 								_moment_,
 								_GEOFENCE_EVENTS_) {
-
+		
 		RotaLogService = _RotaLogService_;
 		Rota = _Rota_;
 		RotaLocation = _RotaLocation_;
@@ -33,12 +33,12 @@ describe('saferota.rota-log RotaLogService', function () {
 		RequestService = _RequestService_;
 		moment = _moment_;
 		GEOFENCE_EVENTS = _GEOFENCE_EVENTS_;
-
-
+		
+		
 		DataStore.$alwaysSearchLocal = true;
 		RequestService.$disableBackgroundQueueProcessing = true;
-
-
+		
+		
 		aEnter1 = {
 			id:             'unique1',
 			transitionType: 1
@@ -47,7 +47,7 @@ describe('saferota.rota-log RotaLogService', function () {
 			id:             'unique1',
 			transitionType: 2
 		};
-
+		
 		aLocation = RotaLocation.create({
 			objectId:         'loc1',
 			uniqueIdentifier: 'unique1',
@@ -61,13 +61,13 @@ describe('saferota.rota-log RotaLogService', function () {
 			adjustShiftEnd:     0,
 			defaultShiftLength: 8
 		});
-
+		
 	}));
-
+	
 	function _d() {
 		$rootScope.$digest();
 	}
-
+	
 	/*
 	 * helper function to setup the data
 	 * Easier to do per unit test than in before due to digest issues
@@ -78,12 +78,12 @@ describe('saferota.rota-log RotaLogService', function () {
 			return DataStore.save([aRota, aLocation]);
 		});
 	}
-
-
+	
+	
 	//.createRotaEvent
 	it('Can create a rota event from a transaction', function (done) {
 		_up().then(function () {
-			return RotaLogService.createRotaEvent(aEnter1);
+			return RotaLogService.createRotaEvent(aEnter1, aLocation);
 		}).then(function (event) {
 			expect(event.rota).toBe('rota1');
 			expect(event.location).toBe('loc1');
@@ -103,7 +103,23 @@ describe('saferota.rota-log RotaLogService', function () {
 		});
 		_d();
 	});
-
+	it('Can create rota event will accept a date if passed', function (done) {
+		var geofence = {
+			id:             'unique1',
+			transitionType: 1,
+			date:           moment('2013-02-08 12:00:00.000').valueOf()
+		};
+		
+		_up().then(function () {
+			return RotaLogService.createRotaEvent(geofence, aLocation);
+		}).then(function (event) {
+			expect(event.timestamp).toEqual(geofence.date);
+			done();
+		});
+		
+		_d();
+	});
+	
 	//.findEnterEvents
 	it('.findEnterEvents can retrieve the events that correspond to entering', function (done) {
 		var e1 = RotaEvent.create({ //should find
@@ -135,74 +151,33 @@ describe('saferota.rota-log RotaLogService', function () {
 				type:     1,
 				exited:   false
 			});
-
+		
 		var exitEvent = RotaEvent.create({
 			location: 'loc1',
 			type:     2
 		});
-
+		
 		_up().then(function () {
 			return DataStore.save([e1, e2, e3, e4, e5])
 		}).then(function () {
 			return RotaLogService.findEnterEvents(exitEvent);
 		}).then(function (events) {
 			expect(events.length).toBe(2);
-
+			
 			//should be sorted so latest is first
 			expect(events[0].objectId).toBe('e2');
 			expect(events[0].type).toBe(1);
 			done();
 		});
-
+		
 		_d();
 	});
-
-	//.processEnterEvents
-	it('.processEnterEvents returns the first event', function () {
-		RotaLogService.processEnterEvents([{id: 1}, {id: 2}, {id: 3}], aRota).then(function (foundEvent) {
-			e = foundEvent;
-		});
-		$rootScope.$apply();
-		expect(e.id).toBe(1);
-	});
-	it('.processEnterEvents returns null if an empty array', function () {
-		RotaLogService.processEnterEvents([], aRota).then(function (foundEvent) {
-			e = foundEvent;
-		});
-		$rootScope.$apply();
-		expect(e).toBe(null);
-	});
-	it('.processEnterEvents sets errorflag and exited for previous events', function () {
-		var events = [
-			RotaEvent.create({ //should find
-				objectId:  'e1',
-				timestamp: 100,
-				location:  'loc1',
-				type:      1,
-				exited:    false
-			}),
-			RotaEvent.create({ //should find
-				objectId:  'e2',
-				timestamp: 500,
-				location:  'loc1',
-				type:      1,
-				exited:    false
-			})
-		];
-		
-		RotaLogService.processEnterEvents(events, aRota);
-		$rootScope.$apply();
-		expect(events[0].exited).toBe(true);
-		expect(events[0].error).not.toBe(null);
-
-	});
-
-
+	
 	//.createRotaTimeSpan
 	it('.createRotaTimespan takes an enter and an exit and creates a timespan object', function () {
 		var enter = moment('2013-02-08 12:00:00.000').valueOf();
 		var exit = moment('2013-02-08 14:30:00.000').valueOf();
-
+		
 		var e1 = RotaEvent.create({ //should find
 				objectId:      'e1',
 				timestamp: enter,
@@ -218,9 +193,9 @@ describe('saferota.rota-log RotaLogService', function () {
 				type:      2,
 				exited:    false
 			});
-
+		
 		var ts = RotaLogService.createRotaTimespan(e1, e2, aRota);
-
+		
 		expect(ts.location).toEqual('loc1');
 		expect(ts.rota).toEqual('rota1');
 		expect(ts.enter).toBe(enter);
@@ -230,9 +205,9 @@ describe('saferota.rota-log RotaLogService', function () {
 	it('.createRotaTimespan returns null if less than min duration', function () {
 		var enter = moment('2013-02-08 12:00:00.000').valueOf();
 		var exit = moment('2013-02-08 12:15:00.000').valueOf();
-
+		
 		aRota.minimumTime = 30;
-
+		
 		var e1 = RotaEvent.create({ //should find
 				objectId:      'e1',
 				timestamp: enter,
@@ -248,11 +223,11 @@ describe('saferota.rota-log RotaLogService', function () {
 				type:      2,
 				exited:    false
 			});
-
+		
 		var ts = RotaLogService.createRotaTimespan(e1, e2, aRota);
-
+		
 		expect(ts).toBeNull();
-
+		
 		expect(e2.error).not.toBe(null);
 	});
 	
@@ -296,15 +271,15 @@ describe('saferota.rota-log RotaLogService', function () {
 		});
 		
 	});
-
-
+	
+	
 	//.calculateDuration
 	it('.calculateDuration can calculate the duration and return in minutes', function () {
 		var enter = moment('2013-02-08 12:00:00.000').valueOf();
 		var exit = moment('2013-02-08 14:20:00.000').valueOf();
-
+		
 		var duration = RotaLogService.calculateDuration(enter, exit);
-
+		
 		expect(duration).toBe(140);
 	});
 	
@@ -379,22 +354,22 @@ describe('saferota.rota-log RotaLogService', function () {
 			
 		});
 	});
-
-
+	
+	
 	//.receiveNotification
-	it('.receiveNotification can receive an enter and exit and create a timespan', function (done) {
-
+	it('.receiveNotification can receive an enter and exit event and create a timespan', function (done) {
+		
 		/*
 		 * Code to fake the times
 		 */
 		var TIME_1 = moment('2016-02-08 12:00:00.000').valueOf(),
 			TIME_2 = moment('2016-02-08 14:30:00.000').valueOf();
-
+		
 		var FAKE_TIME = TIME_1;
 		spyOn(RotaLogService, 'getTimeStamp').and.callFake(function () {
 			return FAKE_TIME;
 		});
-
+		
 		_up().then(function () {
 			/*
 			 * Send a create event
@@ -426,29 +401,29 @@ describe('saferota.rota-log RotaLogService', function () {
 			expect(events[0].timestamp).toBe(TIME_1);
 			expect(events[0].exited).toBe(true);
 			expect(events[0].type).toBe(GEOFENCE_EVENTS.ENTER);
-
+			
 			expect(events[1].timestamp).toBe(TIME_2);
 			expect(events[1].exited).toBe(false);
 			expect(events[1].type).toBe(GEOFENCE_EVENTS.EXIT);
-
+			
 			//check that a a timespan has been created
 			return RotaTimespan.$find();
 		}).then(function (timespans) {
 			expect(timespans.length).toBe(1);
-
+			
 			var t = timespans[0];
 			expect(t.rota).toBe('rota1');
 			expect(t.location).toBe('loc1');
 			expect(t.enter).toBe(TIME_1);
 			expect(t.exit).toBe(TIME_2);
 			expect(t.duration).toBe(150);
-
+			
 			done();
 		});
-
+		
 		_d();
 	});
-
+	
 	it('.receiveNotification can handle with no found enter event', function (done) {
 		
 		var TIME_1 = moment('2016-02-08 10:00:00.000').valueOf(),
@@ -457,7 +432,7 @@ describe('saferota.rota-log RotaLogService', function () {
 		spyOn(RotaLogService, 'getTimeStamp').and.callFake(function () {
 			return TIME_2;
 		});
-
+		
 		_up().then(function () {
 			/*
 			 * Send a create event
@@ -491,8 +466,9 @@ describe('saferota.rota-log RotaLogService', function () {
 			expect(ts.unresolvedError).toBe(true);
 			done();
 		});
-
+		
 		_d();
 	});
-
+	
+	
 });

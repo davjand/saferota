@@ -37,7 +37,6 @@
     "cordova-plugin-splashscreen",
     "cordova-plugin-statusbar",
     "ionic-plugin-keyboard",
-    "cordova-plugin-geofence",
     "cordova-plugin-geolocation",
     "cordova-plugin-datepicker",
     {
@@ -50,6 +49,10 @@
     {
       "locator": "https://github.com/selahssea/Cordova-open-native-settings.git",
       "id": "com.phonegap.plugins.nativesettingsopener"
+    },
+    {
+      "locator": "https://github.com/davjand/cordova-plugin-geofence.git",
+      "id": "cordova-plugin-geofence"
     }
   ],
   "cordovaPlatforms": [

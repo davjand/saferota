@@ -31,6 +31,7 @@
 			this._Model = Model;
 
 			this._ready = $q.defer();
+			this._isReady = false;
 			this._updatedAt = null;
 
 			/*
@@ -72,7 +73,11 @@
 		//Internal Config
 		Repository.prototype._initConfig = _initConfig;
 		Repository.prototype.ready = function () {
-			return this._ready.promise;
+			if (this._isReady) {
+				return $q.when();
+			} else {
+				return this._ready.promise;
+			}
 		};
 
 		//is offline
@@ -536,7 +541,10 @@
 						self._updatedAt = null;
 					}
 					self._configLoaded = true;
+					
 					self._ready.resolve();
+					self._isReady = true;
+					
 					return $q.when();
 				}, _err(self._ready));
 			} else {

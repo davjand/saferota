@@ -45,7 +45,8 @@
 		self.deactivate = deactivate;
 		self.deactivateAll = deactivateAll;
 		self.isActive = isActive;
-
+		
+		self._callTest = _callTest;
 
 		////////////////
 
@@ -259,6 +260,15 @@
 				$rootScope.$emit(APP_MSG.GEO_DEACTIVATE);
 				return $q.when();
 			})
+		}
+		
+		/**
+		 * call a test function on the API
+		 * Used for testing API
+		 */
+		function _callTest(data) {
+			
+			geofence.api.__test(data);
 		}
 	}
 
