@@ -222,19 +222,13 @@
 							 */
 							angular.forEach(enterEvents, function (processEvent) {
 								processEvent.exited = true;
-								processEvent.error = 'No Exit Event found, exited at: ' + moment().format();
-								
-								//create a timespan object and flag up to the user
-								toSave.push(
-									self.createDefaultRotaTimespanWhenNoExitEvent(processEvent, rota)
-								);
-								
+								processEvent.error = 'No Exit Event found';
 							});
 						} else {
 							
 							
 							/*
-							 *
+							 *receiveNotification
 							 * No Enter Event Found, create default and flag up error
 							 *
 							 */
@@ -259,8 +253,6 @@
 									
 									return $q.when(null);
 								}
-								
-								
 							});
 							
 							
@@ -300,11 +292,15 @@
 								self.createDefaultRotaTimespanWhenNoExitEvent(lastEvent, rota)
 							);
 							lastEvent.exited = true;
-							event.error = "No Exit Event: Not Entered within last: " + rota.minimumTime + " mins (default created)";
+							lastEvent.error = "No Exit Event: Not Entered within last: " + rota.minimumTime + " mins (default created)";
 						}
 						
 						return $q.when();
+					} else {
+						//BOTH - nothing to do.
+						
 					}
+					
 					
 				}).then(function () {
 					/*

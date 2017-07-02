@@ -142,6 +142,73 @@ describe('saferota.core rotaLogService E2E', function () {
 			_d();
 		});
 		
+		it('Shouldnt generate default times when events are recorded normally', function (done) {
+			var R = RotaLogService,
+				now = moment("2015-12-25").hour(9).minute(0).seconds(0).valueOf(),
+				twoHour = moment(now).add(2, 'hours').valueOf(),
+				fourHour = moment(now).add(4, 'hours').valueOf(),
+				sixHour = moment(now).add(6, 'hours').valueOf(),
+				eightHour = moment(now).add(6, 'hours').valueOf(),
+				tenHour = moment(now).add(8, 'hours').valueOf();
+			
+			R.receiveNotification([{
+				id: 'unique1',
+				transitionType: GEOFENCE_EVENTS.ENTER,
+				date: now
+			}]).then(function(){
+				return R.receiveNotification([{
+					id: 'unique1',
+					transitionType: GEOFENCE_EVENTS.EXIT,
+					date: twoHour
+				}]);
+			}).then(function(){
+				return R.receiveNotification([{
+					id: 'unique1',
+					transitionType: GEOFENCE_EVENTS.ENTER,
+					date: fourHour
+				}]);
+			}).then(function(){
+				return R.receiveNotification([{
+					id: 'unique1',
+					transitionType: GEOFENCE_EVENTS.EXIT,
+					date: sixHour
+				}]);
+			}).then(function(){
+				return R.receiveNotification([{
+					id: 'unique1',
+					transitionType: GEOFENCE_EVENTS.ENTER,
+					date: eightHour
+				}]);
+			}).then(function(){
+				return R.receiveNotification([{
+					id: 'unique1',
+					transitionType: GEOFENCE_EVENTS.EXIT,
+					date: tenHour
+				}]);
+			}).then(function(){
+				return $q.all({
+					timespans: RotaTimespan.$find(),
+					events:    RotaEvent.$find()
+				});
+			}).then(function(results){
+				
+				expect(results.timespans.length).toBe(3);
+				expect(results.events.length).toBe(6);
+				
+				angular.forEach(results.events,function(event){
+					expect(event.error).toBe(null);
+					if(event.type === GEOFENCE_EVENTS.ENTER){
+						expect(event.exited).toBe(true);
+					}
+				});
+				
+				done();
+			});
+			
+			_d();
+			
+		});
+		
 		
 		describe('Process multiple events simultaneously', function () {
 			

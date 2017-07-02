@@ -255,7 +255,7 @@
 					$ionicListDelegate.closeOptionButtons();
 					$ionicLoading.hide();
 				}, function (error) {
-					handleError(error, 'Cannot deactivate rota')
+					handleError(error, 'Cannot activate rota - please ensure location services and notifications are enabled')
 				});
 		}
 
